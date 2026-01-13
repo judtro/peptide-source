@@ -26,6 +26,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
+import { ArticleTooltip } from '@/components/ArticleTooltip';
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -314,8 +315,18 @@ const ProductDetailPage = () => {
               </div>
             </section>
 
-            {/* Calculator */}
-            <ReconstitutionCalculator />
+            {/* Calculator with Article Link */}
+            <div className="relative">
+              <div className="mb-2 text-sm text-muted-foreground">
+                <ArticleTooltip 
+                  articleSlug="proper-reconstitution-protocols" 
+                  tooltipText="Unsure how to mix? Learn the proper technique."
+                >
+                  Need help with reconstitution?
+                </ArticleTooltip>
+              </div>
+              <ReconstitutionCalculator />
+            </div>
 
             {/* === SECTION C: Verified Supply Chain === */}
             <section id="vendor-table" className="scroll-mt-32">
