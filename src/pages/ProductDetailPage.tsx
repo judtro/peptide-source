@@ -13,10 +13,13 @@ import {
   Thermometer,
   Snowflake,
   FlaskConical,
-  FileText,
-  AlertTriangle,
+  Microscope,
+  BookOpen,
+  ExternalLink,
+  ShieldAlert,
+  Atom,
+  ShieldCheck,
 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DiscountBadge } from '@/components/DiscountBadge';
 
 const ProductDetailPage = () => {
@@ -39,7 +42,7 @@ const ProductDetailPage = () => {
   return (
     <Layout
       title={`${product.name} - ${product.fullName} | ChemVerify`}
-      description={`${product.name} research peptide. CAS: ${product.casNumber}. ${product.description.slice(0, 150)}`}
+      description={product.mechanismOfAction.slice(0, 155)}
     >
       <article className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -51,33 +54,52 @@ const ProductDetailPage = () => {
           Back to Products
         </Link>
 
-        {/* Header */}
-        <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Dna className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">{product.name}</h1>
-              <p className="text-lg text-muted-foreground">{product.fullName}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="font-mono">
-                  {product.category}
-                </Badge>
-                <span className="text-sm text-muted-foreground">•</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm text-muted-foreground">Partner Discount:</span>
-                  <DiscountBadge code="CHEM10" variant="compact" />
+        {/* === HEADER: Chemical Abstract === */}
+        <header className="mb-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex items-start gap-5">
+              {/* Molecule Card Placeholder */}
+              <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30">
+                <Atom className="h-10 w-10 text-primary/60" />
+                <span className="mt-1 text-[10px] text-muted-foreground">2D Structure</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                  {product.name}
+                </h1>
+                <p className="mt-1 text-lg text-muted-foreground">{product.scientificName}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="font-mono text-xs">
+                    CAS: {product.casNumber}
+                  </Badge>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {product.category}
+                  </Badge>
                 </div>
+              </div>
+            </div>
+
+            {/* Compliance Badge */}
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <Badge
+                variant="destructive"
+                className="gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide"
+              >
+                <ShieldAlert className="h-3.5 w-3.5" />
+                Research Chemical - Not for Human Use
+              </Badge>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Partner Discount:</span>
+                <DiscountBadge code="CHEM10" variant="compact" />
               </div>
             </div>
           </div>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main Content */}
+          {/* === MAIN CONTENT === */}
           <div className="space-y-8 lg:col-span-2">
-            {/* Molecule Data */}
+            {/* Molecular Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -86,25 +108,33 @@ const ProductDetailPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-sm text-muted-foreground">CAS Number</p>
-                    <p className="font-mono text-lg font-semibold">{product.casNumber}</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      CAS Number
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{product.casNumber}</p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-sm text-muted-foreground">Molar Mass</p>
-                    <p className="font-mono text-lg font-semibold">{product.molarMass}</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Molar Mass
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{product.molarMass}</p>
                   </div>
-                  <div className="col-span-full rounded-lg bg-muted/50 p-4">
-                    <p className="text-sm text-muted-foreground">Molecular Formula</p>
-                    <p className="font-mono text-lg font-semibold">{product.molecularFormula}</p>
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Formula</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">
+                      {product.molecularFormula}
+                    </p>
                   </div>
                 </div>
 
                 <Separator className="my-6" />
 
                 <div>
-                  <p className="mb-2 text-sm font-medium text-muted-foreground">Amino Acid Sequence</p>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                    Amino Acid Sequence
+                  </p>
                   <div className="overflow-x-auto rounded-lg bg-secondary/10 p-3">
                     <code className="whitespace-nowrap font-mono text-xs text-foreground">
                       {product.sequence}
@@ -114,34 +144,40 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
 
-            {/* Description */}
+            {/* === SECTION A: Mechanism & Research Findings === */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  Research Overview
+                  <Microscope className="h-5 w-5 text-primary" />
+                  Observed Research Properties
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="leading-relaxed text-muted-foreground">{product.description}</p>
-
-                <Alert className="mt-6 border-warning/50 bg-warning/10">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  <AlertDescription className="text-sm">
-                    This information is provided for research purposes only. Not intended for human
-                    consumption or medical advice.
-                  </AlertDescription>
-                </Alert>
-
-                <Separator className="my-6" />
-
+              <CardContent className="space-y-6">
+                {/* Mechanism of Action */}
                 <div>
-                  <h4 className="mb-3 font-semibold">Research Applications</h4>
-                  <ul className="grid gap-2 sm:grid-cols-2">
-                    {product.researchApplications.map((app, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        {app}
+                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Mechanism of Action
+                  </h3>
+                  <p className="leading-relaxed text-foreground">{product.mechanismOfAction}</p>
+                </div>
+
+                <Separator />
+
+                {/* Research Findings */}
+                <div>
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Key Research Findings
+                  </h3>
+                  <ul className="grid gap-3 sm:grid-cols-1">
+                    {product.researchFindings.map((finding, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-3"
+                      >
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                          {i + 1}
+                        </div>
+                        <p className="text-sm text-foreground">{finding}</p>
                       </li>
                     ))}
                   </ul>
@@ -149,17 +185,61 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
 
+            {/* === SECTION B: Primary Literature === */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  Primary Literature
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {product.studies.map((study, i) => (
+                    <a
+                      key={i}
+                      href={study.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-start gap-3 rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-muted/30"
+                    >
+                      <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary">
+                          {study.title}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          PubMed • {study.year}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs text-muted-foreground">
+                  * External links to PubMed/NCBI. ChemVerify is not affiliated with these
+                  publications.
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Calculator */}
             <ReconstitutionCalculator />
 
-            {/* Verified Vendors */}
+            {/* === SECTION C: Verified Supply Chain === */}
             <section>
-              <h2 className="mb-4 text-xl font-semibold">Verified Vendors for {product.name}</h2>
+              <div className="mb-4 flex items-center gap-3">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold">Verified Sources for {product.name}</h2>
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Third-party COA verified vendors that stock {product.name}. Use code CHEM10 for 10%
+                off.
+              </p>
               <VendorTable filterByPeptide={product.id} showMarketToggle />
             </section>
           </div>
 
-          {/* Sidebar */}
+          {/* === SIDEBAR === */}
           <aside className="space-y-6">
             {/* Storage Instructions */}
             <Card>
@@ -191,7 +271,7 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
 
-            {/* Quick Facts */}
+            {/* Quick Reference */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Quick Reference</CardTitle>
@@ -204,15 +284,40 @@ const ProductDetailPage = () => {
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">CAS</dt>
-                    <dd className="font-mono">{product.casNumber}</dd>
+                    <dt className="text-muted-foreground">CAS Number</dt>
+                    <dd className="font-mono text-xs">{product.casNumber}</dd>
                   </div>
                   <Separator />
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Mass</dt>
+                    <dt className="text-muted-foreground">Molar Mass</dt>
                     <dd className="font-mono text-xs">{product.molarMass}</dd>
                   </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Studies</dt>
+                    <dd className="font-medium">{product.studies.length} cited</dd>
+                  </div>
                 </dl>
+              </CardContent>
+            </Card>
+
+            {/* Research Applications */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Dna className="h-4 w-4 text-primary" />
+                  Research Applications
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {product.researchApplications.map((app, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      {app}
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           </aside>
