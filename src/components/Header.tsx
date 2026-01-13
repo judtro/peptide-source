@@ -22,6 +22,7 @@ export const Header = () => {
     { href: '/', label: t('nav.home') },
     { href: '/vendors', label: t('nav.vendors') },
     { href: '/products', label: t('nav.products') },
+    { href: '/verify', label: t('nav.verify') },
     { href: '/calculator', label: t('nav.calculator') },
   ];
 
