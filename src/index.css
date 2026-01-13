@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lora&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,7 +22,7 @@
     --popover-foreground: 222 47% 11%;
 
     /* Medical Blue - Primary */
-    --primary: 201 96% 32%;
+    --primary: 218 92% 49%;
     --primary-foreground: 0 0% 100%;
 
     /* Clinical Slate */
@@ -30,7 +33,7 @@
     --muted-foreground: 215 16% 47%;
 
     --accent: 201 96% 95%;
-    --accent-foreground: 201 96% 25%;
+    --accent-foreground: 218 92% 49%;
 
     /* Danger/Warning */
     --destructive: 0 72% 51%;
@@ -68,8 +71,8 @@
     --sidebar-ring: 201 96% 50%;
 
     /* Typography */
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
     /* LCD Display colors */
     --lcd-glow: 142 76% 50%;
