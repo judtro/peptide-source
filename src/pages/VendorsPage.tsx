@@ -3,7 +3,7 @@ import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { useRegion } from '@/context/RegionContext';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Info } from 'lucide-react';
+import { ShieldCheck, Info, Truck } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const VendorsPage = () => {
@@ -29,23 +29,18 @@ const VendorsPage = () => {
         </div>
 
         <Alert className="mb-8 border-primary/50 bg-primary/5">
-          <Info className="h-4 w-4" />
-          <AlertTitle>Region Filter Active</AlertTitle>
+          <Truck className="h-4 w-4" />
+          <AlertTitle>Market Filter Active</AlertTitle>
           <AlertDescription>
-            Showing vendors available in{' '}
+            Showing vendors that ship to{' '}
             <Badge variant="secondary" className="font-mono">
               {region === 'US' ? '🇺🇸 United States' : '🇪🇺 European Union'}
             </Badge>
-            . Change your region in the header to see other vendors.
+            . Use the toggle to switch markets and avoid customs issues.
           </AlertDescription>
         </Alert>
 
-        <VendorTable />
-
-        <div className="mt-12">
-          <h2 className="mb-4 text-xl font-semibold">All Vendors (Global)</h2>
-          <VendorTable showAllRegions />
-        </div>
+        <VendorTable showMarketToggle />
       </div>
     </Layout>
   );
