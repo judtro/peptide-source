@@ -37,6 +37,12 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMac, setIsMac] = useState(true);
+
+  // Detect platform for keyboard shortcut display
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
 
   // Handle scroll to hide utility bar
   useEffect(() => {
@@ -248,7 +254,7 @@ export const Header = () => {
               <Search className="h-4 w-4" />
               <span className="min-w-[140px] text-left">Search...</span>
               <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                ⌘K
+                {isMac ? '⌘K' : 'Ctrl+K'}
               </kbd>
             </button>
 
