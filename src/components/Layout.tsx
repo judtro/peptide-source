@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { ComplianceHeader } from './ComplianceHeader';
 import { ComplianceFooter } from './ComplianceFooter';
 import { RegionModal } from './RegionModal';
 
@@ -25,6 +26,7 @@ export const Layout = ({
         <link rel="canonical" href={window.location.href} />
       </Helmet>
       <div className="flex min-h-screen flex-col">
+        <ComplianceHeader />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
