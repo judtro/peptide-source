@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,8 +25,8 @@ import {
 import { useRegion } from '@/context/RegionContext';
 import { FlaskConical, Menu, MapPin, Languages, Dna } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useState } from 'react';
 import { DiscountBadge } from './DiscountBadge';
+import { CommandSearch, CommandSearchTrigger, CommandSearchTriggerMobile } from './CommandSearch';
 import { products } from '@/data/products';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +35,7 @@ export const Header = () => {
   const { region, setRegion } = useRegion();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const navLinks = [
     { href: '/', label: t('nav.home') },
@@ -142,6 +144,13 @@ export const Header = () => {
 
         {/* Controls */}
         <div className="flex items-center gap-2">
+          {/* Search Triggers */}
+          <CommandSearchTrigger onClick={() => setSearchOpen(true)} />
+          <CommandSearchTriggerMobile onClick={() => setSearchOpen(true)} />
+          
+          {/* Command Search Dialog */}
+          <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+          
           {/* Discount Badge */}
           <DiscountBadge code="CHEM10" variant="compact" />
           {/* Region Selector */}
