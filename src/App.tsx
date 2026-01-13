@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "@/i18n/config";
 
 import ScrollToTop from "./components/ScrollToTop";
+import UnderConstruction from "./pages/UnderConstruction";
 
 // Eagerly load critical pages
 import Index from "./pages/Index";
@@ -29,6 +30,8 @@ const ArticlePage = lazy(() => import("./pages/ArticlePage"));
 
 const queryClient = new QueryClient();
 
+const STORAGE_KEY = 'site_access';
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center">
@@ -36,37 +39,53 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <RegionProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/vendors" element={<VendorsPage />} />
-                <Route path="/vendor/:slug" element={<VendorDetailPage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/verify" element={<BatchVerifyPage />} />
-                <Route path="/calculator" element={<CalculatorPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/disclaimer" element={<DisclaimerPage />} />
-                <Route path="/legal" element={<LegalPage />} />
-                <Route path="/education" element={<EducationPage />} />
-                <Route path="/education/:slug" element={<ArticlePage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </RegionProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  });
+
+  const handleAccessGranted = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Show Under Construction gate if not authenticated
+  if (!isAuthenticated) {
+    return <UnderConstruction onAccessGranted={handleAccessGranted} />;
+  }
+
+  // Render the main application if authenticated
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <RegionProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/vendors" element={<VendorsPage />} />
+                  <Route path="/vendor/:slug" element={<VendorDetailPage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/verify" element={<BatchVerifyPage />} />
+                  <Route path="/calculator" element={<CalculatorPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/disclaimer" element={<DisclaimerPage />} />
+                  <Route path="/legal" element={<LegalPage />} />
+                  <Route path="/education" element={<EducationPage />} />
+                  <Route path="/education/:slug" element={<ArticlePage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </RegionProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;
