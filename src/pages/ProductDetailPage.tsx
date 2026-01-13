@@ -22,6 +22,8 @@ import {
   ShieldCheck,
   ArrowDown,
   ArrowUp,
+  Beaker,
+  AlertTriangle,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
 
@@ -249,6 +251,68 @@ const ProductDetailPage = () => {
                 </p>
               </CardContent>
             </Card>
+
+            {/* === RESEARCH PROFILE: Observations & Safety Analysis === */}
+            <section>
+              <div className="mb-4 flex items-center gap-3">
+                <FlaskConical className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold">Research Profile: Observations & Safety Analysis</h2>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Column 1: Documented Research Outcomes */}
+                <Card className="border-primary/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base text-primary">
+                      <Beaker className="h-4 w-4" />
+                      Documented Research Outcomes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {product.researchOutcomes.map((outcome, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <Beaker className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" />
+                          <span className="text-sm text-foreground">{outcome}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-4 text-xs italic text-muted-foreground">
+                      Based on in-vitro and animal model studies.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Column 2: Potential Adverse Effects & Safety Risks */}
+                <Card className="border-amber-500/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base text-amber-600 dark:text-amber-500">
+                      <AlertTriangle className="h-4 w-4" />
+                      Potential Adverse Effects & Safety Risks
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {product.adverseEffects.map((effect, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500/60" />
+                          <span className="text-sm text-foreground">{effect}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="mt-4 rounded-lg bg-muted/30 p-4">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Note:</strong> This data is compiled from available clinical trials and laboratory reports. 
+                  It is provided for educational research purposes only and does not constitute medical advice or a 
+                  safety guarantee for human consumption.
+                </p>
+              </div>
+            </section>
 
             {/* Calculator */}
             <ReconstitutionCalculator />

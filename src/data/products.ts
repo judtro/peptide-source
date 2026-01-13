@@ -17,6 +17,8 @@ export interface Product {
   description: string;
   mechanismOfAction: string;
   researchFindings: string[];
+  researchOutcomes: string[];
+  adverseEffects: string[];
   studies: Study[];
   storageInstructions: {
     lyophilized: string;
@@ -47,6 +49,21 @@ export const products: Product[] = [
       'Modulation of dopaminergic system in nigrostriatal lesion models',
       'Improved ligament healing rates in MCL transection studies',
       'Cytoprotective effects observed in NSAID-induced gastric damage models',
+    ],
+    researchOutcomes: [
+      'Increased angiogenesis and blood vessel formation in tissue samples',
+      'Neuroprotective properties observed in rodent models',
+      'Enhanced tendon-to-bone healing in rotator cuff studies',
+      'Cytoprotective effects against NSAID-induced gastric damage',
+      'Modulation of nitric oxide system pathways',
+      'Improved ligament healing rates in MCL injury models',
+    ],
+    adverseEffects: [
+      'Potential injection site irritation reported in some studies',
+      'Limited data on long-term systemic effects',
+      'Possible interaction with dopaminergic medications',
+      'Lack of comprehensive human clinical trial data',
+      'Long-term safety data in humans is lacking',
     ],
     studies: [
       {
@@ -98,6 +115,20 @@ export const products: Product[] = [
       'Reduced inflammatory markers in corneal injury models',
       'Accelerated muscle fiber regeneration in cardiotoxin-induced injury studies',
     ],
+    researchOutcomes: [
+      'Enhanced dermal wound closure in murine models',
+      'Improved cardiac function markers post-myocardial infarction',
+      'Increased hair follicle stem cell migration',
+      'Reduced inflammatory markers in corneal injury studies',
+      'Accelerated muscle fiber regeneration in injury models',
+    ],
+    adverseEffects: [
+      'Theoretical concern for tumor growth promotion due to angiogenic properties',
+      'Limited pharmacokinetic data available',
+      'Potential for immunomodulatory effects requiring further study',
+      'No established dosing guidelines from human trials',
+      'Long-term safety data in humans is lacking',
+    ],
     studies: [
       {
         title: 'Thymosin beta4 activates integrin-linked kinase and promotes cardiac cell migration',
@@ -147,6 +178,21 @@ export const products: Product[] = [
       'Reduced oxidative stress markers in UV-damaged skin models',
       'Modulation of 4,000+ human genes in microarray expression studies',
       'Improved skin elasticity measurements in clinical topical studies',
+    ],
+    researchOutcomes: [
+      'Increased collagen I and III synthesis in fibroblast cultures',
+      'Enhanced wound contraction in tissue models',
+      'Upregulation of VEGF and FGF-2 in angiogenesis assays',
+      'Reduced oxidative stress markers in UV-damaged skin models',
+      'Modulation of 4,000+ human genes in expression studies',
+      'Improved skin elasticity in topical application studies',
+    ],
+    adverseEffects: [
+      'Potential for copper toxicity at high concentrations',
+      'Possible skin sensitivity reactions with topical application',
+      'Unknown interactions with other copper-binding compounds',
+      'Limited systemic administration safety data',
+      'Long-term safety data in humans is lacking',
     ],
     studies: [
       {
