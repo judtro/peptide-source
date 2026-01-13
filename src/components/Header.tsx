@@ -64,68 +64,9 @@ export const Header = () => {
 
   return (
     <>
-      {/* Top Utility Row - Dark Slate */}
-      <div 
-        className={cn(
-          'sticky top-[36px] z-40 border-b border-border/20 bg-foreground transition-all duration-300',
-          isScrolled ? 'h-0 overflow-hidden opacity-0' : 'h-auto opacity-100'
-        )}
-      >
-        <div className="container mx-auto flex h-9 items-center justify-end gap-3 px-4">
-          {/* Region Selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-background">
-                <MapPin className="h-3.5 w-3.5" />
-                <span>{region === 'US' ? '🇺🇸' : '🇪🇺'} {region}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setRegion('US')} className="gap-2">
-                <span className="text-lg">🇺🇸</span> {t('region.us')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setRegion('EU')} className="gap-2">
-                <span className="text-lg">🇪🇺</span> {t('region.eu')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <span className="h-3 w-px bg-muted-foreground/30" />
-
-          {/* Language Selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-background">
-                <Languages className="h-3.5 w-3.5" />
-                <span className="uppercase">{i18n.language}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                English
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage('de')}>
-                Deutsch
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage('fr')}>
-                Français
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <span className="h-3 w-px bg-muted-foreground/30" />
-
-          {/* CHEM10 Badge - Compact */}
-          <DiscountBadge code="CHEM10" variant="compact" className="border-success/30 bg-success/5 text-success/90 hover:bg-success/10" />
-        </div>
-      </div>
-
       {/* Main Navigation Row - Light */}
       <header 
-        className={cn(
-          'sticky z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90',
-          isScrolled ? 'top-[36px]' : 'top-[calc(36px+36px)]'
-        )}
+        className="sticky top-[36px] z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90"
       >
         {/* Top Row: Logo, Search, Verify Batch */}
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -463,8 +404,13 @@ export const Header = () => {
               </Link>
             </nav>
 
-            {/* Region & Language Selectors */}
+            {/* Discount Badge + Region & Language Selectors */}
             <div className="flex items-center gap-3">
+              {/* Discount Badge */}
+              <DiscountBadge code="CHEM10" variant="compact" className="border-success/30 bg-success/5 text-success/90 hover:bg-success/10" />
+
+              <span className="h-3 w-px bg-border" />
+
               {/* Region Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
