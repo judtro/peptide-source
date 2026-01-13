@@ -127,127 +127,19 @@ export const Header = () => {
           isScrolled ? 'top-[36px]' : 'top-[calc(36px+36px)]'
         )}
       >
+        {/* Top Row: Logo, Search, Verify Batch */}
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img src={logo} alt="ChemVerify.com" className="h-12 w-auto transition-transform duration-200 hover:scale-105" />
           </Link>
 
-          {/* Desktop Navigation - Center */}
-          <nav className="hidden items-center gap-x-8 lg:flex">
-            <Link to="/">
-              <Button
-                variant={isActive('/') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2 font-medium"
-              >
-                Home
-              </Button>
-            </Link>
-
-            <Link to="/vendors">
-              <Button
-                variant={isActive('/vendors') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2 font-medium"
-              >
-                <Building2 className="h-4 w-4" />
-                Verified Vendors
-              </Button>
-            </Link>
-
-            {/* Products Dropdown with Calculator */}
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      'h-9 gap-2 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
-                      isProductsActive && 'bg-secondary text-secondary-foreground'
-                    )}
-                  >
-                    <Beaker className="h-4 w-4" />
-                    {t('nav.products')}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-[420px] gap-1 p-3 md:w-[520px] md:grid-cols-2">
-                      {products.map((product) => (
-                        <NavigationMenuLink key={product.id} asChild>
-                          <Link
-                            to={`/product/${product.id}`}
-                            className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
-                          >
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                              <Dna className="h-4 w-4 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-foreground">
-                                {product.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {product.category}
-                              </p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      ))}
-                      
-                      {/* Divider */}
-                      <div className="col-span-full my-2 border-t border-border" />
-                      
-                      {/* Calculator - Featured Utility */}
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/calculator"
-                          className="col-span-full flex items-center gap-3 rounded-md bg-accent/50 p-3 transition-colors hover:bg-accent"
-                        >
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
-                            <Calculator className="h-4 w-4 text-primary-foreground" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-foreground">
-                              Reconstitution Calculator
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Calculate precise dosages for your research
-                            </p>
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-
-                      {/* View All Link */}
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/products"
-                          className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                        >
-                          View All Products →
-                        </Link>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-
-            <Link to="/education">
-              <Button
-                variant={isActive('/education') || location.pathname.startsWith('/education/') ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-2 font-medium"
-              >
-                <BookOpen className="h-4 w-4" />
-                Knowledge Hub
-              </Button>
-            </Link>
-          </nav>
-
           {/* Right Controls */}
           <div className="flex items-center gap-3">
             {/* Search Bar Trigger - Desktop */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="hidden items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:flex"
+              className="hidden items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:flex"
             >
               <Search className="h-4 w-4" />
               <span className="min-w-[140px] text-left">Search...</span>
@@ -260,7 +152,7 @@ export const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="md:hidden"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
@@ -280,9 +172,6 @@ export const Header = () => {
                 <ShieldCheck className="h-5 w-5" />
               </Button>
             </Link>
-
-            {/* Command Search Dialog */}
-            <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -456,6 +345,167 @@ export const Header = () => {
                 </nav>
               </SheetContent>
             </Sheet>
+
+            {/* Command Search Dialog */}
+            <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+          </div>
+        </div>
+
+        {/* Bottom Row: Navigation + Region/Language - Desktop Only */}
+        <div className="hidden border-t border-border/50 lg:block">
+          <div className="container mx-auto flex h-12 items-center justify-between px-4">
+            {/* Desktop Navigation */}
+            <nav className="flex items-center gap-x-6">
+              <Link to="/">
+                <Button
+                  variant={isActive('/') ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="gap-2 font-medium"
+                >
+                  Home
+                </Button>
+              </Link>
+
+              <Link to="/vendors">
+                <Button
+                  variant={isActive('/vendors') ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="gap-2 font-medium"
+                >
+                  <Building2 className="h-4 w-4" />
+                  Verified Vendors
+                </Button>
+              </Link>
+
+              {/* Products Dropdown with Calculator */}
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger
+                      className={cn(
+                        'h-9 gap-2 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+                        isProductsActive && 'bg-secondary text-secondary-foreground'
+                      )}
+                    >
+                      <Beaker className="h-4 w-4" />
+                      {t('nav.products')}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid w-[420px] gap-1 p-3 md:w-[520px] md:grid-cols-2">
+                        {products.map((product) => (
+                          <NavigationMenuLink key={product.id} asChild>
+                            <Link
+                              to={`/product/${product.id}`}
+                              className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
+                            >
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                                <Dna className="h-4 w-4 text-primary" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground">
+                                  {product.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {product.category}
+                                </p>
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        ))}
+                        
+                        {/* Divider */}
+                        <div className="col-span-full my-2 border-t border-border" />
+                        
+                        {/* Calculator - Featured Utility */}
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/calculator"
+                            className="col-span-full flex items-center gap-3 rounded-md bg-accent/50 p-3 transition-colors hover:bg-accent"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
+                              <Calculator className="h-4 w-4 text-primary-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-foreground">
+                                Reconstitution Calculator
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Calculate precise dosages for your research
+                              </p>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+
+                        {/* View All Link */}
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/products"
+                            className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                          >
+                            View All Products →
+                          </Link>
+                        </NavigationMenuLink>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+
+              <Link to="/education">
+                <Button
+                  variant={isActive('/education') || location.pathname.startsWith('/education/') ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="gap-2 font-medium"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Knowledge Hub
+                </Button>
+              </Link>
+            </nav>
+
+            {/* Region & Language Selectors */}
+            <div className="flex items-center gap-3">
+              {/* Region Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{region === 'US' ? '🇺🇸' : '🇪🇺'} {region}</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setRegion('US')} className="gap-2">
+                    <span className="text-lg">🇺🇸</span> {t('region.us')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRegion('EU')} className="gap-2">
+                    <span className="text-lg">🇪🇺</span> {t('region.eu')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <span className="h-3 w-px bg-border" />
+
+              {/* Language Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                    <Languages className="h-3.5 w-3.5" />
+                    <span className="uppercase">{i18n.language}</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('de')}>
+                    Deutsch
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('fr')}>
+                    Français
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>
