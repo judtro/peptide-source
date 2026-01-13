@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Fragment } from 'react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,20 +9,19 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-export interface BreadcrumbItem {
+export interface BreadcrumbItemType {
   label: string;
   href?: string;
 }
 
 interface BreadcrumbsProps {
-  items: BreadcrumbItem[];
+  items: BreadcrumbItemType[];
 }
 
 export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
   return (
     <Breadcrumb className="mb-6">
       <BreadcrumbList>
-        {/* Home is always first */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link 
@@ -37,7 +37,7 @@ export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
           const isLast = index === items.length - 1;
           
           return (
-            <div key={item.label} className="flex items-center gap-1.5 sm:gap-2.5">
+            <Fragment key={item.label}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 {isLast || !item.href ? (
@@ -55,7 +55,7 @@ export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-            </div>
+            </Fragment>
           );
         })}
       </BreadcrumbList>
