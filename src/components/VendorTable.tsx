@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -204,7 +205,14 @@ export const VendorTable = ({
               <TableBody>
                 {sortedVendors.map((vendor) => (
                   <TableRow key={vendor.id}>
-                    <TableCell className="font-medium">{vendor.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link 
+                        to={`/vendor/${vendor.slug}`}
+                        className="transition-colors hover:text-primary hover:underline"
+                      >
+                        {vendor.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <Tooltip>
                         <TooltipTrigger asChild>
