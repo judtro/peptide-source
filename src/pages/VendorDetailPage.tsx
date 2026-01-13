@@ -24,6 +24,7 @@ import {
   Package,
 } from 'lucide-react';
 import { generateBreadcrumbSchema } from '@/components/SEOHead';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const VendorDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -121,17 +122,14 @@ const VendorDetailPage = () => {
       jsonLd={jsonLdSchemas}
     >
 
-      <div className="container mx-auto px-4 py-6 sm:py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-4 sm:mb-6">
-          <Link
-            to="/vendors"
-            className="inline-flex min-h-[44px] items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to All Vendors
-          </Link>
-        </nav>
+      <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs 
+          items={[
+            { label: 'Vendors', href: '/vendors' },
+            { label: vendor.name }
+          ]} 
+        />
 
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main Content */}

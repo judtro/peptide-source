@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/data/products';
-import { ArrowRight, FlaskConical, Dna } from 'lucide-react';
+import { ArrowRight, Dna, ShieldCheck } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProductCardProps {
   product: Product;
@@ -28,7 +29,20 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </Badge>
           ))}
         </div>
-        <CardTitle className="mt-3 text-xl font-bold">{product.name}</CardTitle>
+        <CardTitle className="mt-3 flex items-center gap-2 text-xl font-bold">
+          {product.name}
+          {/* Lab Tested Badge - Show for verified products */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex items-center">
+                <ShieldCheck className="h-4 w-4 text-success" aria-hidden="true" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Lab Tested & Verified</p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
         <p className="text-sm text-muted-foreground">{product.fullName}</p>
       </CardHeader>
       <CardContent className="space-y-4">

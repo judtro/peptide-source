@@ -25,6 +25,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const ArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -90,15 +91,14 @@ const ArticlePage = () => {
       title={`${article.title} | ChemVerify Education`}
       description={article.summary}
     >
-      <article className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <Link
-          to="/education"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Knowledge Hub
-        </Link>
+      <article className="container mx-auto max-w-7xl px-4 py-8">
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs 
+          items={[
+            { label: 'Knowledge Hub', href: '/education' },
+            { label: article.title }
+          ]} 
+        />
 
         <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
           {/* Main Content - Narrow reading column */}

@@ -7,13 +7,13 @@ export const Footer = () => {
 
   return (
     <footer className="border-t border-border bg-card pb-16">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <FlaskConical className="h-5 w-5 text-primary-foreground" />
+                <FlaskConical className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
               </div>
               <span className="font-mono text-lg font-bold text-foreground">ChemVerify</span>
             </Link>
@@ -28,17 +28,17 @@ export const Footer = () => {
             <h4 className="mb-4 font-semibold text-foreground">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/vendors" className="text-muted-foreground hover:text-primary">
+                <Link to="/vendors" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('nav.vendors')}
                 </Link>
               </li>
               <li>
-                <Link to="/products" className="text-muted-foreground hover:text-primary">
+                <Link to="/products" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('nav.products')}
                 </Link>
               </li>
               <li>
-                <Link to="/calculator" className="text-muted-foreground hover:text-primary">
+                <Link to="/calculator" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('nav.calculator')}
                 </Link>
               </li>
@@ -50,17 +50,17 @@ export const Footer = () => {
             <h4 className="mb-4 font-semibold text-foreground">{t('footer.sitemap')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary">
+                <Link to="/privacy" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('footer.privacy')}
                 </Link>
               </li>
               <li>
-                <Link to="/legal" className="text-muted-foreground hover:text-primary">
+                <Link to="/legal" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('footer.legal')}
                 </Link>
               </li>
               <li>
-                <Link to="/disclaimer" className="text-muted-foreground hover:text-primary">
+                <Link to="/disclaimer" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {t('footer.disclaimer')}
                 </Link>
               </li>
@@ -68,7 +68,30 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground">
+        {/* Lab Partners Section */}
+        <div className="mt-12 border-t border-border pt-8">
+          <p className="mb-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Third-Party Testing Partners
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            {/* Janoshik Analytics */}
+            <div className="flex items-center gap-2 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+                <span className="text-xs font-bold text-muted-foreground">JA</span>
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">Janoshik Analytics</span>
+            </div>
+            {/* MZ Biolabs */}
+            <div className="flex items-center gap-2 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+                <span className="text-xs font-bold text-muted-foreground">MZ</span>
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">MZ Biolabs</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-border pt-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} ChemVerify. All rights reserved. For research purposes only.
         </div>
       </div>
