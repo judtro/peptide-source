@@ -27,7 +27,7 @@ export const RegionModal = () => {
 
   return (
     <Dialog open={showRegionModal} onOpenChange={setShowRegionModal}>
-      <DialogContent className="mx-4 max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto border-border bg-card sm:mx-auto sm:max-w-md">
+      <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] overflow-x-hidden border-border bg-card sm:mx-auto sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 sm:h-16 sm:w-16">
             <MapPin className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
