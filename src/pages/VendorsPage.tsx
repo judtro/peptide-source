@@ -9,7 +9,7 @@ import { getRegionFlag, getRegionName } from '@/components/MarketToggle';
 
 const VendorsPage = () => {
   const { t } = useTranslation();
-  const { region } = useRegion();
+  const { region, showAllMarkets } = useRegion();
 
   return (
     <Layout
@@ -31,13 +31,22 @@ const VendorsPage = () => {
 
         <Alert className="mb-8 border-primary/50 bg-primary/5">
           <Truck className="h-4 w-4" />
-          <AlertTitle>Market Filter Active</AlertTitle>
+          <AlertTitle>Market Filter {showAllMarkets ? 'Disabled' : 'Active'}</AlertTitle>
           <AlertDescription>
-            Showing vendors that ship to{' '}
-            <Badge variant="secondary" className="font-mono">
-              {getRegionFlag(region)} {getRegionName(region)}
-            </Badge>
-            . Use the toggle to switch markets and avoid customs issues.
+            {showAllMarkets ? (
+              <>
+                Showing <Badge variant="secondary" className="font-mono">🌍 All Markets</Badge>. 
+                Use the toggle to filter by a specific region.
+              </>
+            ) : (
+              <>
+                Showing vendors that ship to{' '}
+                <Badge variant="secondary" className="font-mono">
+                  {getRegionFlag(region)} {getRegionName(region)}
+                </Badge>
+                . Use the toggle to switch markets and avoid customs issues.
+              </>
+            )}
           </AlertDescription>
         </Alert>
 
