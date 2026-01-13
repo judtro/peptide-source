@@ -17,6 +17,7 @@ import {
   GraduationCap,
   Microscope,
   Filter,
+  Search,
 } from 'lucide-react';
 
 const PILLAR_ICONS = {
@@ -24,6 +25,7 @@ const PILLAR_ICONS = {
   ShieldCheck,
   Activity,
   AlertTriangle,
+  Search,
 } as const;
 
 const CATEGORY_COLORS: Record<Article['category'], string> = {
@@ -31,6 +33,7 @@ const CATEGORY_COLORS: Record<Article['category'], string> = {
   verification: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
   pharmacokinetics: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
   safety: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  sourcing: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
 };
 
 const EducationPage = () => {
@@ -197,6 +200,20 @@ const EducationPage = () => {
                             strokeWidth="3"
                           />
                           <line x1="50" y1="35" x2="50" y2="55" stroke="currentColor" strokeWidth="4" />
+                          <circle cx="50" cy="65" r="3" fill="currentColor" />
+                        </svg>
+                      )}
+                      {article.category === 'sourcing' && (
+                        <svg className="h-20 w-20 text-primary/20" viewBox="0 0 100 100">
+                          {/* Sourcing/Vendor Map */}
+                          <circle cx="35" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                          <circle cx="65" cy="35" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                          <circle cx="50" cy="65" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                          <line x1="42" y1="44" x2="43" y2="58" stroke="currentColor" strokeWidth="2" />
+                          <line x1="58" y1="41" x2="55" y2="57" stroke="currentColor" strokeWidth="2" />
+                          <line x1="42" y1="37" x2="57" y2="35" stroke="currentColor" strokeWidth="2" />
+                          <circle cx="35" cy="40" r="3" fill="currentColor" />
+                          <circle cx="65" cy="35" r="3" fill="currentColor" />
                           <circle cx="50" cy="65" r="3" fill="currentColor" />
                         </svg>
                       )}

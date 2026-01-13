@@ -21,6 +21,8 @@ import {
   AlertTriangle,
   FileText,
   ShieldCheck,
+  Database,
+  Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -343,23 +345,47 @@ const ArticlePage = () => {
                 </CardContent>
               </Card>
 
-              {/* Verify CTA Box */}
-              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-                <CardContent className="p-4">
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <ShieldCheck className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="mb-1 font-semibold text-foreground">Verify Your Batch</h3>
-                  <p className="mb-3 text-xs text-muted-foreground">
-                    Cross-reference your peptide with third-party COA reports in our database.
-                  </p>
-                  <Link to="/verify">
-                    <Button size="sm" className="w-full">
-                      Check Authenticity
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              {/* Vendor CTA Box - For Sourcing Guides */}
+              {article.category === 'sourcing' ? (
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                  <CardContent className="p-4">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Database className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="mb-1 font-semibold text-foreground">Looking for verified sources?</h3>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      Access our audited Vendor List with current discount codes and verification status.
+                    </p>
+                    <Link to="/vendors">
+                      <Button size="sm" className="w-full gap-2">
+                        <Database className="h-4 w-4" />
+                        Go to Vendor Database
+                      </Button>
+                    </Link>
+                    <div className="mt-3 flex items-center gap-2 rounded-md bg-background/50 px-3 py-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-medium text-foreground">Use code: <span className="font-bold text-primary">CHEM10</span></span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                  <CardContent className="p-4">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="mb-1 font-semibold text-foreground">Verify Your Batch</h3>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      Cross-reference your peptide with third-party COA reports in our database.
+                    </p>
+                    <Link to="/verify">
+                      <Button size="sm" className="w-full">
+                        Check Authenticity
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Related Articles */}
               {relatedArticles.length > 0 && (
