@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { articles, EDUCATION_PILLARS, getArticleCountByCategory, Article } from '@/data/articles';
 import {
   Beaker,
@@ -18,6 +25,10 @@ import {
   Microscope,
   Filter,
   Search,
+  FlaskConical,
+  Atom,
+  Thermometer,
+  TestTube,
 } from 'lucide-react';
 
 const PILLAR_ICONS = {
@@ -34,6 +45,76 @@ const CATEGORY_COLORS: Record<Article['category'], string> = {
   pharmacokinetics: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
   safety: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   sourcing: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
+};
+
+// Technical FAQ Data grouped by category
+const TECHNICAL_FAQ_GROUPS = [
+  {
+    id: 'composition',
+    title: 'Chemical Composition & Purity',
+    icon: Atom,
+    questions: [
+      {
+        question: 'What is the difference between Peptide Purity and Net Peptide Content?',
+        answer: "This is a critical distinction. Purity (determined by HPLC) refers to the ratio of the target peptide versus impurities like deletion sequences or byproducts. Net Peptide Content refers to the actual weight of the peptide versus the total weight of the powder, which includes residual water and counter-ions (salts) like Acetate or TFA. A 5mg vial with 99% purity may only contain ~4.2mg of actual peptide mass due to these salts.",
+      },
+      {
+        question: 'Why do some lyophilized cakes look different (Puck vs. Powder)?',
+        answer: "The visual appearance depends on the lyophilization process and the use of excipients (bulking agents) like Mannitol. A solid 'puck' usually indicates the presence of a bulking agent to stabilize the structure. A loose powder or shrunken cake often indicates a pure peptide without fillers. Both are valid, provided the mass spectrometry confirms the identity.",
+      },
+      {
+        question: "What is 'Counter-Ion Exchange' (Acetate vs. TFA)?",
+        answer: "Most synthetic peptides are produced using Trifluoroacetic Acid (TFA). For sensitive research applications (e.g., cell culture), TFA salts can be cytotoxic. High-end manufacturing involves a 'counter-ion exchange' process to replace TFA with Acetate or Hydrochloride (HCl), which is more biocompatible but increases production costs.",
+      },
+    ],
+  },
+  {
+    id: 'stability',
+    title: 'Stability & Degradation',
+    icon: Thermometer,
+    questions: [
+      {
+        question: "How does the 'Isoelectric Point' affect solubility?",
+        answer: "Every peptide has an isoelectric point (pI)—the pH at which it carries no net electrical charge and is least soluble. If a peptide fails to dissolve in neutral Bacteriostatic Water, the pH of the solvent may be close to the peptide's pI. Research protocols often suggest adding a small amount of dilute Acetic Acid (10%) or Ammonia to shift the pH and facilitate dissolution.",
+      },
+      {
+        question: 'What are the visible signs of peptide degradation?',
+        answer: 'Lyophilized powder is extremely stable. Once reconstituted, degradation can occur via hydrolysis, oxidation, or aggregation. Visible signs include cloudiness (turbidity), precipitation (particles settling), or unexpected color changes. If a solution that should be clear turns cloudy, the tertiary structure may have collapsed, rendering the sample invalid.',
+      },
+    ],
+  },
+  {
+    id: 'handling',
+    title: 'Handling & Protocols',
+    icon: TestTube,
+    questions: [
+      {
+        question: 'Can multiple compounds be co-solubilized (Stacked) in one vial?',
+        answer: 'While physically possible, verify chemical compatibility first. Some peptides have conflicting pH stability requirements. Additionally, mixing compounds in a single vial prevents the isolation of variables in a research setting. Best practice dictates keeping solutions separate until the moment of administration in the test model.',
+      },
+      {
+        question: "Why must 'Bacteriostatic Water' be used within 28 days?",
+        answer: 'Bacteriostatic water contains 0.9% Benzyl Alcohol as a preservative. While it inhibits bacterial reproduction, the alcohol itself can slowly degrade or evaporate after the vial is punctured multiple times, and it can eventually interact with the peptide bonds (oxidation) over extended periods. The 28-day rule is a standard pharmaceutical safety limit.',
+      },
+    ],
+  },
+];
+
+// Flatten all questions for schema
+const allTechnicalFAQs = TECHNICAL_FAQ_GROUPS.flatMap(group => group.questions);
+
+// Generate FAQ Schema for SEO
+const technicalFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: allTechnicalFAQs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
 };
 
 const EducationPage = () => {
@@ -267,6 +348,79 @@ const EducationPage = () => {
               <Button size="sm" className="gap-2">
                 <ShieldCheck className="h-4 w-4" />
                 Verify a Batch
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        <Separator className="my-10 sm:my-16" />
+
+        {/* Technical FAQ Section */}
+        <section>
+          <Helmet>
+            <script type="application/ld+json">
+              {JSON.stringify(technicalFaqSchema)}
+            </script>
+          </Helmet>
+          
+          <div className="mb-6 text-center sm:mb-10">
+            <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 sm:mb-4 sm:px-4 sm:py-2">
+              <FlaskConical className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+              <span className="text-xs font-medium text-primary sm:text-sm">Advanced Reference</span>
+            </div>
+            <h2 className="mb-2 text-xl font-bold text-foreground sm:text-2xl md:text-3xl">
+              Technical Specifications & Laboratory Protocols
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
+              Deep-knowledge FAQ covering chemical composition, stability science, and handling protocols 
+              for advanced researchers.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl space-y-8">
+            {TECHNICAL_FAQ_GROUPS.map((group) => {
+              const IconComponent = group.icon;
+              
+              return (
+                <div key={group.id}>
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                      <IconComponent className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground sm:text-lg">
+                      {group.title}
+                    </h3>
+                  </div>
+                  
+                  <Accordion type="single" collapsible className="w-full space-y-2">
+                    {group.questions.map((faq, index) => (
+                      <AccordionItem
+                        key={index}
+                        value={`${group.id}-${index}`}
+                        className="rounded-lg border border-border bg-card px-4 transition-all data-[state=open]:border-primary/50 data-[state=open]:shadow-sm sm:px-5"
+                      >
+                        <AccordionTrigger className="py-4 text-left text-sm font-medium hover:no-underline sm:text-base [&[data-state=open]>svg]:text-primary">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 text-center sm:mt-10">
+            <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">
+              Have a specific research question? Consult our article library above.
+            </p>
+            <Link to="/calculator">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Beaker className="h-4 w-4" />
+                Use Reconstitution Calculator
               </Button>
             </Link>
           </div>
