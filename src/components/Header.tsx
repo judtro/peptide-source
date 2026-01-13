@@ -40,6 +40,7 @@ export const Header = () => {
     { href: '/vendors', label: t('nav.vendors') },
     { href: '/verify', label: t('nav.verify') },
     { href: '/calculator', label: t('nav.calculator') },
+    { href: '/education', label: 'Knowledge Hub' },
   ];
 
   const changeLanguage = (lng: string) => {

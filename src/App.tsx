@@ -15,6 +15,8 @@ import CalculatorPage from "./pages/CalculatorPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import LegalPage from "./pages/LegalPage";
+import EducationPage from "./pages/EducationPage";
+import ArticlePage from "./pages/ArticlePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,8 +37,9 @@ const App = () => (
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/legal" element={<LegalPage />} />
+            <Route path="/education" element={<EducationPage />} />
+            <Route path="/education/:slug" element={<ArticlePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
