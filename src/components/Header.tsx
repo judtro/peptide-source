@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -128,11 +129,8 @@ export const Header = () => {
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <FlaskConical className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-mono text-lg font-bold text-foreground">ChemVerify</span>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="ChemVerify.com" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation - Center */}
