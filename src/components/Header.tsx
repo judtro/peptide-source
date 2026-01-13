@@ -23,7 +23,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useRegion } from '@/context/RegionContext';
-import { FlaskConical, Menu, MapPin, Languages, Dna, Search, ShieldCheck, Calculator, BookOpen, Building2, Beaker, FileCheck } from 'lucide-react';
+import { FlaskConical, Menu, MapPin, Languages, Dna, Search, ShieldCheck, Calculator, BookOpen, Building2, Beaker, FileCheck, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DiscountBadge } from './DiscountBadge';
 import { CommandSearch } from './CommandSearch';
@@ -131,6 +131,16 @@ export const Header = () => {
 
           {/* Desktop Navigation - Center */}
           <nav className="hidden items-center gap-x-8 lg:flex">
+            <Link to="/">
+              <Button
+                variant={isActive('/') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2 font-medium"
+              >
+                Home
+              </Button>
+            </Link>
+
             <Link to="/vendors">
               <Button
                 variant={isActive('/vendors') ? 'secondary' : 'ghost'}
@@ -312,6 +322,16 @@ export const Header = () => {
                       Information
                     </h3>
                     <div className="flex flex-col gap-1">
+                      <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                        <Button
+                          variant={isActive('/') ? 'secondary' : 'ghost'}
+                          className="min-h-[48px] w-full justify-start gap-3 text-base"
+                        >
+                          <Home className="h-5 w-5" />
+                          Home
+                        </Button>
+                      </Link>
+
                       <Link to="/vendors" onClick={() => setMobileMenuOpen(false)}>
                         <Button
                           variant={isActive('/vendors') ? 'secondary' : 'ghost'}
