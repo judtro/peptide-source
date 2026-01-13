@@ -95,22 +95,22 @@ const ProductDetailPage = () => {
                     {product.category}
                   </Badge>
                 </div>
-                {/* CTA Button */}
-                <Button
-                  className="mt-4 gap-2"
-                  size="lg"
-                  onClick={() => {
-                    document.getElementById('vendor-table')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  <ArrowDown className="h-4 w-4" />
-                  View Verified Sources
-                </Button>
               </div>
             </div>
 
-            {/* Compliance Badge */}
+            {/* Right Side: CTA + Compliance Badge */}
             <div className="flex flex-col items-start gap-3 lg:items-end">
+              {/* CTA Button */}
+              <Button
+                className="gap-2"
+                size="lg"
+                onClick={() => {
+                  document.getElementById('vendor-table')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <ArrowDown className="h-4 w-4" />
+                View Verified Sources
+              </Button>
               <Badge
                 variant="destructive"
                 className="gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide"
