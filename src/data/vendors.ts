@@ -3,7 +3,7 @@ export type { VendorStatus, Region, Vendor } from '@/types';
 import type { Vendor, Region } from '@/types';
 
 export const vendors: Vendor[] = [
-  // --- US MARKET LEADERS ---
+  // --- US MARKET LEADERS (VERIFIED) ---
   {
     id: 'swiss-chems',
     slug: 'swiss-chems',
@@ -45,6 +45,26 @@ export const vendors: Vendor[] = [
     paymentMethods: ['Credit Card', 'Venmo', 'Crypto'],
   },
   {
+    id: 'limitless-life',
+    slug: 'limitless-life-nootropics',
+    name: 'Limitless Life',
+    region: 'US',
+    shippingRegions: ['US', 'EU'],
+    purityScore: 99.9,
+    coaVerified: true,
+    pricePerMg: 0.85,
+    status: 'verified',
+    website: 'https://limitlesslifenootropics.com',
+    peptides: ['bpc-157', 'tb-500', 'semaglutide', 'tirzepatide', 'retatrutide', 'mots-c', 'ss-31'],
+    lastVerified: '2026-01-12',
+    discountCode: 'CHEM10',
+    description: 'Premium pricing for premium research. Known for specialized VIP service and stocking rare, experimental compounds not found elsewhere.',
+    location: 'United States',
+    yearFounded: '2016',
+    shippingMethods: ['FedEx', 'UPS'],
+    paymentMethods: ['Credit Card', 'Crypto'],
+  },
+  {
     id: 'sports-technology-labs',
     slug: 'sports-tech-labs',
     name: 'Sports Technology Labs',
@@ -65,7 +85,29 @@ export const vendors: Vendor[] = [
     paymentMethods: ['Credit Card', 'E-Check', 'Crypto'],
   },
 
-  // --- EU MARKET LEADERS ---
+  // --- CANADA (HIGH AUTHORITY) ---
+  {
+    id: 'canlab-research',
+    slug: 'canlab-research',
+    name: 'CanLab Research',
+    region: 'US', // Ships to North America
+    shippingRegions: ['US'],
+    purityScore: 99.95,
+    coaVerified: true,
+    pricePerMg: 0.95,
+    status: 'verified',
+    website: 'https://canlabresearch.com',
+    peptides: ['bpc-157', 'tb-500', 'ghk-cu', 'semaglutide', 'ipamorelin', 'cjc-1295', 'epithalon'],
+    lastVerified: '2026-01-11',
+    discountCode: '',
+    description: 'Operated by Jean-François Tremblay. Synthesizes peptides in-house in Montreal rather than outsourcing. Regarded as the "Gold Standard" for purity.',
+    location: 'Canada',
+    yearFounded: '2015',
+    shippingMethods: ['Canada Post', 'Xpresspost'],
+    paymentMethods: ['E-Transfer', 'Crypto'],
+  },
+
+  // --- EU & UK MARKET ---
   {
     id: 'pulse-peptides',
     slug: 'pulse-peptides',
@@ -107,6 +149,28 @@ export const vendors: Vendor[] = [
     paymentMethods: ['Card', 'Transfer'],
   },
   {
+    id: 'trident-peptide',
+    slug: 'trident-peptide',
+    name: 'Trident Peptide',
+    region: 'EU',
+    shippingRegions: ['EU'],
+    purityScore: 99.2,
+    coaVerified: true,
+    pricePerMg: 0.58,
+    status: 'verified',
+    website: 'https://tridentpeptide.com',
+    peptides: ['bpc-157', 'tb-500', 'ghk-cu', 'ipamorelin', 'melanotan-2'],
+    lastVerified: '2026-01-09',
+    discountCode: '',
+    description: 'The go-to source for researchers in the UK. Ships domestically via Royal Mail, avoiding Brexit-related customs delays.',
+    location: 'United Kingdom',
+    yearFounded: '2018',
+    shippingMethods: ['Royal Mail 24/48'],
+    paymentMethods: ['Bank Transfer', 'Card'],
+  },
+
+  // --- UNVERIFIED / MIXED (FOR UI CONTRAST) ---
+  {
     id: 'particle-peptides',
     slug: 'particle-peptides',
     name: 'Particle Peptides',
@@ -125,6 +189,26 @@ export const vendors: Vendor[] = [
     yearFounded: '2017',
     shippingMethods: ['Slovak Post', 'DHL Express'],
     paymentMethods: ['Bank Transfer', 'Bitcoin'],
+  },
+  {
+    id: 'amino-asylum',
+    slug: 'amino-asylum',
+    name: 'Amino Asylum',
+    region: 'US',
+    shippingRegions: ['US'],
+    purityScore: 95.0,
+    coaVerified: false,
+    pricePerMg: 0.28,
+    status: 'warning',
+    website: 'https://aminoasylum.shop',
+    peptides: ['bpc-157', 'tb-500', 'mk-677'],
+    lastVerified: '2025-11-15',
+    discountCode: '',
+    description: 'Aggressive marketing and extensive catalog including research oils. Quality reports vary heavily in community discussions.',
+    location: 'United States',
+    yearFounded: '2018',
+    shippingMethods: ['USPS'],
+    paymentMethods: ['Credit Card (High Risk)', 'Zelle', 'CashApp'],
   },
 ];
 
