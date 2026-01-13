@@ -1,11 +1,18 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ProductCard } from '@/components/ProductCard';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { products } from '@/data/products';
 import { useRegion } from '@/context/RegionContext';
 import {
@@ -17,7 +24,49 @@ import {
   Microscope,
   FileCheck,
   Lock,
+  HelpCircle,
 } from 'lucide-react';
+
+const FAQ_DATA = [
+  {
+    question: 'Does ChemVerify sell peptides directly?',
+    answer: 'No. ChemVerify is an independent data aggregation and audit platform. We do not manufacture, stock, or sell any chemical compounds. We review and list third-party vendors that meet our strict testing standards.',
+  },
+  {
+    question: 'Are these products safe for human consumption?',
+    answer: 'Absolutely not. All listed compounds are strictly for laboratory research and development purposes only (in-vitro or animal model studies). They are not approved by the FDA for human use, and any mention of personal use is strictly prohibited on this platform.',
+  },
+  {
+    question: 'How does your verification process work?',
+    answer: "We audit vendors based on their transparency. To be listed as 'Verified', a vendor must provide up-to-date Certificates of Analysis (COAs) from reputable third-party laboratories (such as Janoshik or MZ Biolabs) that match specific batch numbers.",
+  },
+  {
+    question: 'I live in the EU/Europe. Can I order safely?',
+    answer: "Customs regulations vary by country. We strongly recommend using our 'Region Filter' (toggle at the top of the page) to select 'EU Market'. This filters the database to show only vendors shipping from within the European Union, significantly reducing customs risks.",
+  },
+  {
+    question: "What is a 'Batch Number'?",
+    answer: "A batch number is a unique code printed on a vial that identifies a specific production run. You can use our 'Batch Search' tool to verify if the specific vial you hold has been tested and view its corresponding lab report.",
+  },
+  {
+    question: 'Why do purity levels vary (e.g., 98% vs 99%)?',
+    answer: "In chemical synthesis, minor byproducts or moisture can remain. A purity of 98%+ is generally considered the 'Gold Standard' for research grade peptides. Lower purity may affect the accuracy of your research data.",
+  },
+];
+
+// Generate FAQ Schema for SEO
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_DATA.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 
 const Index = () => {
   const { t } = useTranslation();
@@ -146,6 +195,58 @@ const Index = () => {
       <section className="border-t border-border py-10 sm:py-12 md:py-16">
         <div className="container mx-auto max-w-4xl px-4">
           <ReconstitutionCalculator />
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="border-t border-border bg-muted/30 py-10 sm:py-12 md:py-16">
+        <Helmet>
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
+        </Helmet>
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="mb-6 text-center sm:mb-8">
+            <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 sm:mb-4 sm:px-4 sm:py-2">
+              <HelpCircle className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+              <span className="text-xs font-medium text-primary sm:text-sm">FAQ</span>
+            </div>
+            <h2 className="mb-2 text-xl font-bold text-foreground sm:text-2xl md:text-3xl">
+              Common Questions about Research Verification
+            </h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Understanding our platform, compliance, and verification standards.
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full space-y-3">
+            {FAQ_DATA.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="rounded-lg border border-border bg-card px-4 transition-all data-[state=open]:border-primary/50 data-[state=open]:shadow-sm sm:px-6"
+              >
+                <AccordionTrigger className="py-4 text-left text-sm font-medium hover:no-underline sm:py-5 sm:text-base [&[data-state=open]>svg]:text-primary">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground sm:pb-5 sm:text-base">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          <div className="mt-6 text-center sm:mt-8">
+            <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">
+              Still have questions? Check our Knowledge Hub for detailed guides.
+            </p>
+            <Link to="/education">
+              <Button variant="outline" size="sm" className="gap-2">
+                Visit Knowledge Hub
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </Layout>
