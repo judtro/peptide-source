@@ -8,6 +8,7 @@ import "@/i18n/config";
 
 import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
+import VendorDetailPage from "./pages/VendorDetailPage";
 import VendorsPage from "./pages/VendorsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -33,6 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/vendors" element={<VendorsPage />} />
+            <Route path="/vendor/:slug" element={<VendorDetailPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/verify" element={<BatchVerifyPage />} />
