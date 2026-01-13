@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   Atom,
   ShieldCheck,
+  ArrowDown,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
 
@@ -76,6 +77,17 @@ const ProductDetailPage = () => {
                     {product.category}
                   </Badge>
                 </div>
+                {/* CTA Button */}
+                <Button
+                  className="mt-4 gap-2"
+                  size="lg"
+                  onClick={() => {
+                    document.getElementById('vendor-table')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <ArrowDown className="h-4 w-4" />
+                  View Verified Sources
+                </Button>
               </div>
             </div>
 
@@ -226,7 +238,7 @@ const ProductDetailPage = () => {
             <ReconstitutionCalculator />
 
             {/* === SECTION C: Verified Supply Chain === */}
-            <section>
+            <section id="vendor-table" className="scroll-mt-32">
               <div className="mb-4 flex items-center gap-3">
                 <ShieldCheck className="h-6 w-6 text-primary" />
                 <h2 className="text-xl font-semibold">Verified Sources for {product.name}</h2>
