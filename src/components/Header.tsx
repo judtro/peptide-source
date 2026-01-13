@@ -130,7 +130,7 @@ export const Header = () => {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="ChemVerify.com" className="h-12 w-auto" />
+            <img src={logo} alt="ChemVerify.com" className="h-12 w-auto transition-transform duration-200 hover:scale-105" />
           </Link>
 
           {/* Desktop Navigation - Center */}
