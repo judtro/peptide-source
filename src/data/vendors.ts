@@ -13,6 +13,7 @@ export interface Vendor {
   website: string;
   peptides: string[];
   lastVerified: string;
+  discountCode: string; // Affiliate discount code
 }
 
 export const vendors: Vendor[] = [
@@ -28,6 +29,7 @@ export const vendors: Vendor[] = [
     website: 'https://swisschems.is',
     peptides: ['bpc-157', 'tb-500', 'ghk-cu'],
     lastVerified: '2026-01-10',
+    discountCode: 'CHEM10',
   },
   {
     id: 'pulse-peptides',
@@ -41,6 +43,7 @@ export const vendors: Vendor[] = [
     website: 'https://pulsepeptides.eu',
     peptides: ['bpc-157', 'tb-500', 'ghk-cu'],
     lastVerified: '2026-01-08',
+    discountCode: 'CHEM10',
   },
   {
     id: 'peptide-sciences',
@@ -54,6 +57,7 @@ export const vendors: Vendor[] = [
     website: 'https://peptidesciences.com',
     peptides: ['bpc-157', 'tb-500'],
     lastVerified: '2026-01-12',
+    discountCode: 'VERIFY10',
   },
   {
     id: 'euro-peptides',
@@ -67,6 +71,7 @@ export const vendors: Vendor[] = [
     website: 'https://europeptides.com',
     peptides: ['bpc-157', 'ghk-cu'],
     lastVerified: '2025-12-15',
+    discountCode: 'CHEM10',
   },
   {
     id: 'biotech-peptides',
@@ -80,6 +85,7 @@ export const vendors: Vendor[] = [
     website: 'https://biotechpeptides.com',
     peptides: ['bpc-157', 'tb-500', 'ghk-cu'],
     lastVerified: '2026-01-05',
+    discountCode: 'CHEM10',
   },
 ];
 

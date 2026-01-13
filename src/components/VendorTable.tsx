@@ -29,6 +29,7 @@ import {
 import { useState } from 'react';
 import { MarketToggle } from './MarketToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DiscountBadge } from './DiscountBadge';
 
 type SortKey = 'name' | 'purityScore' | 'pricePerMg';
 type SortDirection = 'asc' | 'desc';
@@ -237,15 +238,18 @@ export const VendorTable = ({
                     </TableCell>
                     <TableCell>{getStatusBadge(vendor.status)}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        onClick={() => window.open(vendor.website, '_blank')}
-                      >
-                        {t('vendors.action')}
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <DiscountBadge code={vendor.discountCode} variant="compact" />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          onClick={() => window.open(vendor.website, '_blank')}
+                        >
+                          {t('vendors.action')}
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -17,6 +17,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DiscountBadge } from '@/components/DiscountBadge';
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,9 +60,16 @@ const ProductDetailPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">{product.name}</h1>
               <p className="text-lg text-muted-foreground">{product.fullName}</p>
-              <Badge variant="outline" className="mt-2 font-mono">
-                {product.category}
-              </Badge>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="font-mono">
+                  {product.category}
+                </Badge>
+                <span className="text-sm text-muted-foreground">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-muted-foreground">Partner Discount:</span>
+                  <DiscountBadge code="CHEM10" variant="compact" />
+                </div>
+              </div>
             </div>
           </div>
         </header>
