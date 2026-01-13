@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Layout } from '@/components/Layout';
+import { generateFAQSchema } from '@/components/SEOHead';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,18 +104,7 @@ const TECHNICAL_FAQ_GROUPS = [
 const allTechnicalFAQs = TECHNICAL_FAQ_GROUPS.flatMap(group => group.questions);
 
 // Generate FAQ Schema for SEO
-const technicalFaqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: allTechnicalFAQs.map((faq) => ({
-    '@type': 'Question',
-    name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
-  })),
-};
+const technicalFaqSchema = generateFAQSchema(allTechnicalFAQs);
 
 const EducationPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<Article['category'] | 'all'>('all');
@@ -128,6 +117,7 @@ const EducationPage = () => {
     <Layout
       title="Research Knowledge Hub | ChemVerify Education"
       description="Comprehensive educational resources for laboratory handling, analytical verification, pharmacokinetics, and research safety protocols."
+      jsonLd={technicalFaqSchema}
     >
       <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Hero Section */}
@@ -357,12 +347,6 @@ const EducationPage = () => {
 
         {/* Technical FAQ Section */}
         <section>
-          <Helmet>
-            <script type="application/ld+json">
-              {JSON.stringify(technicalFaqSchema)}
-            </script>
-          </Helmet>
-          
           <div className="mb-6 text-center sm:mb-10">
             <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 sm:mb-4 sm:px-4 sm:py-2">
               <FlaskConical className="h-4 w-4 text-primary sm:h-5 sm:w-5" />

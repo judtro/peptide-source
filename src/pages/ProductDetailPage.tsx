@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
 import { ArticleTooltip } from '@/components/ArticleTooltip';
+import { generateProductSchema, generateBreadcrumbSchema } from '@/components/SEOHead';
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +47,36 @@ const ProductDetailPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Generate JSON-LD schemas for SEO
+  const jsonLdSchemas = useMemo(() => {
+    if (!product) return [];
+    
+    const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    
+    const productSchema = generateProductSchema({
+      name: product.name,
+      description: product.mechanismOfAction,
+      casNumber: product.casNumber,
+      category: product.category,
+      molecularFormula: product.molecularFormula,
+      molarMass: product.molarMass,
+    });
+
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: 'Home', url: siteUrl },
+      { name: 'Products', url: `${siteUrl}/products` },
+      { name: product.name, url: `${siteUrl}/product/${product.id}` },
+    ]);
+
+    return [productSchema, breadcrumbSchema];
+  }, [product]);
+
   if (!product) {
     return (
-      <Layout title="Product Not Found | ChemVerify">
+      <Layout 
+        title="Product Not Found | ChemVerify"
+        description="The requested product could not be found."
+      >
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="mb-4 text-2xl font-bold">Product Not Found</h1>
           <Link to="/products">
@@ -61,8 +89,10 @@ const ProductDetailPage = () => {
 
   return (
     <Layout
-      title={`${product.name} - ${product.fullName} | ChemVerify`}
+      title={`${product.name} Research Data & Verified Sources | ChemVerify`}
       description={product.mechanismOfAction.slice(0, 155)}
+      type="product"
+      jsonLd={jsonLdSchemas}
     >
       <article className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
