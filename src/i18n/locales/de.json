@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "vendors": "Verifizierte Anbieter",
+    "products": "Produkte",
+    "calculator": "Rechner",
+    "about": "Über uns"
+  },
+  "hero": {
+    "title": "Keine unbekannten Chemikalien mehr",
+    "subtitle": "Die definitive Verifizierungsplattform für Forschungspeptid-Quellen. Drittanbieter-COA verifiziert. Regionsfilter. Von Laboren weltweit vertraut.",
+    "cta": "Verifizierte Anbieter anzeigen",
+    "secondary": "Produkte durchsuchen"
+  },
+  "region": {
+    "detected": "Wir haben erkannt, dass Sie aus",
+    "confirm": "Ist das korrekt?",
+    "stay": "Im {{region}} Store bleiben",
+    "switch": "Region wechseln",
+    "us": "Vereinigte Staaten",
+    "eu": "Europäische Union"
+  },
+  "vendors": {
+    "title": "Verifizierte Anbieter",
+    "subtitle": "Drittanbieter-getestet und COA-verifizierte Peptidquellen",
+    "name": "Anbieter",
+    "region": "Region",
+    "purity": "Reinheit",
+    "coa": "COA Verifiziert",
+    "price": "Preis/mg",
+    "status": "Status",
+    "action": "Website besuchen",
+    "verified": "Verifiziert",
+    "warning": "Warnung",
+    "scam": "Betrug"
+  },
+  "products": {
+    "title": "Forschungspeptide",
+    "subtitle": "Detaillierte molekulare Informationen und verifizierte Anbieterlisten"
+  },
+  "calculator": {
+    "title": "Rekonstitutionsrechner",
+    "peptideAmount": "Peptidmenge",
+    "waterVolume": "Bakteriostatisches Wasser",
+    "result": "Konzentration",
+    "perUnit": "pro 0,1ml (10 Einheiten)"
+  },
+  "compliance": {
+    "warning": "NUR FÜR LABORFORSCHUNGSZWECKE. NICHT FÜR DEN MENSCHLICHEN VERZEHR. MINDESTALTER 18 JAHRE."
+  },
+  "footer": {
+    "privacy": "Datenschutz",
+    "legal": "Impressum",
+    "disclaimer": "Haftungsausschluss",
+    "sitemap": "Sitemap"
+  }
+}
