@@ -45,28 +45,28 @@ const EducationPage = () => {
       title="Research Knowledge Hub | ChemVerify Education"
       description="Comprehensive educational resources for laboratory handling, analytical verification, pharmacokinetics, and research safety protocols."
     >
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Hero Section */}
-        <header className="mb-12 text-center">
-          <div className="mb-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-4 py-2">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Research Education</span>
+        <header className="mb-8 text-center sm:mb-12">
+          <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 sm:mb-4 sm:px-4 sm:py-2">
+            <GraduationCap className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+            <span className="text-xs font-medium text-primary sm:text-sm">Research Education</span>
           </div>
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+          <h1 className="mb-3 text-2xl font-bold tracking-tight text-foreground sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl">
             Research Knowledge Hub
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base lg:text-lg">
             Comprehensive educational resources for laboratory protocols, verification methodologies,
             and research safety standards. Written by analytical chemists for the research community.
           </p>
         </header>
 
         {/* Four Pillars */}
-        <section className="mb-16">
-          <h2 className="mb-6 text-center text-2xl font-semibold text-foreground">
+        <section className="mb-10 sm:mb-16">
+          <h2 className="mb-4 text-center text-lg font-semibold text-foreground sm:mb-6 sm:text-xl md:text-2xl">
             Four Pillars of Research Excellence
           </h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {EDUCATION_PILLARS.map((pillar) => {
               const IconComponent = PILLAR_ICONS[pillar.icon as keyof typeof PILLAR_ICONS];
               const articleCount = getArticleCountByCategory(pillar.id as Article['category']);
@@ -115,14 +115,14 @@ const EducationPage = () => {
           </div>
         </section>
 
-        <Separator className="mb-12" />
+        <Separator className="mb-8 sm:mb-12" />
 
         {/* Article Grid */}
         <section>
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-semibold text-foreground">
+          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <BookOpen className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
+              <h2 className="text-lg font-semibold text-foreground sm:text-xl md:text-2xl">
                 {selectedCategory === 'all' ? 'All Articles' : EDUCATION_PILLARS.find(p => p.id === selectedCategory)?.title}
               </h2>
             </div>
@@ -138,14 +138,14 @@ const EducationPage = () => {
                   Clear Filter
                 </Button>
               )}
-              <Badge variant="outline" className="gap-1.5">
-                <Microscope className="h-3.5 w-3.5" />
+              <Badge variant="outline" className="gap-1.5 text-xs">
+                <Microscope className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {filteredArticles.length} Publications
               </Badge>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {filteredArticles.map((article) => (
               <Link key={article.id} to={`/education/${article.slug}`}>
                 <Card className="group h-full transition-all hover:border-primary/50 hover:shadow-md">
@@ -236,13 +236,13 @@ const EducationPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="mt-16 rounded-xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-8 text-center">
+        <section className="mt-10 rounded-xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-6 text-center sm:mt-16 sm:p-8">
           <div className="mx-auto max-w-md">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Microscope className="h-6 w-6 text-primary" />
+            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 sm:mb-4 sm:h-12 sm:w-12">
+              <Microscope className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">Verify Your Research Compounds</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <h3 className="mb-2 text-base font-semibold sm:text-lg">Verify Your Research Compounds</h3>
+            <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">
               Apply your knowledge by verifying batch authenticity with our COA database.
               Cross-reference your peptides with third-party analytical reports.
             </p>
