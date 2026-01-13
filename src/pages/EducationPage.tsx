@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { articles, EDUCATION_PILLARS } from '@/data/articles';
+import { articles, EDUCATION_PILLARS, getArticleCountByCategory, Article } from '@/data/articles';
 import {
   Beaker,
   ShieldCheck,
@@ -15,6 +16,7 @@ import {
   BookOpen,
   GraduationCap,
   Microscope,
+  Filter,
 } from 'lucide-react';
 
 const PILLAR_ICONS = {
@@ -24,11 +26,24 @@ const PILLAR_ICONS = {
   AlertTriangle,
 } as const;
 
+const CATEGORY_COLORS: Record<Article['category'], string> = {
+  handling: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  verification: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+  pharmacokinetics: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+  safety: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+};
+
 const EducationPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState<Article['category'] | 'all'>('all');
+
+  const filteredArticles = selectedCategory === 'all' 
+    ? articles 
+    : articles.filter(a => a.category === selectedCategory);
+
   return (
     <Layout
-      title="Research Knowledge Hub | ChemVerify"
-      description="Educational resources for laboratory handling, verification, pharmacokinetics, and research safety protocols."
+      title="Research Knowledge Hub | ChemVerify Education"
+      description="Comprehensive educational resources for laboratory handling, analytical verification, pharmacokinetics, and research safety protocols."
     >
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -54,15 +69,21 @@ const EducationPage = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {EDUCATION_PILLARS.map((pillar) => {
               const IconComponent = PILLAR_ICONS[pillar.icon as keyof typeof PILLAR_ICONS];
-              const categoryArticles = articles.filter((a) => a.category === pillar.id);
+              const articleCount = getArticleCountByCategory(pillar.id as Article['category']);
+              const isSelected = selectedCategory === pillar.id;
               
               return (
                 <Card
                   key={pillar.id}
-                  className="group relative overflow-hidden transition-all hover:border-primary/50 hover:shadow-md"
+                  className={`group relative cursor-pointer overflow-hidden transition-all hover:border-primary/50 hover:shadow-md ${
+                    isSelected ? 'border-primary bg-primary/5' : ''
+                  }`}
+                  onClick={() => setSelectedCategory(isSelected ? 'all' : pillar.id as Article['category'])}
                 >
                   <CardHeader>
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                    <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${
+                      isSelected ? 'bg-primary/20' : 'bg-primary/10 group-hover:bg-primary/20'
+                    }`}>
                       <IconComponent className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{pillar.title}</CardTitle>
@@ -71,10 +92,12 @@ const EducationPage = () => {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="text-xs">
-                        {categoryArticles.length} {categoryArticles.length === 1 ? 'Article' : 'Articles'}
+                        {articleCount} {articleCount === 1 ? 'Article' : 'Articles'}
                       </Badge>
-                      {categoryArticles.length > 0 && (
-                        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                      {articleCount > 0 && (
+                        <ArrowRight className={`h-4 w-4 transition-transform ${
+                          isSelected ? 'text-primary' : 'text-muted-foreground group-hover:translate-x-1 group-hover:text-primary'
+                        }`} />
                       )}
                     </div>
                   </CardContent>
@@ -96,19 +119,34 @@ const EducationPage = () => {
 
         {/* Article Grid */}
         <section>
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <BookOpen className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-semibold text-foreground">Featured Articles</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                {selectedCategory === 'all' ? 'All Articles' : EDUCATION_PILLARS.find(p => p.id === selectedCategory)?.title}
+              </h2>
             </div>
-            <Badge variant="outline" className="gap-1.5">
-              <Microscope className="h-3.5 w-3.5" />
-              {articles.length} Publications
-            </Badge>
+            <div className="flex items-center gap-2">
+              {selectedCategory !== 'all' && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedCategory('all')}
+                  className="gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  Clear Filter
+                </Button>
+              )}
+              <Badge variant="outline" className="gap-1.5">
+                <Microscope className="h-3.5 w-3.5" />
+                {filteredArticles.length} Publications
+              </Badge>
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {articles.map((article) => (
+            {filteredArticles.map((article) => (
               <Link key={article.id} to={`/education/${article.slug}`}>
                 <Card className="group h-full transition-all hover:border-primary/50 hover:shadow-md">
                   {/* Abstract Illustration Header */}
@@ -145,6 +183,8 @@ const EducationPage = () => {
                             stroke="currentColor"
                             strokeWidth="3"
                           />
+                          <line x1="10" y1="80" x2="90" y2="80" stroke="currentColor" strokeWidth="2" />
+                          <line x1="10" y1="20" x2="10" y2="80" stroke="currentColor" strokeWidth="2" />
                         </svg>
                       )}
                       {article.category === 'safety' && (
@@ -161,7 +201,10 @@ const EducationPage = () => {
                         </svg>
                       )}
                     </div>
-                    <Badge className="absolute right-3 top-3 text-xs" variant="secondary">
+                    <Badge 
+                      className={`absolute right-3 top-3 text-xs border ${CATEGORY_COLORS[article.category]}`}
+                      variant="outline"
+                    >
                       {article.categoryLabel}
                     </Badge>
                   </div>
@@ -171,7 +214,7 @@ const EducationPage = () => {
                       {article.title}
                     </CardTitle>
                     <CardDescription className="line-clamp-2 text-sm">
-                      {article.excerpt}
+                      {article.summary}
                     </CardDescription>
                   </CardHeader>
 
@@ -181,7 +224,9 @@ const EducationPage = () => {
                         <Clock className="h-3.5 w-3.5" />
                         {article.readTime} min read
                       </div>
-                      <span>Updated {new Date(article.updatedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                      <span>
+                        {new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -190,20 +235,23 @@ const EducationPage = () => {
           </div>
         </section>
 
-        {/* Coming Soon Placeholder */}
-        <section className="mt-16 rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
+        {/* CTA Section */}
+        <section className="mt-16 rounded-xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-8 text-center">
           <div className="mx-auto max-w-md">
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <Microscope className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">More Content Coming Soon</h3>
+            <h3 className="mb-2 text-lg font-semibold">Verify Your Research Compounds</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              Our research team is continuously developing new educational materials covering
-              pharmacokinetics, advanced safety protocols, and emerging research methodologies.
+              Apply your knowledge by verifying batch authenticity with our COA database.
+              Cross-reference your peptides with third-party analytical reports.
             </p>
-            <Button variant="outline" size="sm" disabled>
-              Subscribe for Updates
-            </Button>
+            <Link to="/verify">
+              <Button size="sm" className="gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                Verify a Batch
+              </Button>
+            </Link>
           </div>
         </section>
       </div>

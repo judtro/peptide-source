@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
-import { getArticleBySlug, getRelatedArticles } from '@/data/articles';
+import { getArticleBySlug, getRelatedArticles, articles } from '@/data/articles';
 import { getProductById } from '@/data/products';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
   Info,
   AlertTriangle,
   FileText,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -84,8 +85,8 @@ const ArticlePage = () => {
 
   return (
     <Layout
-      title={`${article.title} | ChemVerify Research`}
-      description={article.excerpt}
+      title={`${article.title} | ChemVerify Education`}
+      description={article.summary}
     >
       <article className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -97,18 +98,20 @@ const ArticlePage = () => {
           Back to Knowledge Hub
         </Link>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
-          {/* Main Content */}
+        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+          {/* Main Content - Narrow reading column */}
           <div className="min-w-0">
             {/* Article Header */}
             <header className="mb-8">
               <Badge variant="secondary" className="mb-4">
                 {article.categoryLabel}
               </Badge>
-              <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              <h1 className="mb-4 font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
                 {article.title}
               </h1>
-              <p className="mb-6 text-lg text-muted-foreground">{article.excerpt}</p>
+              <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
+                {article.summary}
+              </p>
 
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1.5">
@@ -122,8 +125,8 @@ const ArticlePage = () => {
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    Updated{' '}
-                    {new Date(article.updatedAt).toLocaleDateString('en-US', {
+                    Published{' '}
+                    {new Date(article.publishedDate).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
                       year: 'numeric',
@@ -135,8 +138,8 @@ const ArticlePage = () => {
 
             <Separator className="mb-8" />
 
-            {/* Article Body */}
-            <div className="prose prose-lg max-w-none dark:prose-invert">
+            {/* Article Body - Journal style with max-width for readability */}
+            <div className="prose-article mx-auto max-w-[650px]">
               {article.content.map((block, index) => {
                 if (block.type === 'heading') {
                   const HeadingTag = block.level === 1 ? 'h2' : 'h3';
@@ -145,8 +148,8 @@ const ArticlePage = () => {
                       key={index}
                       id={block.id}
                       className={cn(
-                        'scroll-mt-24 font-semibold text-foreground',
-                        block.level === 1 ? 'mb-4 mt-8 text-2xl' : 'mb-3 mt-6 text-xl'
+                        'scroll-mt-24 font-serif font-semibold text-foreground',
+                        block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl'
                       )}
                     >
                       {block.text}
@@ -156,7 +159,10 @@ const ArticlePage = () => {
 
                 if (block.type === 'paragraph') {
                   return (
-                    <p key={index} className="mb-4 leading-relaxed text-foreground">
+                    <p 
+                      key={index} 
+                      className="mb-5 font-serif text-base leading-[1.8] text-foreground/90"
+                    >
                       {block.text}
                     </p>
                   );
@@ -164,11 +170,11 @@ const ArticlePage = () => {
 
                 if (block.type === 'list') {
                   return (
-                    <ul key={index} className="mb-4 space-y-2">
+                    <ul key={index} className="mb-5 space-y-2 pl-1">
                       {block.items?.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-foreground">
-                          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-primary" />
-                          <span>{item}</span>
+                        <li key={i} className="flex items-start gap-3 text-foreground/90">
+                          <ChevronRight className="mt-1.5 h-4 w-4 shrink-0 text-primary" />
+                          <span className="font-serif text-base leading-relaxed">{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -180,16 +186,16 @@ const ArticlePage = () => {
                     <div
                       key={index}
                       className={cn(
-                        'my-6 flex items-start gap-3 rounded-lg border p-4',
+                        'my-8 flex items-start gap-4 rounded-lg border p-5',
                         block.variant === 'info' && 'border-primary/30 bg-primary/5',
                         block.variant === 'warning' && 'border-amber-500/30 bg-amber-500/5',
-                        block.variant === 'note' && 'border-border bg-muted/30'
+                        block.variant === 'note' && 'border-border bg-muted/50'
                       )}
                     >
                       {block.variant === 'info' && <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />}
                       {block.variant === 'warning' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />}
                       {block.variant === 'note' && <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />}
-                      <p className="text-sm text-foreground">{block.text}</p>
+                      <p className="font-serif text-sm leading-relaxed text-foreground/90">{block.text}</p>
                     </div>
                   );
                 }
@@ -198,10 +204,10 @@ const ArticlePage = () => {
                   return (
                     <div
                       key={index}
-                      className="my-4 border-l-2 border-primary/30 pl-4 text-sm text-muted-foreground"
+                      className="my-6 border-l-2 border-primary/30 py-1 pl-4 font-serif text-sm italic text-muted-foreground"
                     >
-                      <sup className="mr-1 text-primary">[{block.citation?.number}]</sup>
-                      {block.citation?.text} — <em>{block.citation?.source}</em>
+                      <sup className="mr-1 not-italic text-primary">[{block.citation?.number}]</sup>
+                      {block.citation?.text} — <span className="not-italic">{block.citation?.source}</span>
                     </div>
                   );
                 }
@@ -212,9 +218,9 @@ const ArticlePage = () => {
 
             {/* Citations Section */}
             {article.citations.length > 0 && (
-              <section className="mt-12">
+              <section className="mx-auto mt-12 max-w-[650px]">
                 <Separator className="mb-8" />
-                <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+                <h2 className="mb-4 flex items-center gap-2 font-serif text-xl font-semibold">
                   <BookOpen className="h-5 w-5 text-primary" />
                   References
                 </h2>
@@ -245,9 +251,9 @@ const ArticlePage = () => {
 
             {/* Related Peptides Widget */}
             {relatedPeptides.length > 0 && (
-              <section className="mt-12">
+              <section className="mx-auto mt-12 max-w-[650px]">
                 <Separator className="mb-8" />
-                <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+                <h2 className="mb-4 flex items-center gap-2 font-serif text-xl font-semibold">
                   <Dna className="h-5 w-5 text-primary" />
                   Related Research Compounds
                 </h2>
@@ -271,15 +277,15 @@ const ArticlePage = () => {
               </section>
             )}
 
-            {/* Related Articles */}
+            {/* Related Articles - Mobile Only */}
             {relatedArticles.length > 0 && (
-              <section className="mt-12">
+              <section className="mx-auto mt-12 max-w-[650px] lg:hidden">
                 <Separator className="mb-8" />
-                <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+                <h2 className="mb-4 flex items-center gap-2 font-serif text-xl font-semibold">
                   <BookOpen className="h-5 w-5 text-primary" />
                   Continue Reading
                 </h2>
-                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {relatedArticles.map((relatedArticle) => (
                     <Link key={relatedArticle.id} to={`/education/${relatedArticle.slug}`}>
                       <Card className="group h-full transition-all hover:border-primary/50">
@@ -305,9 +311,10 @@ const ArticlePage = () => {
             )}
           </div>
 
-          {/* Sticky Sidebar - Table of Contents */}
+          {/* Sticky Sidebar - Desktop Only */}
           <aside className="hidden lg:block">
-            <div className="sticky top-32">
+            <div className="sticky top-32 space-y-4">
+              {/* Table of Contents */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -316,7 +323,7 @@ const ArticlePage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <nav className="space-y-1">
+                  <nav className="space-y-1.5">
                     {article.tableOfContents.map((item) => (
                       <button
                         key={item.id}
@@ -336,8 +343,53 @@ const ArticlePage = () => {
                 </CardContent>
               </Card>
 
+              {/* Verify CTA Box */}
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                <CardContent className="p-4">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="mb-1 font-semibold text-foreground">Verify Your Batch</h3>
+                  <p className="mb-3 text-xs text-muted-foreground">
+                    Cross-reference your peptide with third-party COA reports in our database.
+                  </p>
+                  <Link to="/verify">
+                    <Button size="sm" className="w-full">
+                      Check Authenticity
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Related Articles */}
+              {relatedArticles.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Related Articles
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 pt-0">
+                    {relatedArticles.map((relatedArticle) => (
+                      <Link
+                        key={relatedArticle.id}
+                        to={`/education/${relatedArticle.slug}`}
+                        className="block group"
+                      >
+                        <p className="line-clamp-2 text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                          {relatedArticle.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {relatedArticle.readTime} min read
+                        </p>
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Author Card */}
-              <Card className="mt-4">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
