@@ -47,14 +47,14 @@ export const VendorTable = ({
   showMarketToggle = false,
 }: VendorTableProps) => {
   const { t } = useTranslation();
-  const { region } = useRegion();
+  const { region, showAllMarkets } = useRegion();
   const [sortKey, setSortKey] = useState<SortKey>('purityScore');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Determine which vendors to show
   let filteredVendors: Vendor[];
 
-  if (showAllRegions) {
+  if (showAllRegions || showAllMarkets) {
     filteredVendors = filterByPeptide
       ? vendors.filter((v) => v.peptides.includes(filterByPeptide))
       : vendors;
@@ -142,12 +142,23 @@ export const VendorTable = ({
           </Link>
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <span className="text-lg">{getWarehouseFlag(vendor.region)}</span>
-            <span>{vendor.region}</span>
-            <span className="text-border" aria-hidden="true">•</span>
-            {getShippingBadges(vendor)}
+            <span>{vendor.location}</span>
           </div>
         </div>
         <StatusBadge status={vendor.status} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="text-xs text-muted-foreground">Delivers to:</span>
+        {vendor.shippingRegions.map((sr) => (
+          <span 
+            key={sr} 
+            className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+          >
+            <span>{getRegionFlag(sr)}</span>
+            <span>{sr}</span>
+          </span>
+        ))}
       </div>
       
       <div className="mt-3 flex items-center gap-4 text-sm">
@@ -290,7 +301,19 @@ export const VendorTable = ({
                             </TooltipContent>
                           </Tooltip>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell">{getShippingBadges(vendor)}</TableCell>
+                        <TableCell className="hidden xl:table-cell">
+                          <div className="flex flex-wrap gap-1">
+                            {vendor.shippingRegions.map((sr) => (
+                              <span 
+                                key={sr} 
+                                className="inline-flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-xs"
+                              >
+                                <span>{getRegionFlag(sr)}</span>
+                                <span className="text-muted-foreground">{sr}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <span className="font-mono text-sm font-semibold text-success">
                             {vendor.purityScore}%

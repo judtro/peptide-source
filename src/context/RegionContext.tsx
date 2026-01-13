@@ -6,6 +6,8 @@ interface RegionContextType {
   setRegion: (region: Region) => void;
   showRegionModal: boolean;
   setShowRegionModal: (show: boolean) => void;
+  showAllMarkets: boolean;
+  setShowAllMarkets: (show: boolean) => void;
 }
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined);
@@ -13,9 +15,12 @@ const RegionContext = createContext<RegionContextType | undefined>(undefined);
 export const RegionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [region, setRegionState] = useState<Region>('US');
   const [showRegionModal, setShowRegionModal] = useState(false);
+  const [showAllMarkets, setShowAllMarkets] = useState(false);
 
   useEffect(() => {
     const savedRegion = localStorage.getItem('chemverify-region') as Region | null;
+    const savedShowAll = localStorage.getItem('chemverify-show-all-markets');
+    
     if (savedRegion) {
       setRegionState(savedRegion);
     } else {
@@ -24,6 +29,10 @@ export const RegionProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       // Default detection mock - in production would use IP geolocation
       setRegionState('US');
     }
+    
+    if (savedShowAll === 'true') {
+      setShowAllMarkets(true);
+    }
   }, []);
 
   const setRegion = (newRegion: Region) => {
@@ -31,8 +40,20 @@ export const RegionProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     localStorage.setItem('chemverify-region', newRegion);
   };
 
+  const handleSetShowAllMarkets = (show: boolean) => {
+    setShowAllMarkets(show);
+    localStorage.setItem('chemverify-show-all-markets', String(show));
+  };
+
   return (
-    <RegionContext.Provider value={{ region, setRegion, showRegionModal, setShowRegionModal }}>
+    <RegionContext.Provider value={{ 
+      region, 
+      setRegion, 
+      showRegionModal, 
+      setShowRegionModal,
+      showAllMarkets,
+      setShowAllMarkets: handleSetShowAllMarkets
+    }}>
       {children}
     </RegionContext.Provider>
   );
