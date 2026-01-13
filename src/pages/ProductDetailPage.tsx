@@ -147,7 +147,7 @@ const ProductDetailPage = () => {
             {/* Verified Vendors */}
             <section>
               <h2 className="mb-4 text-xl font-semibold">Verified Vendors for {product.name}</h2>
-              <VendorTable filterByPeptide={product.id} showAllRegions />
+              <VendorTable filterByPeptide={product.id} showMarketToggle />
             </section>
           </div>
 
