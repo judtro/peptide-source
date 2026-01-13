@@ -1,40 +1,6 @@
-export interface Study {
-  title: string;
-  url: string;
-  year: string;
-}
-
-export type ResearchArea =
-  | 'Tissue Regeneration'
-  | 'Metabolic Research'
-  | 'Hormonal Regulation'
-  | 'Dermal & Cosmetic Research'
-  | 'Cognitive Studies'
-  | 'Peptide Signaling';
-
-export interface Product {
-  id: string;
-  name: string;
-  fullName: string;
-  scientificName: string;
-  casNumber: string;
-  molarMass: string;
-  molecularFormula: string;
-  sequence: string;
-  category: string;
-  researchAreas: ResearchArea[];
-  description: string;
-  mechanismOfAction: string;
-  researchFindings: string[];
-  researchOutcomes: string[];
-  adverseEffects: string[];
-  studies: Study[];
-  storageInstructions: {
-    lyophilized: string;
-    reconstituted: string;
-  };
-  researchApplications: string[];
-}
+// Re-export types from central types file for backwards compatibility
+export type { Study, ResearchArea, Product } from '@/types';
+import type { Product, ResearchArea } from '@/types';
 
 export const RESEARCH_AREAS: ResearchArea[] = [
   'Tissue Regeneration',

@@ -15,13 +15,11 @@ import {
   vendors,
   getVendorsByShippingRegion,
   getVendorsByPeptideAndMarket,
-  Vendor,
-  VendorStatus,
 } from '@/data/vendors';
+import type { Vendor } from '@/types';
 import { useRegion } from '@/context/RegionContext';
 import {
   CheckCircle2,
-  AlertTriangle,
   XCircle,
   ExternalLink,
   ArrowUpDown,
@@ -32,6 +30,7 @@ import { useState } from 'react';
 import { MarketToggle } from './MarketToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiscountBadge } from './DiscountBadge';
+import { StatusBadge } from './ui/status-badge';
 
 type SortKey = 'name' | 'purityScore' | 'pricePerMg';
 type SortDirection = 'asc' | 'desc';
@@ -85,31 +84,6 @@ export const VendorTable = ({
     }
   };
 
-  const getStatusBadge = (status: VendorStatus) => {
-    switch (status) {
-      case 'verified':
-        return (
-          <Badge className="gap-1 bg-success text-success-foreground hover:bg-success/90">
-            <CheckCircle2 className="h-3 w-3" />
-            <span className="hidden sm:inline">{t('vendors.verified')}</span>
-          </Badge>
-        );
-      case 'warning':
-        return (
-          <Badge className="gap-1 bg-warning text-warning-foreground hover:bg-warning/90">
-            <AlertTriangle className="h-3 w-3" />
-            <span className="hidden sm:inline">{t('vendors.warning')}</span>
-          </Badge>
-        );
-      case 'scam':
-        return (
-          <Badge variant="destructive" className="gap-1">
-            <XCircle className="h-3 w-3" />
-            <span className="hidden sm:inline">{t('vendors.scam')}</span>
-          </Badge>
-        );
-    }
-  };
 
   const getWarehouseFlag = (vendorRegion: string) => {
     return vendorRegion === 'US' ? '🇺🇸' : '🇪🇺';
@@ -157,7 +131,7 @@ export const VendorTable = ({
             {getShippingBadges(vendor)}
           </div>
         </div>
-        {getStatusBadge(vendor.status)}
+        <StatusBadge status={vendor.status} />
       </div>
       
       <div className="mt-3 flex items-center gap-4 text-sm">
@@ -313,7 +287,7 @@ export const VendorTable = ({
                         <TableCell>
                           <span className="font-mono text-sm">${vendor.pricePerMg.toFixed(2)}</span>
                         </TableCell>
-                        <TableCell>{getStatusBadge(vendor.status)}</TableCell>
+                        <TableCell><StatusBadge status={vendor.status} /></TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <DiscountBadge code={vendor.discountCode} variant="compact" />
