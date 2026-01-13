@@ -186,46 +186,45 @@ export const Header = () => {
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="min-h-[44px] min-w-[44px]">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <nav className="mt-8 flex flex-col gap-2">
+            <SheetContent side="right" className="w-[85vw] max-w-[320px] overflow-y-auto">
+              <nav className="mt-6 flex flex-col gap-1 sm:mt-8 sm:gap-2">
                 {navLinks.slice(0, 2).map((link) => (
                   <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive(link.href) ? 'secondary' : 'ghost'}
-                      className="w-full justify-start"
+                      className="min-h-[48px] w-full justify-start text-base"
                     >
                       {link.label}
                     </Button>
                   </Link>
                 ))}
 
-                {/* Products Accordion for Mobile */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="products" className="border-none">
                     <AccordionTrigger
                       className={cn(
-                        'h-10 rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:no-underline',
+                        'min-h-[48px] rounded-md px-4 py-2 text-base font-medium hover:bg-accent hover:no-underline',
                         isProductsActive && 'bg-secondary text-secondary-foreground'
                       )}
                     >
                       {t('nav.products')}
                     </AccordionTrigger>
                     <AccordionContent className="pb-0 pt-1">
-                      <div className="flex flex-col gap-1 pl-4">
+                      <div className="flex flex-col gap-1 pl-2 sm:pl-4">
                         {products.map((product) => (
                           <Link
                             key={product.id}
                             to={`/product/${product.id}`}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                            className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
                           >
                             <Dna className="h-4 w-4 text-primary" />
-                            <span>{product.name}</span>
-                            <span className="ml-auto text-xs text-muted-foreground">
+                            <span className="flex-1">{product.name}</span>
+                            <span className="text-xs text-muted-foreground">
                               {product.category}
                             </span>
                           </Link>
@@ -233,7 +232,7 @@ export const Header = () => {
                         <Link
                           to="/products"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="mt-1 flex items-center justify-center rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                          className="mt-1 flex min-h-[44px] items-center justify-center rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                         >
                           View All →
                         </Link>
@@ -246,7 +245,7 @@ export const Header = () => {
                   <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive(link.href) ? 'secondary' : 'ghost'}
-                      className="w-full justify-start"
+                      className="min-h-[48px] w-full justify-start text-base"
                     >
                       {link.label}
                     </Button>

@@ -92,45 +92,45 @@ const VendorDetailPage = () => {
         />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6">
+        <nav className="mb-4 sm:mb-6">
           <Link
             to="/vendors"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="inline-flex min-h-[44px] items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to All Vendors
           </Link>
         </nav>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Vendor Header */}
-            <div className="mb-8">
-              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
                 {/* Logo Placeholder */}
-                <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-primary/10 text-3xl font-bold text-primary">
+                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 text-2xl font-bold text-primary sm:h-20 sm:w-20 sm:text-3xl">
                   {vendor.name.charAt(0)}
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-3xl font-bold">{vendor.name}</h1>
+                    <h1 className="text-xl font-bold sm:text-2xl md:text-3xl">{vendor.name}</h1>
                     {vendor.coaVerified && (
                       <Badge className={`gap-1 ${statusInfo.className}`}>
                         <StatusIcon className="h-3.5 w-3.5" />
-                        {statusInfo.label}
+                        <span className="hidden sm:inline">{statusInfo.label}</span>
                       </Badge>
                     )}
                   </div>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:gap-4 sm:text-sm">
                     <span className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4" />
-                      <span className="text-lg">{getRegionFlag(vendor.region)}</span>
-                      {vendor.location}
+                      <span className="text-base sm:text-lg">{getRegionFlag(vendor.region)}</span>
+                      <span className="truncate">{vendor.location}</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
@@ -141,31 +141,31 @@ const VendorDetailPage = () => {
               </div>
 
               {/* Purity Score */}
-              <div className="mt-6 flex flex-wrap items-center gap-6">
-                <div className="rounded-lg bg-muted/50 px-4 py-2">
-                  <span className="text-sm text-muted-foreground">Purity Score</span>
-                  <div className="font-mono text-2xl font-bold text-success">
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:gap-4 md:gap-6">
+                <div className="rounded-lg bg-muted/50 p-2 text-center sm:px-4 sm:py-2 sm:text-left">
+                  <span className="text-xs text-muted-foreground sm:text-sm">Purity</span>
+                  <div className="font-mono text-lg font-bold text-success sm:text-2xl">
                     {vendor.purityScore}%
                   </div>
                 </div>
-                <div className="rounded-lg bg-muted/50 px-4 py-2">
-                  <span className="text-sm text-muted-foreground">Avg. Price</span>
-                  <div className="font-mono text-2xl font-bold">
-                    ${vendor.pricePerMg.toFixed(2)}/mg
+                <div className="rounded-lg bg-muted/50 p-2 text-center sm:px-4 sm:py-2 sm:text-left">
+                  <span className="text-xs text-muted-foreground sm:text-sm">Price</span>
+                  <div className="font-mono text-lg font-bold sm:text-2xl">
+                    ${vendor.pricePerMg.toFixed(2)}
                   </div>
                 </div>
-                <div className="rounded-lg bg-muted/50 px-4 py-2">
-                  <span className="text-sm text-muted-foreground">COA Verified</span>
-                  <div className="flex items-center gap-1 text-lg font-bold">
+                <div className="rounded-lg bg-muted/50 p-2 text-center sm:px-4 sm:py-2 sm:text-left">
+                  <span className="text-xs text-muted-foreground sm:text-sm">COA</span>
+                  <div className="flex items-center justify-center gap-1 text-base font-bold sm:justify-start sm:text-lg">
                     {vendor.coaVerified ? (
                       <>
-                        <CheckCircle2 className="h-5 w-5 text-success" />
+                        <CheckCircle2 className="h-4 w-4 text-success sm:h-5 sm:w-5" />
                         <span className="text-success">Yes</span>
                       </>
                     ) : (
                       <>
-                        <AlertTriangle className="h-5 w-5 text-warning" />
-                        <span className="text-warning">Pending</span>
+                        <AlertTriangle className="h-4 w-4 text-warning sm:h-5 sm:w-5" />
+                        <span className="text-warning">N/A</span>
                       </>
                     )}
                   </div>
@@ -173,21 +173,21 @@ const VendorDetailPage = () => {
               </div>
             </div>
 
-            <Separator className="my-8" />
+            <Separator className="my-6 sm:my-8" />
 
             {/* About Section */}
-            <section className="mb-8">
-              <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+            <section className="mb-6 sm:mb-8">
+              <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold sm:mb-4 sm:text-xl">
                 <Building2 className="h-5 w-5 text-primary" />
                 About {vendor.name}
               </h2>
-              <p className="leading-relaxed text-muted-foreground">{vendor.description}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{vendor.description}</p>
             </section>
 
             {/* Key Facts Grid */}
-            <section className="mb-8">
-              <h2 className="mb-4 text-xl font-semibold">Key Facts</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <section className="mb-6 sm:mb-8">
+              <h2 className="mb-3 text-lg font-semibold sm:mb-4 sm:text-xl">Key Facts</h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3">
                 <Card className="border-border">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
