@@ -86,7 +86,23 @@ export const VendorTable = ({
 
 
   const getWarehouseFlag = (vendorRegion: string) => {
-    return vendorRegion === 'US' ? '🇺🇸' : '🇪🇺';
+    switch (vendorRegion) {
+      case 'US': return '🇺🇸';
+      case 'EU': return '🇪🇺';
+      case 'UK': return '🇬🇧';
+      case 'CA': return '🇨🇦';
+      default: return '🌍';
+    }
+  };
+
+  const getRegionFlag = (region: string) => {
+    switch (region) {
+      case 'US': return '🇺🇸';
+      case 'EU': return '🇪🇺';
+      case 'UK': return '🇬🇧';
+      case 'CA': return '🇨🇦';
+      default: return '🌍';
+    }
   };
 
   const getShippingBadges = (vendor: Vendor) => {
@@ -98,7 +114,7 @@ export const VendorTable = ({
             <div className="flex gap-0.5">
               {vendor.shippingRegions.map((sr) => (
                 <span key={sr} className="text-sm">
-                  {sr === 'US' ? '🇺🇸' : '🇪🇺'}
+                  {getRegionFlag(sr)}
                 </span>
               ))}
             </div>

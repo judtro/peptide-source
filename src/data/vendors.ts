@@ -9,7 +9,7 @@ export const vendors: Vendor[] = [
     slug: 'swiss-chems',
     name: 'Swiss Chems',
     region: 'US',
-    shippingRegions: ['US', 'EU'],
+    shippingRegions: ['US', 'EU', 'UK', 'CA'],
     purityScore: 99.8,
     coaVerified: true,
     pricePerMg: 0.45,
@@ -49,7 +49,7 @@ export const vendors: Vendor[] = [
     slug: 'limitless-life-nootropics',
     name: 'Limitless Life',
     region: 'US',
-    shippingRegions: ['US', 'EU'],
+    shippingRegions: ['US', 'CA'],
     purityScore: 99.9,
     coaVerified: true,
     pricePerMg: 0.85,
@@ -90,8 +90,8 @@ export const vendors: Vendor[] = [
     id: 'canlab-research',
     slug: 'canlab-research',
     name: 'CanLab Research',
-    region: 'US', // Ships to North America
-    shippingRegions: ['US'],
+    region: 'CA',
+    shippingRegions: ['CA', 'US'],
     purityScore: 99.95,
     coaVerified: true,
     pricePerMg: 0.95,
@@ -107,7 +107,7 @@ export const vendors: Vendor[] = [
     paymentMethods: ['E-Transfer', 'Crypto'],
   },
 
-  // --- EU & UK MARKET ---
+  // --- EU MARKET ---
   {
     id: 'pulse-peptides',
     slug: 'pulse-peptides',
@@ -148,12 +148,14 @@ export const vendors: Vendor[] = [
     shippingMethods: ['InPost', 'DPD', 'DHL'],
     paymentMethods: ['Card', 'Transfer'],
   },
+
+  // --- UK MARKET ---
   {
     id: 'trident-peptide',
     slug: 'trident-peptide',
     name: 'Trident Peptide',
-    region: 'EU',
-    shippingRegions: ['EU'],
+    region: 'UK',
+    shippingRegions: ['UK'],
     purityScore: 99.2,
     coaVerified: true,
     pricePerMg: 0.58,
@@ -175,7 +177,7 @@ export const vendors: Vendor[] = [
     slug: 'particle-peptides',
     name: 'Particle Peptides',
     region: 'EU',
-    shippingRegions: ['EU'],
+    shippingRegions: ['EU', 'UK'],
     purityScore: 98.4,
     coaVerified: false,
     pricePerMg: 0.42,
