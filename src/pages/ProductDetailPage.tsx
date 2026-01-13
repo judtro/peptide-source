@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
@@ -20,12 +21,27 @@ import {
   Atom,
   ShieldCheck,
   ArrowDown,
+  ArrowUp,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const product = getProductById(id || '');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (!product) {
     return (
@@ -334,6 +350,18 @@ const ProductDetailPage = () => {
             </Card>
           </aside>
         </div>
+
+        {/* Back to Top Button */}
+        {showBackToTop && (
+          <Button
+            onClick={scrollToTop}
+            size="icon"
+            className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+            aria-label="Back to top"
+          >
+            <ArrowUp className="h-5 w-5" />
+          </Button>
+        )}
       </article>
     </Layout>
   );
