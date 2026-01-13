@@ -80,14 +80,16 @@ export const Header = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger
-                  className={cn(
-                    'h-9 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
-                    isProductsActive && 'bg-secondary text-secondary-foreground'
-                  )}
-                >
-                  {t('nav.products')}
-                </NavigationMenuTrigger>
+                <Link to="/products">
+                  <NavigationMenuTrigger
+                    className={cn(
+                      'h-9 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+                      isProductsActive && 'bg-secondary text-secondary-foreground'
+                    )}
+                  >
+                    {t('nav.products')}
+                  </NavigationMenuTrigger>
+                </Link>
                 <NavigationMenuContent>
                   <div className="grid w-[400px] gap-1 p-3 md:w-[500px] md:grid-cols-2">
                     {products.map((product) => (
