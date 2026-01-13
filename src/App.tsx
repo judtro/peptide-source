@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RegionProvider } from "@/context/RegionContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "@/i18n/config";
 
 import ScrollToTop from "./components/ScrollToTop";
@@ -36,34 +37,36 @@ const PageLoader = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <RegionProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/vendors" element={<VendorsPage />} />
-              <Route path="/vendor/:slug" element={<VendorDetailPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
-              <Route path="/verify" element={<BatchVerifyPage />} />
-              <Route path="/calculator" element={<CalculatorPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/disclaimer" element={<DisclaimerPage />} />
-              <Route path="/legal" element={<LegalPage />} />
-              <Route path="/education" element={<EducationPage />} />
-              <Route path="/education/:slug" element={<ArticlePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </RegionProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <RegionProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/vendors" element={<VendorsPage />} />
+                <Route path="/vendor/:slug" element={<VendorDetailPage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/verify" element={<BatchVerifyPage />} />
+                <Route path="/calculator" element={<CalculatorPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/disclaimer" element={<DisclaimerPage />} />
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/education" element={<EducationPage />} />
+                <Route path="/education/:slug" element={<ArticlePage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </RegionProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

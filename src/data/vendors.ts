@@ -1,28 +1,6 @@
-export type VendorStatus = 'verified' | 'warning' | 'scam';
-export type Region = 'US' | 'EU';
-
-export interface Vendor {
-  id: string;
-  slug: string;
-  name: string;
-  region: Region; // Warehouse/HQ location
-  shippingRegions: Region[]; // Where they can ship to
-  purityScore: number;
-  coaVerified: boolean;
-  pricePerMg: number;
-  status: VendorStatus;
-  website: string;
-  peptides: string[];
-  lastVerified: string;
-  discountCode: string; // Affiliate discount code
-  // Extended fields for vendor profile pages
-  description: string;
-  location: string;
-  yearFounded: string;
-  shippingMethods: string[];
-  paymentMethods: string[];
-  logoUrl?: string;
-}
+// Re-export types from central types file for backwards compatibility
+export type { VendorStatus, Region, Vendor } from '@/types';
+import type { Vendor, Region } from '@/types';
 
 export const vendors: Vendor[] = [
   {

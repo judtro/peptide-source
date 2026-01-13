@@ -1,13 +1,6 @@
-export interface BatchRecord {
-  batchId: string;
-  vendorName: string;
-  productName: string;
-  testDate: string;
-  purityResult: number;
-  reportUrl: string;
-  labName: string;
-  testMethod: string;
-}
+// Re-export types from central types file for backwards compatibility
+export type { BatchRecord } from '@/types';
+import type { BatchRecord } from '@/types';
 
 export const batches: BatchRecord[] = [
   {

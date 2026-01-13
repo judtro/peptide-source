@@ -1,44 +1,6 @@
-export interface Article {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  category: 'verification' | 'handling' | 'pharmacokinetics' | 'safety' | 'sourcing';
-  categoryLabel: string;
-  readTime: number;
-  publishedDate: string;
-  updatedAt: string;
-  author: {
-    name: string;
-    role: string;
-  };
-  tableOfContents: {
-    id: string;
-    title: string;
-    level: number;
-  }[];
-  content: {
-    type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation';
-    id?: string;
-    level?: number;
-    text?: string;
-    items?: string[];
-    variant?: 'info' | 'warning' | 'note';
-    citation?: {
-      number: number;
-      text: string;
-      source: string;
-      url?: string;
-    };
-  }[];
-  citations: {
-    number: number;
-    text: string;
-    source: string;
-    url?: string;
-  }[];
-  relatedPeptides: string[];
-}
+// Re-export types from central types file for backwards compatibility
+export type { Article, ArticleCategory, ArticleAuthor, TableOfContentsItem, Citation, ArticleContentBlock, EducationPillar } from '@/types';
+import type { Article, EducationPillar } from '@/types';
 
 export const EDUCATION_PILLARS = [
   {
