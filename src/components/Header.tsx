@@ -9,15 +9,25 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useRegion } from '@/context/RegionContext';
-import { FlaskConical, Menu, MapPin, Languages } from 'lucide-react';
+import { FlaskConical, Menu, MapPin, Languages, Dna } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { DiscountBadge } from './DiscountBadge';
-
+import { products } from '@/data/products';
+import { cn } from '@/lib/utils';
 
 export const Header = () => {
   const { t, i18n } = useTranslation();
@@ -70,15 +80,47 @@ export const Header = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link to="/products">
-                  <Button
-                    variant={isProductsActive ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="font-medium"
-                  >
-                    {t('nav.products')}
-                  </Button>
-                </Link>
+                <NavigationMenuTrigger
+                  className={cn(
+                    'h-9 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+                    isProductsActive && 'bg-secondary text-secondary-foreground'
+                  )}
+                >
+                  {t('nav.products')}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid w-[400px] gap-1 p-3 md:w-[500px] md:grid-cols-2">
+                    {products.map((product) => (
+                      <NavigationMenuLink key={product.id} asChild>
+                        <Link
+                          to={`/product/${product.id}`}
+                          className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
+                        >
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                            <Dna className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground">
+                              {product.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {product.category}
+                            </p>
+                          </div>
+                        </Link>
+                      </NavigationMenuLink>
+                    ))}
+                    {/* View All Link */}
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to="/products"
+                        className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                      >
+                        View All Products →
+                      </Link>
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -159,15 +201,44 @@ export const Header = () => {
                   </Link>
                 ))}
 
-                {/* Products Link for Mobile */}
-                <Link to="/products" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={isProductsActive ? 'secondary' : 'ghost'}
-                    className="w-full justify-start"
-                  >
-                    {t('nav.products')}
-                  </Button>
-                </Link>
+                {/* Products Accordion for Mobile */}
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="products" className="border-none">
+                    <AccordionTrigger
+                      className={cn(
+                        'h-10 rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:no-underline',
+                        isProductsActive && 'bg-secondary text-secondary-foreground'
+                      )}
+                    >
+                      {t('nav.products')}
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-0 pt-1">
+                      <div className="flex flex-col gap-1 pl-4">
+                        {products.map((product) => (
+                          <Link
+                            key={product.id}
+                            to={`/product/${product.id}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                          >
+                            <Dna className="h-4 w-4 text-primary" />
+                            <span>{product.name}</span>
+                            <span className="ml-auto text-xs text-muted-foreground">
+                              {product.category}
+                            </span>
+                          </Link>
+                        ))}
+                        <Link
+                          to="/products"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="mt-1 flex items-center justify-center rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        >
+                          View All →
+                        </Link>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
                 {navLinks.slice(2).map((link) => (
                   <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>
