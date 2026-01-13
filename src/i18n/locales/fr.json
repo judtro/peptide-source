@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "vendors": "Vendeurs Vérifiés",
+    "products": "Produits",
+    "calculator": "Calculatrice",
+    "about": "À propos"
+  },
+  "hero": {
+    "title": "Arrêtez d'injecter des produits chimiques inconnus",
+    "subtitle": "La plateforme de vérification définitive pour les sources de peptides de recherche. COA vérifié par des tiers. Filtré par région. Approuvé par des laboratoires du monde entier.",
+    "cta": "Voir les vendeurs vérifiés",
+    "secondary": "Parcourir les produits"
+  },
+  "region": {
+    "detected": "Nous avons détecté que vous êtes de",
+    "confirm": "Est-ce correct?",
+    "stay": "Rester dans la boutique {{region}}",
+    "switch": "Changer de région",
+    "us": "États-Unis",
+    "eu": "Union Européenne"
+  },
+  "vendors": {
+    "title": "Vendeurs Vérifiés",
+    "subtitle": "Sources de peptides testées par des tiers et vérifiées COA",
+    "name": "Vendeur",
+    "region": "Région",
+    "purity": "Pureté",
+    "coa": "COA Vérifié",
+    "price": "Prix/mg",
+    "status": "Statut",
+    "action": "Visiter le site",
+    "verified": "Vérifié",
+    "warning": "Attention",
+    "scam": "Arnaque"
+  },
+  "products": {
+    "title": "Peptides de Recherche",
+    "subtitle": "Informations moléculaires détaillées et listes de vendeurs vérifiés"
+  },
+  "calculator": {
+    "title": "Calculatrice de Reconstitution",
+    "peptideAmount": "Quantité de Peptide",
+    "waterVolume": "Eau Bactériostatique",
+    "result": "Concentration",
+    "perUnit": "par 0,1ml (10 unités)"
+  },
+  "compliance": {
+    "warning": "UNIQUEMENT POUR LA RECHERCHE EN LABORATOIRE. NON DESTINÉ À LA CONSOMMATION HUMAINE. 18 ANS MINIMUM."
+  },
+  "footer": {
+    "privacy": "Politique de confidentialité",
+    "legal": "Mentions légales",
+    "disclaimer": "Avertissement",
+    "sitemap": "Plan du site"
+  }
+}

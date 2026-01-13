@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "home": "Home",
+    "vendors": "Verified Vendors",
+    "products": "Products",
+    "calculator": "Calculator",
+    "about": "About"
+  },
+  "hero": {
+    "title": "Stop Injecting Mystery Chemicals",
+    "subtitle": "The definitive verification platform for research peptide sources. Third-party COA verified. Region-filtered. Trusted by laboratories worldwide.",
+    "cta": "View Verified Vendors",
+    "secondary": "Browse Products"
+  },
+  "region": {
+    "detected": "We detected you are from",
+    "confirm": "Is this correct?",
+    "stay": "Stay in {{region}} Store",
+    "switch": "Switch Region",
+    "us": "United States",
+    "eu": "European Union"
+  },
+  "vendors": {
+    "title": "Verified Vendors",
+    "subtitle": "Third-party tested and COA verified peptide sources",
+    "name": "Vendor",
+    "region": "Region",
+    "purity": "Purity",
+    "coa": "COA Verified",
+    "price": "Price/mg",
+    "status": "Status",
+    "action": "Visit Site",
+    "verified": "Verified",
+    "warning": "Warning",
+    "scam": "Scam"
+  },
+  "products": {
+    "title": "Research Peptides",
+    "subtitle": "Detailed molecular information and verified vendor listings"
+  },
+  "calculator": {
+    "title": "Reconstitution Calculator",
+    "peptideAmount": "Peptide Amount",
+    "waterVolume": "Bacteriostatic Water",
+    "result": "Concentration",
+    "perUnit": "per 0.1ml (10 units)"
+  },
+  "compliance": {
+    "warning": "FOR LABORATORY RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION. MUST BE 18+."
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "legal": "Legal Notice",
+    "disclaimer": "Disclaimer",
+    "sitemap": "Sitemap"
+  }
+}
