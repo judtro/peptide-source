@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { getVendorBySlug, Vendor } from '@/data/vendors';
 import { products, Product } from '@/data/products';
@@ -23,14 +23,46 @@ import {
   ArrowLeft,
   Package,
 } from 'lucide-react';
+import { generateBreadcrumbSchema } from '@/components/SEOHead';
 
 const VendorDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const vendor = slug ? getVendorBySlug(slug) : undefined;
 
+  // Generate JSON-LD schemas for SEO
+  const jsonLdSchemas = useMemo(() => {
+    if (!vendor) return [];
+    
+    const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: 'Home', url: siteUrl },
+      { name: 'Vendors', url: `${siteUrl}/vendors` },
+      { name: vendor.name, url: `${siteUrl}/vendor/${vendor.slug}` },
+    ]);
+
+    const organizationSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: vendor.name,
+      url: vendor.website,
+      description: vendor.description,
+      foundingDate: vendor.yearFounded,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: vendor.location,
+      },
+    };
+
+    return [breadcrumbSchema, organizationSchema];
+  }, [vendor]);
+
   if (!vendor) {
     return (
-      <Layout>
+      <Layout
+        title="Vendor Not Found | ChemVerify"
+        description="The requested vendor could not be found."
+      >
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold">Vendor Not Found</h1>
           <p className="mt-2 text-muted-foreground">
@@ -83,14 +115,11 @@ const VendorDetailPage = () => {
   const StatusIcon = statusInfo.icon;
 
   return (
-    <Layout>
-      <Helmet>
-        <title>{vendor.name} Review & Discount Code | Verified Peptide Source</title>
-        <meta
-          name="description"
-          content={`${vendor.name} review and verification status. ${vendor.coaVerified ? 'COA verified supplier' : 'Peptide supplier'} based in ${vendor.location}. Use code ${vendor.discountCode} for partner discount.`}
-        />
-      </Helmet>
+    <Layout
+      title={`${vendor.name} Review & Discount Code | ChemVerify`}
+      description={`${vendor.name} review and verification status. ${vendor.coaVerified ? 'COA verified supplier' : 'Peptide supplier'} based in ${vendor.location}. Use code ${vendor.discountCode} for partner discount.`}
+      jsonLd={jsonLdSchemas}
+    >
 
       <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Breadcrumb */}

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ProductCard } from '@/components/ProductCard';
@@ -20,12 +19,11 @@ import {
   FlaskConical,
   Globe2,
   ArrowRight,
-  CheckCircle2,
   Microscope,
-  FileCheck,
   Lock,
   HelpCircle,
 } from 'lucide-react';
+import { generateFAQSchema } from '@/components/SEOHead';
 
 const FAQ_DATA = [
   {
@@ -55,18 +53,7 @@ const FAQ_DATA = [
 ];
 
 // Generate FAQ Schema for SEO
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ_DATA.map((faq) => ({
-    '@type': 'Question',
-    name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
-  })),
-};
+const faqSchema = generateFAQSchema(FAQ_DATA);
 
 const Index = () => {
   const { t } = useTranslation();
@@ -96,7 +83,11 @@ const Index = () => {
   ];
 
   return (
-    <Layout>
+    <Layout
+      title="ChemVerify - Research Peptide Verification Platform"
+      description="The definitive verification platform for research peptide sources. Third-party COA verified and region-filtered. Trusted by laboratories worldwide."
+      jsonLd={faqSchema}
+    >
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-secondary/5 to-background">
         <div className="absolute inset-0 opacity-30">
@@ -200,11 +191,6 @@ const Index = () => {
 
       {/* FAQ Section */}
       <section className="border-t border-border bg-muted/30 py-10 sm:py-12 md:py-16">
-        <Helmet>
-          <script type="application/ld+json">
-            {JSON.stringify(faqSchema)}
-          </script>
-        </Helmet>
         <div className="container mx-auto max-w-3xl px-4">
           <div className="mb-6 text-center sm:mb-8">
             <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 sm:mb-4 sm:px-4 sm:py-2">
