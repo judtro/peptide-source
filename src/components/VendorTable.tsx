@@ -115,12 +115,12 @@ export const VendorTable = ({
 
   // Mobile Card View Component
   const VendorCard = ({ vendor }: { vendor: Vendor }) => (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <article className="rounded-lg border border-border bg-card p-4" aria-label={`${vendor.name} vendor card`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Link 
             to={`/vendor/${vendor.slug}`}
-            className="font-medium text-foreground transition-colors hover:text-primary hover:underline"
+            className="inline-block min-h-[44px] py-2 font-medium text-foreground transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {vendor.name}
           </Link>
@@ -168,7 +168,7 @@ export const VendorTable = ({
           </Button>
         </Link>
       </div>
-    </div>
+    </article>
   );
 
   return (
@@ -211,35 +211,38 @@ export const VendorTable = ({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead
-                        className="cursor-pointer hover:text-primary"
-                        onClick={() => handleSort('name')}
-                      >
-                        <div className="flex items-center gap-1">
+                      <TableHead>
+                        <button
+                          className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          onClick={() => handleSort('name')}
+                          aria-label={`Sort by vendor name, currently ${sortKey === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'not sorted'}`}
+                        >
                           {t('vendors.name')}
-                          <ArrowUpDown className="h-3 w-3" />
-                        </div>
+                          <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                        </button>
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">Warehouse</TableHead>
                       <TableHead>Ships To</TableHead>
-                      <TableHead
-                        className="cursor-pointer hover:text-primary"
-                        onClick={() => handleSort('purityScore')}
-                      >
-                        <div className="flex items-center gap-1">
+                      <TableHead>
+                        <button
+                          className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          onClick={() => handleSort('purityScore')}
+                          aria-label={`Sort by purity score, currently ${sortKey === 'purityScore' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'not sorted'}`}
+                        >
                           {t('vendors.purity')}
-                          <ArrowUpDown className="h-3 w-3" />
-                        </div>
+                          <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                        </button>
                       </TableHead>
                       <TableHead>{t('vendors.coa')}</TableHead>
-                      <TableHead
-                        className="cursor-pointer hover:text-primary"
-                        onClick={() => handleSort('pricePerMg')}
-                      >
-                        <div className="flex items-center gap-1">
+                      <TableHead>
+                        <button
+                          className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          onClick={() => handleSort('pricePerMg')}
+                          aria-label={`Sort by price per mg, currently ${sortKey === 'pricePerMg' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'not sorted'}`}
+                        >
                           {t('vendors.price')}
-                          <ArrowUpDown className="h-3 w-3" />
-                        </div>
+                          <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                        </button>
                       </TableHead>
                       <TableHead>{t('vendors.status')}</TableHead>
                       <TableHead className="text-right">{t('vendors.action')}</TableHead>
