@@ -21,7 +21,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {product.category}
           </Badge>
         </div>
-        <CardTitle className="mt-4 text-xl font-bold">{product.name}</CardTitle>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {product.researchAreas.map((area) => (
+            <Badge key={area} variant="secondary" className="text-xs">
+              {area}
+            </Badge>
+          ))}
+        </div>
+        <CardTitle className="mt-3 text-xl font-bold">{product.name}</CardTitle>
         <p className="text-sm text-muted-foreground">{product.fullName}</p>
       </CardHeader>
       <CardContent className="space-y-4">
