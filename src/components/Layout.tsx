@@ -5,7 +5,6 @@ import { Footer } from './Footer';
 import { ComplianceHeader } from './ComplianceHeader';
 import { ComplianceFooter } from './ComplianceFooter';
 import { RegionModal } from './RegionModal';
-import { AnnouncementBar } from './AnnouncementBar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -28,7 +27,6 @@ export const Layout = ({
       </Helmet>
       <div className="flex min-h-screen flex-col">
         <ComplianceHeader />
-        <AnnouncementBar />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
