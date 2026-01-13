@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { Region } from '@/data/vendors';
+import type { Region } from '@/types';
 
 interface RegionContextType {
   region: Region;

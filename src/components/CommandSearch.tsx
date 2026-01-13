@@ -174,8 +174,14 @@ export const CommandSearch = ({ open, onOpenChange }: CommandSearchProps) => {
     navigate(path);
   }, [navigate, setIsOpen]);
 
-  const getRegionFlag = (region: 'US' | 'EU') => {
-    return region === 'US' ? '🇺🇸' : '🇪🇺';
+  const getRegionFlag = (region: string) => {
+    switch (region) {
+      case 'US': return '🇺🇸';
+      case 'EU': return '🇪🇺';
+      case 'UK': return '🇬🇧';
+      case 'CA': return '🇨🇦';
+      default: return '🌍';
+    }
   };
 
   return (

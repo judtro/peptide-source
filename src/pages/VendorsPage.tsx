@@ -3,8 +3,9 @@ import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { useRegion } from '@/context/RegionContext';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Info, Truck } from 'lucide-react';
+import { ShieldCheck, Truck } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getRegionFlag, getRegionName } from '@/components/MarketToggle';
 
 const VendorsPage = () => {
   const { t } = useTranslation();
@@ -13,7 +14,7 @@ const VendorsPage = () => {
   return (
     <Layout
       title="Verified Vendors | ChemVerify"
-      description="Third-party COA verified research peptide vendors. HPLC tested for purity. Filter by US or EU region."
+      description="Third-party COA verified research peptide vendors. HPLC tested for purity. Filter by US, EU, UK, or Canada region."
     >
       <div className="container mx-auto px-4 py-12">
         <div className="mb-8">
@@ -34,7 +35,7 @@ const VendorsPage = () => {
           <AlertDescription>
             Showing vendors that ship to{' '}
             <Badge variant="secondary" className="font-mono">
-              {region === 'US' ? '🇺🇸 United States' : '🇪🇺 European Union'}
+              {getRegionFlag(region)} {getRegionName(region)}
             </Badge>
             . Use the toggle to switch markets and avoid customs issues.
           </AlertDescription>

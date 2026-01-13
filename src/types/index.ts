@@ -50,7 +50,7 @@ export interface Product {
 // ============================================
 
 export type VendorStatus = 'verified' | 'warning' | 'scam';
-export type Region = 'US' | 'EU';
+export type Region = 'US' | 'EU' | 'UK' | 'CA';
 
 export interface Vendor {
   id: string;
