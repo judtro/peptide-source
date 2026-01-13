@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import VendorsPage from "./pages/VendorsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import BatchVerifyPage from "./pages/BatchVerifyPage";
 import CalculatorPage from "./pages/CalculatorPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
@@ -30,8 +31,10 @@ const App = () => (
             <Route path="/vendors" element={<VendorsPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
+            <Route path="/verify" element={<BatchVerifyPage />} />
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/legal" element={<LegalPage />} />
             <Route path="*" element={<NotFound />} />
