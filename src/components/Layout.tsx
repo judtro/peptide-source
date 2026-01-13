@@ -34,9 +34,15 @@ export const Layout = ({
         jsonLd={jsonLd}
       />
       <div className="flex min-h-screen flex-col">
+        {/* Skip to main content link for keyboard users */}
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
         <ComplianceHeader />
         <Header />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1" tabIndex={-1}>
+          {children}
+        </main>
         <Footer />
         <ComplianceFooter />
         <RegionModal />
