@@ -24,7 +24,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useRegion } from '@/context/RegionContext';
-import { FlaskConical, Menu, MapPin, Languages, Dna, Search, ShieldCheck, Calculator, BookOpen, Building2, Beaker, FileCheck, Home } from 'lucide-react';
+import { Menu, MapPin, Languages, Dna, Search, ShieldCheck, BookOpen, Building2, Beaker, FileCheck, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DiscountBadge } from './DiscountBadge';
 import { CommandSearch } from './CommandSearch';
@@ -60,22 +60,180 @@ export const Header = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
-  const isProductsActive = location.pathname.startsWith('/product') || location.pathname === '/calculator';
+  const isProductsActive = location.pathname.startsWith('/product');
 
   return (
     <>
-      {/* Main Navigation Row - Light */}
-      <header 
-        className="sticky top-[36px] z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90"
+      {/* ===== TOP BAR: Utility Layer (Dark) ===== */}
+      <div 
+        className={cn(
+          "sticky top-0 z-50 h-10 bg-slate-900 transition-all duration-300",
+          isScrolled && "h-0 overflow-hidden opacity-0"
+        )}
       >
-        {/* Top Row: Logo, Search, Verify Batch */}
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="ChemVerify.com" className="h-12 w-auto transition-transform duration-200 hover:scale-105" />
+        <div className="container mx-auto flex h-full items-center justify-between px-4">
+          {/* Left: Professional Research Text */}
+          <span className="text-xs text-slate-300">
+            Professional Research Data Only
+          </span>
+
+          {/* Right: Region, Language, Discount */}
+          <div className="flex items-center gap-3">
+            {/* Discount Badge */}
+            <DiscountBadge 
+              code="CHEM10" 
+              variant="compact" 
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" 
+            />
+
+            <span className="h-3 w-px bg-slate-700" aria-hidden="true" />
+
+            {/* Region Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button 
+                  className="flex min-h-[44px] items-center gap-1.5 rounded-md px-2 py-1 text-xs text-slate-300 transition-colors hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                  aria-label={`Region: ${region}`}
+                >
+                  <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>{region === 'US' ? '🇺🇸' : '🇪🇺'} {region}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setRegion('US')} className="gap-2">
+                  <span className="text-lg">🇺🇸</span> {t('region.us')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRegion('EU')} className="gap-2">
+                  <span className="text-lg">🇪🇺</span> {t('region.eu')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <span className="h-3 w-px bg-slate-700" aria-hidden="true" />
+
+            {/* Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button 
+                  className="flex min-h-[44px] items-center gap-1.5 rounded-md px-2 py-1 text-xs text-slate-300 transition-colors hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                  aria-label={`Language: ${i18n.language}`}
+                >
+                  <Languages className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="uppercase">{i18n.language}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage('de')}>
+                  Deutsch
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage('fr')}>
+                  Français
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== MAIN NAVBAR: Clean Navigation (Light/Glassmorphism) ===== */}
+      <header 
+        className={cn(
+          "sticky z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90",
+          isScrolled ? "top-0" : "top-10"
+        )}
+      >
+        <nav className="container mx-auto flex h-16 items-center justify-between px-4">
+          {/* Left: Logo */}
+          <Link to="/" className="flex items-center" aria-label="ChemVerify Home">
+            <img 
+              src={logo} 
+              alt="ChemVerify.com" 
+              className="h-12 w-auto transition-transform duration-200 hover:scale-105" 
+              width={120}
+              height={48}
+            />
           </Link>
 
-          {/* Right Controls */}
+          {/* Center: Main Navigation Links - Desktop */}
+          <div className="hidden items-center gap-1 lg:flex">
+            <Link to="/vendors">
+              <Button
+                variant={isActive('/vendors') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2 font-medium"
+              >
+                <Building2 className="h-4 w-4" aria-hidden="true" />
+                Vendors
+              </Button>
+            </Link>
+
+            {/* Products Dropdown */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger
+                    className={cn(
+                      'h-9 gap-2 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+                      isProductsActive && 'bg-secondary text-secondary-foreground'
+                    )}
+                  >
+                    <Beaker className="h-4 w-4" aria-hidden="true" />
+                    {t('nav.products')}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid w-[420px] gap-1 p-3 md:w-[520px] md:grid-cols-2">
+                      {products.map((product) => (
+                        <NavigationMenuLink key={product.id} asChild>
+                          <Link
+                            to={`/product/${product.id}`}
+                            className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                              <Dna className="h-4 w-4 text-primary" aria-hidden="true" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-foreground">
+                                {product.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {product.category}
+                              </p>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                      
+                      {/* View All Link */}
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/products"
+                          className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        >
+                          View All Products →
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            <Link to="/education">
+              <Button
+                variant={isActive('/education') || location.pathname.startsWith('/education/') ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-2 font-medium"
+              >
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
+                Knowledge Hub
+              </Button>
+            </Link>
+          </div>
+
+          {/* Right: Search + Verify Batch + Mobile Menu */}
           <div className="flex items-center gap-3">
             {/* Search Bar Trigger - Desktop */}
             <button
@@ -84,7 +242,7 @@ export const Header = () => {
               aria-label="Open search dialog"
             >
               <Search className="h-4 w-4" aria-hidden="true" />
-              <span className="min-w-[140px] text-left">Search...</span>
+              <span className="min-w-[100px] text-left">Search...</span>
               <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground" aria-hidden="true">
                 {isMac ? '⌘K' : 'Ctrl+K'}
               </kbd>
@@ -94,36 +252,37 @@ export const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="min-h-[44px] min-w-[44px] md:hidden"
               onClick={() => setSearchOpen(true)}
+              aria-label="Open search"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-5 w-5" aria-hidden="true" />
             </Button>
 
             {/* Verify Batch Button - Primary Action */}
             <Link to="/verify" className="hidden sm:block">
               <Button className="gap-2 font-medium">
-                <ShieldCheck className="h-4 w-4" />
-                <span className="hidden md:inline">Verify Batch</span>
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                Verify Batch
               </Button>
             </Link>
 
             {/* Verify Batch Icon - Mobile */}
-            <Link to="/verify" className="sm:hidden">
+            <Link to="/verify" className="sm:hidden" aria-label="Verify Batch">
               <Button size="icon" className="min-h-[44px] min-w-[44px]">
-                <ShieldCheck className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
               </Button>
             </Link>
 
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="lg:hidden">
-                <Button variant="outline" size="icon" className="min-h-[44px] min-w-[44px]">
-                  <Menu className="h-5 w-5" />
+                <Button variant="outline" size="icon" className="min-h-[44px] min-w-[44px]" aria-label="Open menu">
+                  <Menu className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] max-w-[320px] overflow-y-auto">
-                <nav className="mt-6 flex flex-col gap-4 sm:mt-8">
+                <nav className="mt-6 flex flex-col gap-4 sm:mt-8" aria-label="Mobile navigation">
                   {/* Research Tools Section */}
                   <div>
                     <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -135,7 +294,7 @@ export const Header = () => {
                           variant={isActive('/calculator') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
-                          <Calculator className="h-5 w-5" />
+                          <Beaker className="h-5 w-5" aria-hidden="true" />
                           Reconstitution Calculator
                         </Button>
                       </Link>
@@ -144,7 +303,7 @@ export const Header = () => {
                           variant={isActive('/verify') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
-                          <FileCheck className="h-5 w-5" />
+                          <FileCheck className="h-5 w-5" aria-hidden="true" />
                           Batch Search
                         </Button>
                       </Link>
@@ -162,7 +321,7 @@ export const Header = () => {
                           variant={isActive('/') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
-                          <Home className="h-5 w-5" />
+                          <Home className="h-5 w-5" aria-hidden="true" />
                           Home
                         </Button>
                       </Link>
@@ -172,7 +331,7 @@ export const Header = () => {
                           variant={isActive('/vendors') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
-                          <Building2 className="h-5 w-5" />
+                          <Building2 className="h-5 w-5" aria-hidden="true" />
                           Verified Vendors
                         </Button>
                       </Link>
@@ -186,7 +345,7 @@ export const Header = () => {
                             )}
                           >
                             <span className="flex items-center gap-3">
-                              <Beaker className="h-5 w-5" />
+                              <Beaker className="h-5 w-5" aria-hidden="true" />
                               {t('nav.products')}
                             </span>
                           </AccordionTrigger>
@@ -197,9 +356,9 @@ export const Header = () => {
                                   key={product.id}
                                   to={`/product/${product.id}`}
                                   onClick={() => setMobileMenuOpen(false)}
-                                  className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                                  className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
-                                  <Dna className="h-4 w-4 text-primary" />
+                                  <Dna className="h-4 w-4 text-primary" aria-hidden="true" />
                                   <span className="flex-1">{product.name}</span>
                                   <span className="text-xs text-muted-foreground">
                                     {product.category}
@@ -223,7 +382,7 @@ export const Header = () => {
                           variant={isActive('/education') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
-                          <BookOpen className="h-5 w-5" />
+                          <BookOpen className="h-5 w-5" aria-hidden="true" />
                           Knowledge Hub
                         </Button>
                       </Link>
@@ -240,7 +399,7 @@ export const Header = () => {
                         <span className="text-sm text-muted-foreground">Region</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-2">
+                            <Button variant="outline" size="sm" className="min-h-[44px] gap-2">
                               <span>{region === 'US' ? '🇺🇸' : '🇪🇺'}</span>
                               {region}
                             </Button>
@@ -259,8 +418,8 @@ export const Header = () => {
                         <span className="text-sm text-muted-foreground">Language</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-2">
-                              <Languages className="h-4 w-4" />
+                            <Button variant="outline" size="sm" className="min-h-[44px] gap-2">
+                              <Languages className="h-4 w-4" aria-hidden="true" />
                               <span className="uppercase">{i18n.language}</span>
                             </Button>
                           </DropdownMenuTrigger>
@@ -291,170 +450,7 @@ export const Header = () => {
             {/* Command Search Dialog */}
             <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
           </div>
-        </div>
-
-        {/* Bottom Row: Navigation + Region/Language - Desktop Only */}
-        <div className="hidden border-t border-border/50 lg:block">
-          <div className="container mx-auto flex h-12 items-center justify-between px-4">
-            {/* Desktop Navigation */}
-            <nav className="flex items-center gap-x-6">
-              <Link to="/">
-                <Button
-                  variant={isActive('/') ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="gap-2 font-medium"
-                >
-                  Home
-                </Button>
-              </Link>
-
-              <Link to="/vendors">
-                <Button
-                  variant={isActive('/vendors') ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="gap-2 font-medium"
-                >
-                  <Building2 className="h-4 w-4" />
-                  Verified Vendors
-                </Button>
-              </Link>
-
-              {/* Products Dropdown with Calculator */}
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger
-                      className={cn(
-                        'h-9 gap-2 bg-transparent px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
-                        isProductsActive && 'bg-secondary text-secondary-foreground'
-                      )}
-                    >
-                      <Beaker className="h-4 w-4" />
-                      {t('nav.products')}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="grid w-[420px] gap-1 p-3 md:w-[520px] md:grid-cols-2">
-                        {products.map((product) => (
-                          <NavigationMenuLink key={product.id} asChild>
-                            <Link
-                              to={`/product/${product.id}`}
-                              className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
-                            >
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                                <Dna className="h-4 w-4 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-foreground">
-                                  {product.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {product.category}
-                                </p>
-                              </div>
-                            </Link>
-                          </NavigationMenuLink>
-                        ))}
-                        
-                        {/* Divider */}
-                        <div className="col-span-full my-2 border-t border-border" />
-                        
-                        {/* Calculator - Featured Utility */}
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/calculator"
-                            className="col-span-full flex items-center gap-3 rounded-md bg-accent/50 p-3 transition-colors hover:bg-accent"
-                          >
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
-                              <Calculator className="h-4 w-4 text-primary-foreground" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-foreground">
-                                Reconstitution Calculator
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Calculate precise dosages for your research
-                              </p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-
-                        {/* View All Link */}
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/products"
-                            className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                          >
-                            View All Products →
-                          </Link>
-                        </NavigationMenuLink>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-
-              <Link to="/education">
-                <Button
-                  variant={isActive('/education') || location.pathname.startsWith('/education/') ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="gap-2 font-medium"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Knowledge Hub
-                </Button>
-              </Link>
-            </nav>
-
-            {/* Discount Badge + Region & Language Selectors */}
-            <div className="flex items-center gap-3">
-              {/* Discount Badge */}
-              <DiscountBadge code="CHEM10" variant="compact" className="border-success/30 bg-success/5 text-success/90 hover:bg-success/10" />
-
-              <span className="h-3 w-px bg-border" />
-
-              {/* Region Selector */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
-                    <span>{region === 'US' ? '🇺🇸' : '🇪🇺'} {region}</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setRegion('US')} className="gap-2">
-                    <span className="text-lg">🇺🇸</span> {t('region.us')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRegion('EU')} className="gap-2">
-                    <span className="text-lg">🇪🇺</span> {t('region.eu')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <span className="h-3 w-px bg-border" />
-
-              {/* Language Selector */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                    <Languages className="h-3.5 w-3.5" />
-                    <span className="uppercase">{i18n.language}</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                    English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => changeLanguage('de')}>
-                    Deutsch
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => changeLanguage('fr')}>
-                    Français
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
+        </nav>
       </header>
     </>
   );

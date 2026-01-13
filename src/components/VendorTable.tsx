@@ -94,7 +94,7 @@ export const VendorTable = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1">
-            <Truck className="h-3.5 w-3.5 text-muted-foreground" />
+            <Truck className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
             <div className="flex gap-0.5">
               {vendor.shippingRegions.map((sr) => (
                 <span key={sr} className="text-sm">
@@ -127,7 +127,7 @@ export const VendorTable = ({
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <span className="text-lg">{getWarehouseFlag(vendor.region)}</span>
             <span>{vendor.region}</span>
-            <span className="text-border">•</span>
+            <span className="text-border" aria-hidden="true">•</span>
             {getShippingBadges(vendor)}
           </div>
         </div>
@@ -145,7 +145,7 @@ export const VendorTable = ({
         </div>
         {vendor.coaVerified && (
           <div className="flex items-center gap-1 text-success">
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             <span className="text-xs">COA</span>
           </div>
         )}
@@ -159,12 +159,12 @@ export const VendorTable = ({
           onClick={() => window.open(vendor.website, '_blank')}
         >
           Visit
-          <ExternalLink className="h-3 w-3" />
+          <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </Button>
         <Link to={`/vendor/${vendor.slug}`}>
           <Button size="sm" variant="outline" className="min-h-[44px] gap-1">
             Details
-            <ArrowRight className="h-3 w-3" />
+            <ArrowRight className="h-3 w-3" aria-hidden="true" />
           </Button>
         </Link>
       </div>
@@ -190,7 +190,7 @@ export const VendorTable = ({
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         {sortedVendors.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center sm:p-8">
-            <Truck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
+            <Truck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
             <p className="font-medium text-foreground">No vendors available</p>
             <p className="mt-1 text-sm text-muted-foreground">
               No vendors currently ship to the {region} market for this product.
@@ -205,9 +205,9 @@ export const VendorTable = ({
               ))}
             </div>
 
-            {/* Desktop Table View */}
+            {/* Desktop Table View - Responsive with scrollbar-hide */}
             <div className="hidden md:block">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scrollbar-hide">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -222,7 +222,7 @@ export const VendorTable = ({
                         </button>
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">Warehouse</TableHead>
-                      <TableHead>Ships To</TableHead>
+                      <TableHead className="hidden xl:table-cell">Ships To</TableHead>
                       <TableHead>
                         <button
                           className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -233,8 +233,8 @@ export const VendorTable = ({
                           <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
                         </button>
                       </TableHead>
-                      <TableHead>{t('vendors.coa')}</TableHead>
-                      <TableHead>
+                      <TableHead className="hidden lg:table-cell">{t('vendors.coa')}</TableHead>
+                      <TableHead className="hidden xl:table-cell">
                         <button
                           className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           onClick={() => handleSort('pricePerMg')}
@@ -254,7 +254,7 @@ export const VendorTable = ({
                         <TableCell className="font-medium">
                           <Link 
                             to={`/vendor/${vendor.slug}`}
-                            className="transition-colors hover:text-primary hover:underline"
+                            className="transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {vendor.name}
                           </Link>
@@ -274,20 +274,20 @@ export const VendorTable = ({
                             </TooltipContent>
                           </Tooltip>
                         </TableCell>
-                        <TableCell>{getShippingBadges(vendor)}</TableCell>
+                        <TableCell className="hidden xl:table-cell">{getShippingBadges(vendor)}</TableCell>
                         <TableCell>
                           <span className="font-mono text-sm font-semibold text-success">
                             {vendor.purityScore}%
                           </span>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           {vendor.coaVerified ? (
-                            <CheckCircle2 className="h-5 w-5 text-success" />
+                            <CheckCircle2 className="h-5 w-5 text-success" aria-label="COA Verified" />
                           ) : (
-                            <XCircle className="h-5 w-5 text-muted-foreground" />
+                            <XCircle className="h-5 w-5 text-muted-foreground" aria-label="COA Not Verified" />
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden xl:table-cell">
                           <span className="font-mono text-sm">${vendor.pricePerMg.toFixed(2)}</span>
                         </TableCell>
                         <TableCell><StatusBadge status={vendor.status} /></TableCell>
@@ -301,7 +301,7 @@ export const VendorTable = ({
                               onClick={() => window.open(vendor.website, '_blank')}
                             >
                               {t('vendors.action')}
-                              <ExternalLink className="h-3 w-3" />
+                              <ExternalLink className="h-3 w-3" aria-hidden="true" />
                             </Button>
                           </div>
                         </TableCell>

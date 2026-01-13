@@ -181,4 +181,13 @@
   .skip-to-content {
     @apply absolute -top-10 left-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground transition-all focus:top-4;
   }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
