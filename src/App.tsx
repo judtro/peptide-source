@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RegionProvider } from "@/context/RegionContext";
 import "@/i18n/config";
 
+import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import VendorsPage from "./pages/VendorsPage";
 import ProductsPage from "./pages/ProductsPage";
@@ -28,6 +29,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/vendors" element={<VendorsPage />} />
