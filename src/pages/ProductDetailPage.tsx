@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
   Dna,
   ArrowLeft,
@@ -24,6 +26,7 @@ import {
   ArrowUp,
   Beaker,
   AlertTriangle,
+  Play,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
 import { ArticleTooltip } from '@/components/ArticleTooltip';
@@ -31,6 +34,7 @@ import { generateProductSchema, generateBreadcrumbSchema } from '@/components/SE
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const ProductDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const product = getProductById(id || '');
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -204,6 +208,37 @@ const ProductDetailPage = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* === MECHANISM VIDEO SECTION (Educational) === */}
+            {product.videoUrl && (
+              <Card className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Play className="h-5 w-5 text-primary" />
+                    {t('products.video_section_title')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Video Player - Lecture Hall Style (16:9) */}
+                  <div className="overflow-hidden rounded-lg border border-border shadow-lg">
+                    <AspectRatio ratio={16 / 9}>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${product.videoUrl}?rel=0&modestbranding=1`}
+                        title={`${product.name} - ${t('products.video_section_title')}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="h-full w-full"
+                      />
+                    </AspectRatio>
+                  </div>
+                  
+                  {/* Compliance Disclaimer */}
+                  <p className="text-xs text-muted-foreground">
+                    {t('products.video_disclaimer')}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* === SECTION A: Mechanism & Research Findings === */}
             <Card>

@@ -78,6 +78,7 @@ export const products: Product[] = [
       'Gastrointestinal studies',
       'Angiogenesis investigation',
     ],
+    videoUrl: 'dQw4w9WgXcQ', // Placeholder: Educational lecture on gastric pentadecapeptide
   },
   {
     id: 'tb-500',
@@ -144,6 +145,7 @@ export const products: Product[] = [
       'Wound healing research',
       'Cardiac tissue studies',
     ],
+    videoUrl: 'dQw4w9WgXcQ', // Placeholder: Thymosin Beta-4 mechanism lecture
   },
 
   // ===== METABOLIC RESEARCH =====
@@ -211,6 +213,7 @@ export const products: Product[] = [
       'Lipid metabolism investigation',
       'Metabolic syndrome models',
     ],
+    videoUrl: 'dQw4w9WgXcQ', // Placeholder: GLP-1 receptor agonism lecture
   },
   {
     id: 'tirzepatide',
