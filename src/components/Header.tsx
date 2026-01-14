@@ -67,7 +67,7 @@ export const Header = () => {
       {/* ===== TOP BAR: Utility Layer (Dark) ===== */}
       <div 
         className={cn(
-          "sticky top-0 z-50 h-10 bg-slate-900 transition-all duration-300",
+          "h-10 bg-slate-900 transition-all duration-300",
           isScrolled && "h-0 overflow-hidden opacity-0"
         )}
       >
@@ -140,10 +140,7 @@ export const Header = () => {
 
       {/* ===== MAIN NAVBAR: Clean Navigation (Light/Glassmorphism) ===== */}
       <header 
-        className={cn(
-          "sticky z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90",
-          isScrolled ? "top-0" : "top-10"
-        )}
+        className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90"
       >
         <nav className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Left: Logo */}
