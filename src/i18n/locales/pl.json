@@ -98,6 +98,21 @@
     "video_section_title": "Mechanizm działania (Edukacyjny)",
     "video_disclaimer": "Ten materiał jest udostępniany wyłącznie jako edukacyjne odniesienie do chemicznego mechanizmu działania. Nie stanowi porady medycznej ani rekomendacji do spożycia przez ludzi."
   },
+  "video_gallery": {
+    "title": "Naukowa biblioteka wideo",
+    "subtitle": "Wyselekcjonowane treści edukacyjne wyjaśniające mechanizmy działania, zastosowania badawcze i wyniki kliniczne peptydów badawczych.",
+    "search_placeholder": "Szukaj filmów po nazwie związku...",
+    "all_videos": "Wszystkie filmy edukacyjne",
+    "videos_available": "Dostępne filmy",
+    "research_areas": "Obszary badawcze",
+    "educational": "Edukacyjne",
+    "watch_now": "Oglądaj teraz",
+    "view_full_profile": "Zobacz pełny profil",
+    "no_videos_found": "Nie znaleziono filmów",
+    "try_adjusting": "Spróbuj dostosować kryteria wyszukiwania lub filtrowania.",
+    "clear_filters": "Wyczyść filtry",
+    "back_to_hub": "Powrót do centrum wiedzy"
+  },
   "calculator": {
     "title": "Kalkulator rekonstytucji peptydów",
     "peptideAmount": "Ilość peptydu",
