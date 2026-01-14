@@ -78,7 +78,7 @@ export const products: Product[] = [
       'Gastrointestinal studies',
       'Angiogenesis investigation',
     ],
-    videoUrl: 'dQw4w9WgXcQ', // Placeholder: Educational lecture on gastric pentadecapeptide
+    videoUrl: '4n0zagLkQWA', // Peptides Explained: How BPC-157 Works With Your Body
   },
   {
     id: 'tb-500',
@@ -145,7 +145,7 @@ export const products: Product[] = [
       'Wound healing research',
       'Cardiac tissue studies',
     ],
-    videoUrl: 'dQw4w9WgXcQ', // Placeholder: Thymosin Beta-4 mechanism lecture
+    videoUrl: 'uw0irqYOTDU', // TB4 vs TB-500: One Is Studied. One Is Marketed
   },
 
   // ===== METABOLIC RESEARCH =====
@@ -213,7 +213,7 @@ export const products: Product[] = [
       'Lipid metabolism investigation',
       'Metabolic syndrome models',
     ],
-    videoUrl: 'dQw4w9WgXcQ', // Placeholder: GLP-1 receptor agonism lecture
+    videoUrl: '819bZCHpV9Y', // Mechanism of Action for GLP 1 RAs: "The How"
   },
   {
     id: 'tirzepatide',
@@ -279,6 +279,7 @@ export const products: Product[] = [
       'Adipose tissue metabolism',
       'Hepatic lipid research',
     ],
+    videoUrl: '9M9PQQXqdF8', // Tirzepatide's Unique Mechanism of Action - GIP/GLP-1 Dual Agonist
   },
   {
     id: 'retatrutide',
@@ -344,6 +345,7 @@ export const products: Product[] = [
       'Energy expenditure studies',
       'Comparative metabolic analysis',
     ],
+    videoUrl: 'MQFQpBfyzuc', // Retatrutide Triple Agonist: GLP‑1, GIP, Glucagon — How It Works
   },
   {
     id: 'aod-9604',
@@ -409,6 +411,7 @@ export const products: Product[] = [
       'Glycemic-neutral lipolysis investigation',
       'hGH fragment research',
     ],
+    videoUrl: 'x4d99Xtz0SU', // AOD 9604: The Ultimate Guide to Fat Loss, Tissue Repair
   },
   {
     id: 'mots-c',
@@ -474,6 +477,7 @@ export const products: Product[] = [
       'Mitochondrial function research',
       'Metabolic aging studies',
     ],
+    videoUrl: '_b9Av7aTqas', // MOTS-c (CB-4211): Exercise in a Vial? Full Deep Dive
   },
 
   // ===== HORMONAL REGULATION =====
@@ -541,6 +545,7 @@ export const products: Product[] = [
       'Selective receptor agonism research',
       'Endocrine regulation studies',
     ],
+    videoUrl: 'ZfeXNZzEN14', // CJC-1295 + Ipamorelin, How Does it Really Work?
   },
   {
     id: 'cjc-1295',
@@ -606,6 +611,7 @@ export const products: Product[] = [
       'Synergistic peptide combination research',
       'Endocrine pharmacology',
     ],
+    videoUrl: 'tmG-9v33ZiY', // Ultimate Comparison: GHRH Peptides Revealed
   },
   {
     id: 'mk-677',
@@ -671,6 +677,7 @@ export const products: Product[] = [
       'Oral GH secretagogue research',
       'Aging and sarcopenia studies',
     ],
+    videoUrl: '_OHm24N9iXM', // Sermorelin & Ibutamoren (MK-677) - HGH Secretagogues
   },
 
   // ===== DERMAL & COSMETIC RESEARCH =====
@@ -739,6 +746,7 @@ export const products: Product[] = [
       'Hair follicle stimulation research',
       'Collagen synthesis research',
     ],
+    videoUrl: 'ZVTk7utqjHc', // All About GHK-Cu Peptide | More Than Just Cosmetic
   },
   {
     id: 'melanotan-2',
@@ -804,6 +812,7 @@ export const products: Product[] = [
       'Photoprotection research',
       'Appetite regulation studies',
     ],
+    videoUrl: 'LtPbEW9zPNg', // Melanotan Tanning Peptides: Safe Use, Side Effects & How It Works
   },
 
   // ===== COGNITIVE STUDIES =====
@@ -871,6 +880,7 @@ export const products: Product[] = [
       'Cognitive function research',
       'Neurotransmitter modulation studies',
     ],
+    videoUrl: 'SLYwV0DRRK0', // Semax: The Ultimate Guide to Cognitive Enhancement
   },
   {
     id: 'selank',
@@ -936,6 +946,7 @@ export const products: Product[] = [
       'GABA-A receptor research',
       'Cognitive flexibility studies',
     ],
+    videoUrl: 'PhsGo7MgKnc', // Selank | One of the Best Nootropics for Anxiety Relief & Mental Clarity
   },
 
   // ===== PEPTIDE SIGNALING =====
@@ -1003,6 +1014,7 @@ export const products: Product[] = [
       'Hypothalamic pathway investigation',
       'Comparative pharmacology research',
     ],
+    videoUrl: 'd2QhfVauvIo', // PT-141 VS. Melanotan II: Are They The Same Peptides?
   },
 ];
 
