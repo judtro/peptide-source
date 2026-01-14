@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
+import heroBg from '@/assets/hero-bg.png';
 import { VendorTable } from '@/components/VendorTable';
 import { ProductCard } from '@/components/ProductCard';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
@@ -89,53 +90,62 @@ const Index = () => {
       jsonLd={faqSchema}
     >
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-secondary/5 to-background">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-        </div>
-        <div className="container relative mx-auto px-4 py-12 sm:py-16 md:py-24 lg:py-32">
+      <section className="relative min-h-[600px] overflow-hidden border-b border-border lg:min-h-[80vh]">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroBg})` }}
+        />
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/50" />
+        
+        <div className="container relative z-10 mx-auto flex min-h-[600px] items-center px-4 py-16 sm:py-20 md:py-24 lg:min-h-[80vh] lg:py-32">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge variant="outline" className="mb-4 gap-2 px-3 py-1 font-mono text-xs sm:mb-6 sm:px-4 sm:text-sm">
+            <Badge variant="outline" className="mb-4 gap-2 border-white/20 bg-white/10 px-3 py-1 font-mono text-xs text-white/80 backdrop-blur-sm sm:mb-6 sm:px-4 sm:text-sm">
               <FlaskConical className="h-3 w-3" />
-              Region: {region === 'US' ? '🇺🇸 United States' : '🇪🇺 European Union'}
+              Region: {region === 'US' ? '🇺🇸 United States' : region === 'EU' ? '🇪🇺 European Union' : region === 'UK' ? '🇬🇧 United Kingdom' : '🇨🇦 Canada'}
             </Badge>
-            <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-              {t('hero.title')}
+            <h1 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+              The Global Standard for Peptide Verification.
             </h1>
-            <p className="mx-auto mb-6 max-w-2xl text-base text-muted-foreground sm:mb-8 sm:text-lg md:text-xl">
-              {t('hero.subtitle')}
+            <p className="mx-auto mb-8 max-w-2xl text-base text-slate-300 sm:mb-10 sm:text-lg md:text-xl">
+              Independent audits, HPLC data, and sourcing transparency for professional researchers.
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link to="/vendors">
-                <Button size="lg" className="w-full gap-2 sm:w-auto">
+              <Link to="/verify">
+                <Button size="lg" className="w-full gap-2 bg-cyan-600 text-white hover:bg-cyan-700 sm:w-auto">
                   <ShieldCheck className="h-5 w-5" />
-                  {t('hero.cta')}
+                  Verify a Batch
                 </Button>
               </Link>
-              <Link to="/products">
-                <Button size="lg" variant="outline" className="w-full gap-2 sm:w-auto">
-                  {t('hero.secondary')}
+              <Link to="/vendors">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="w-full gap-2 border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white sm:w-auto"
+                >
+                  Browse Verified Vendors
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-          </div>
 
-          {/* Stats */}
-          <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-4 sm:mt-12 sm:gap-6 md:mt-16 md:grid-cols-4 md:gap-8">
-            {[
-              { value: '4', label: 'Verified Vendors' },
-              { value: '99.9%', label: 'Max Purity' },
-              { value: '3', label: 'Research Peptides' },
-              { value: '2', label: 'Regions' },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="font-mono text-2xl font-bold text-primary sm:text-3xl md:text-4xl">
-                  {stat.value}
+            {/* Stats */}
+            <div className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:mt-16 sm:gap-6 md:mt-20 md:grid-cols-4 md:gap-8">
+              {[
+                { value: '10', label: 'Verified Vendors' },
+                { value: '99.9%', label: 'Max Purity' },
+                { value: '3', label: 'Research Peptides' },
+                { value: '4', label: 'Regions' },
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="font-mono text-2xl font-bold text-cyan-400 sm:text-3xl md:text-4xl">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-400 sm:text-sm">{stat.label}</div>
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
