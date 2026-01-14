@@ -1,58 +1,149 @@
 {
+  "common": {
+    "search_placeholder": "Szukaj molekuł, dostawców lub danych...",
+    "verify_batch_btn": "Weryfikuj partię",
+    "view_details": "Zobacz szczegóły",
+    "visit_site": "Odwiedź stronę",
+    "loading": "Ładowanie...",
+    "no_results": "Nie znaleziono wyników.",
+    "view_all_products": "Zobacz wszystkie produkty →",
+    "details": "Szczegóły",
+    "visit": "Odwiedź",
+    "delivers_to": "Dostarcza do:",
+    "purity": "Czystość:",
+    "price": "Cena:",
+    "ships_to": "Wysyła do:",
+    "warehouse_location": "Lokalizacja magazynu:",
+    "lab_tested": "Przetestowany laboratoryjnie i zweryfikowany",
+    "cas": "CAS:",
+    "molar_mass": "Masa molowa:",
+    "professional_research": "Tylko profesjonalne dane badawcze",
+    "discount_code": "Kod rabatowy:"
+  },
   "nav": {
     "home": "Strona główna",
-    "vendors": "Zweryfikowani Dostawcy",
-    "products": "Molekuły",
-    "verify": "Zweryfikuj Partię",
+    "vendors": "Zweryfikowani dostawcy",
+    "products": "Produkty",
+    "verify": "Weryfikuj partię",
     "calculator": "Kalkulator",
-    "about": "O nas"
+    "about": "O nas",
+    "knowledge_hub": "Centrum wiedzy",
+    "research_tools": "Narzędzia badawcze",
+    "information": "Informacje",
+    "reconstitution_calculator": "Kalkulator rekonstytucji",
+    "batch_search": "Szukaj partii"
   },
   "hero": {
-    "title": "Światowy Standard Weryfikacji Peptydów",
-    "subtitle": "Niezależne audyty, dane HPLC i przejrzystość źródeł dla profesjonalnych badaczy.",
-    "cta": "Zobacz Zweryfikowanych Dostawców",
-    "secondary": "Przeglądaj Produkty"
+    "title": "Globalny standard weryfikacji peptydów.",
+    "subtitle": "Niezależne audyty, dane HPLC i przejrzystość zaopatrzenia dla profesjonalnych badaczy.",
+    "cta_primary": "Weryfikuj partię",
+    "cta_secondary": "Przeglądaj zweryfikowanych dostawców",
+    "region_label": "Region:",
+    "stats": {
+      "verified_vendors": "Zweryfikowani dostawcy",
+      "max_purity": "Maks. czystość",
+      "research_peptides": "Peptydy badawcze",
+      "regions": "Regiony"
+    }
   },
   "region": {
     "detected": "Wykryliśmy, że jesteś z",
-    "confirm": "Czy to prawda?",
-    "stay": "Zostań w sklepie {{region}}",
-    "switch": "Zmień Region",
+    "confirm": "Czy to jest poprawne?",
+    "stay": "Pozostań w sklepie {{region}}",
+    "switch": "Zmień region",
     "us": "Stany Zjednoczone",
-    "eu": "Unia Europejska"
+    "eu": "Unia Europejska",
+    "uk": "Wielka Brytania",
+    "ca": "Kanada"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Zweryfikowany",
+      "description": "Wszyscy dostawcy przechodzą weryfikację certyfikatu analizy przez stronę trzecią"
+    },
+    "region_filtered": {
+      "title": "Filtrowanie regionalne",
+      "description": "Automatycznie filtrowane według Twojego regionu dla odpowiedniego dostępu do dostawców"
+    },
+    "purity_tested": {
+      "title": "Czystość przetestowana",
+      "description": "Testy HPLC i MS potwierdzają tożsamość i czystość peptydów"
+    },
+    "anonymous_access": {
+      "title": "Anonimowy dostęp",
+      "description": "Nie jest wymagane konto. Twoja prywatność badawcza jest chroniona"
+    }
   },
   "vendors": {
-    "title": "Zweryfikowani Dostawcy",
-    "subtitle": "Źródła peptydów z testami zewnętrznymi i zweryfikowanymi COA",
+    "title": "Zweryfikowani dostawcy",
+    "subtitle": "Przetestowane przez strony trzecie i zweryfikowane źródła peptydów z COA",
     "name": "Dostawca",
     "region": "Region",
     "purity": "Czystość",
-    "coa": "COA Zweryfikowane",
+    "coa": "COA Zweryfikowany",
     "price": "Cena/mg",
     "status": "Status",
-    "action": "Odwiedź Stronę",
+    "action": "Odwiedź stronę",
     "verified": "Zweryfikowany",
     "warning": "Ostrzeżenie",
-    "scam": "Oszustwo"
+    "scam": "Oszustwo",
+    "warehouse": "Magazyn",
+    "ships_to": "Wysyła do",
+    "no_vendors_title": "Brak dostępnych dostawców",
+    "no_vendors_description": "Obecnie żaden dostawca nie wysyła na rynek {{region}} dla tego produktu."
   },
   "products": {
-    "title": "Peptydy Badawcze",
+    "title": "Peptydy badawcze",
     "subtitle": "Szczegółowe informacje molekularne i listy zweryfikowanych dostawców"
   },
   "calculator": {
-    "title": "Kalkulator Rekonstytucji",
-    "peptideAmount": "Ilość Peptydu",
-    "waterVolume": "Woda Bakteriostatyczna",
+    "title": "Kalkulator rekonstytucji peptydów",
+    "peptideAmount": "Ilość peptydu",
+    "waterVolume": "Woda bakteriostatyczna",
     "result": "Stężenie",
-    "perUnit": "na 0.1ml (10 jednostek)"
+    "perUnit": "na 0,1ml (10 jednostek)"
   },
   "compliance": {
-    "warning": "WYŁĄCZNIE DO BADAŃ LABORATORYJNYCH. NIE DO SPOŻYCIA. WYMAGANE 18+ LAT."
+    "warning": "TYLKO DO BADAŃ LABORATORYJNYCH. NIE DO SPOŻYCIA PRZEZ LUDZI. WYMAGANE 18+."
+  },
+  "faq": {
+    "title": "Częste pytania dotyczące weryfikacji badań",
+    "subtitle": "Zrozumienie naszej platformy, zgodności i standardów weryfikacji.",
+    "still_questions": "Nadal masz pytania? Sprawdź nasze centrum wiedzy, aby uzyskać szczegółowe przewodniki.",
+    "visit_hub": "Odwiedź centrum wiedzy",
+    "q1": {
+      "question": "Czy ChemVerify sprzedaje peptydy bezpośrednio?",
+      "answer": "Nie. ChemVerify to niezależna platforma agregacji danych i audytu. Nie produkujemy, nie przechowujemy ani nie sprzedajemy żadnych związków chemicznych. Przeglądamy i wymieniamy dostawców zewnętrznych, którzy spełniają nasze rygorystyczne standardy testowania."
+    },
+    "q2": {
+      "question": "Czy te produkty są bezpieczne do spożycia przez ludzi?",
+      "answer": "Absolutnie nie. Wszystkie wymienione związki są przeznaczone wyłącznie do celów badawczych i rozwojowych w laboratorium (badania in vitro lub na modelach zwierzęcych). Nie są zatwierdzone przez FDA do użytku przez ludzi, a wszelkie wzmianki o użytku osobistym są surowo zabronione na tej platformie."
+    },
+    "q3": {
+      "question": "Jak działa Wasz proces weryfikacji?",
+      "answer": "Kontrolujemy dostawców na podstawie ich przejrzystości. Aby być wymienionym jako 'Zweryfikowany', dostawca musi dostarczyć aktualne Certyfikaty Analizy (COA) z renomowanych laboratoriów zewnętrznych (takich jak Janoshik lub MZ Biolabs), które pasują do konkretnych numerów partii."
+    },
+    "q4": {
+      "question": "Mieszkam w UE/Europie. Czy mogę bezpiecznie zamawiać?",
+      "answer": "Przepisy celne różnią się w zależności od kraju. Zdecydowanie zalecamy korzystanie z naszego 'Filtra regionu' (przełącznik na górze strony), aby wybrać 'Rynek UE'. To filtruje bazę danych, aby pokazać tylko dostawców wysyłających z Unii Europejskiej, znacznie zmniejszając ryzyko celne."
+    },
+    "q5": {
+      "question": "Co to jest 'numer partii'?",
+      "answer": "Numer partii to unikalny kod wydrukowany na fiolce, który identyfikuje konkretną serię produkcyjną. Możesz użyć naszego narzędzia 'Szukaj partii', aby sprawdzić, czy konkretna fiolka, którą posiadasz, została przetestowana i zobaczyć odpowiadający jej raport laboratoryjny."
+    },
+    "q6": {
+      "question": "Dlaczego poziomy czystości się różnią (np. 98% vs 99%)?",
+      "answer": "W syntezie chemicznej mogą pozostać niewielkie produkty uboczne lub wilgoć. Czystość 98%+ jest ogólnie uważana za 'Złoty Standard' dla peptydów badawczych. Niższa czystość może wpływać na dokładność danych badawczych."
+    }
   },
   "footer": {
-    "privacy": "Polityka Prywatności",
-    "legal": "Informacje Prawne",
-    "disclaimer": "Zastrzeżenia",
-    "sitemap": "Mapa Strony"
+    "privacy": "Polityka prywatności",
+    "legal": "Informacje prawne",
+    "disclaimer": "Zastrzeżenie",
+    "sitemap": "Mapa strony",
+    "description": "Ostateczna platforma weryfikacyjna dla źródeł peptydów badawczych. Zweryfikowana przez COA stron trzecich i zaufana przez laboratoria na całym świecie.",
+    "quick_links": "Szybkie linki",
+    "testing_partners": "Partnerzy testujący stron trzecich",
+    "copyright": "© {{year}} ChemVerify. Wszelkie prawa zastrzeżone. Wyłącznie do celów badawczych."
   }
 }

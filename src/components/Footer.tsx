@@ -18,14 +18,13 @@ export const Footer = () => {
               <span className="font-mono text-lg font-bold text-foreground">ChemVerify</span>
             </Link>
             <p className="mt-4 max-w-md text-sm text-muted-foreground">
-              The definitive verification platform for research peptide sources. Third-party COA
-              verified and trusted by laboratories worldwide.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 font-semibold text-foreground">Quick Links</h4>
+            <h4 className="mb-4 font-semibold text-foreground">{t('footer.quick_links')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/vendors" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -71,7 +70,7 @@ export const Footer = () => {
         {/* Lab Partners Section */}
         <div className="mt-12 border-t border-border pt-8">
           <p className="mb-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Third-Party Testing Partners
+            {t('footer.testing_partners')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8">
             {/* Janoshik Analytics */}
@@ -92,7 +91,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-8 border-t border-border pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} ChemVerify. All rights reserved. For research purposes only.
+          {t('footer.copyright', { year: new Date().getFullYear() })}
         </div>
       </div>
     </footer>

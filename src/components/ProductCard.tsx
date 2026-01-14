@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
+  const { t } = useTranslation();
+
   return (
     <Card className="group border-border transition-all hover:border-primary/50 hover:shadow-lg">
       <CardHeader className="pb-3">
@@ -39,7 +42,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs">Lab Tested & Verified</p>
+              <p className="text-xs">{t('common.lab_tested')}</p>
             </TooltipContent>
           </Tooltip>
         </CardTitle>
@@ -48,18 +51,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <CardContent className="space-y-4">
         <div className="space-y-2 rounded-lg bg-muted/50 p-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">CAS:</span>
+            <span className="text-muted-foreground">{t('common.cas')}</span>
             <span className="font-mono">{product.casNumber}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Molar Mass:</span>
+            <span className="text-muted-foreground">{t('common.molar_mass')}</span>
             <span className="font-mono text-xs">{product.molarMass}</span>
           </div>
         </div>
         <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
         <Link to={`/product/${product.id}`}>
           <Button className="w-full gap-2 transition-all group-hover:gap-3">
-            View Details
+            {t('common.view_details')}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
