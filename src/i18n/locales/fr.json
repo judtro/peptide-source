@@ -144,6 +144,83 @@
     "description": "La plateforme de vérification définitive pour les sources de peptides de recherche. Vérifiée COA par des tiers et approuvée par les laboratoires du monde entier.",
     "quick_links": "Liens rapides",
     "testing_partners": "Partenaires de test tiers",
-    "copyright": "© {{year}} ChemVerify. Tous droits réservés. À des fins de recherche uniquement."
+    "copyright": "© {{year}} ChemVerify. Tous droits réservés. À des fins de recherche uniquement.",
+    "for_vendors": "Pour les fournisseurs"
+  },
+  "partners": {
+    "hero": {
+      "badge": "PROGRAMME PARTENAIRE B2B",
+      "title": "Transformez la transparence en revenus.",
+      "subtitle": "Rejoignez le réseau vérifié. Plus de 100 000 chercheurs mensuels utilisent ChemVerify pour choisir leurs fournisseurs.",
+      "cta": "Postuler pour la vérification"
+    },
+    "stats": {
+      "researchers": "Chercheurs mensuels",
+      "conversion": "Conversion supérieure",
+      "domain": "Autorité de domaine"
+    },
+    "problem": {
+      "title": "La confiance est la seule monnaie",
+      "subtitle": "Dans un marché non réglementé, si vous n'êtes pas vérifié, vous êtes invisible.",
+      "unverified": {
+        "title": "Fournisseur générique non vérifié",
+        "subtitle": "Pas de validation tierce",
+        "point1": "Zéro trafic organique des plateformes de vérification",
+        "point2": "Confiance client à reconstruire à chaque vente",
+        "point3": "Aucune différenciation des opérations frauduleuses"
+      },
+      "verified": {
+        "title": "Partenaire ChemVerify",
+        "badge": "VÉRIFIÉ",
+        "point1": "Présent dans les recherches d'acheteurs à forte intention",
+        "point2": "Crédibilité instantanée avec le badge d'audit",
+        "point3": "Backlinks directs renforçant l'autorité SEO"
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi les partenaires choisissent ChemVerify",
+      "traffic": {
+        "title": "Trafic direct à forte intention",
+        "description": "Les acheteurs recherchant activement des niveaux de pureté spécifiques (99%+) et des COA vérifiés atterrissent directement sur votre listing."
+      },
+      "badge": {
+        "title": "Autorité du badge",
+        "description": "Affichez le sceau 'ChemVerify Audit' sur votre propre page de paiement. Signal de confiance instantané pour les clients hésitants."
+      },
+      "seo": {
+        "title": "Boost SEO",
+        "description": "Des backlinks do-follow de notre domaine à haute autorité (DA 45+) améliorent directement vos classements Google."
+      }
+    },
+    "process": {
+      "title": "Vérification simple en 3 étapes",
+      "subtitle": "De la candidature au listing en direct en moins de 7 jours.",
+      "step1": {
+        "title": "Soumettre les COA",
+        "description": "Téléchargez vos derniers certificats d'analyse de Janoshik, MZ Biolabs ou laboratoires équivalents."
+      },
+      "step2": {
+        "title": "Vérification croisée indépendante",
+        "description": "Notre équipe vérifie les numéros de lot directement avec le laboratoire de test via API."
+      },
+      "step3": {
+        "title": "Listing en direct",
+        "description": "Votre profil vérifié apparaît dans les résultats de recherche régionaux avec le badge d'audit officiel."
+      }
+    },
+    "form": {
+      "title": "Postuler pour la vérification",
+      "subtitle": "Rejoignez le réseau de confiance des chercheurs professionnels du monde entier.",
+      "name_label": "Nom du contact",
+      "name_placeholder": "Jean Dupont",
+      "url_label": "Site web de l'entreprise",
+      "url_placeholder": "https://votreentreprise.fr",
+      "telegram_label": "ID Telegram (optionnel)",
+      "telegram_placeholder": "@votrehandle",
+      "submit": "Soumettre la candidature",
+      "success": "Candidature soumise! Nous vous contacterons dans les 48 heures.",
+      "error_required": "Veuillez remplir tous les champs obligatoires.",
+      "privacy_note": "Nous ne partagerons jamais vos informations. Réponse sous 48 heures."
+    }
   }
 }

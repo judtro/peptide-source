@@ -144,6 +144,83 @@
     "description": "La plataforma de verificación definitiva para fuentes de péptidos de investigación. Verificada por COA de terceros y confiada por laboratorios en todo el mundo.",
     "quick_links": "Enlaces rápidos",
     "testing_partners": "Socios de pruebas de terceros",
-    "copyright": "© {{year}} ChemVerify. Todos los derechos reservados. Solo para fines de investigación."
+    "copyright": "© {{year}} ChemVerify. Todos los derechos reservados. Solo para fines de investigación.",
+    "for_vendors": "Para proveedores"
+  },
+  "partners": {
+    "hero": {
+      "badge": "PROGRAMA DE SOCIOS B2B",
+      "title": "Convierte la transparencia en ingresos.",
+      "subtitle": "Únete a la red verificada. Más de 100.000 investigadores mensuales usan ChemVerify para elegir sus proveedores.",
+      "cta": "Solicitar verificación"
+    },
+    "stats": {
+      "researchers": "Investigadores mensuales",
+      "conversion": "Mayor conversión",
+      "domain": "Autoridad de dominio"
+    },
+    "problem": {
+      "title": "La confianza es la única moneda",
+      "subtitle": "En un mercado no regulado, si no estás verificado, eres invisible.",
+      "unverified": {
+        "title": "Proveedor genérico no verificado",
+        "subtitle": "Sin validación de terceros",
+        "point1": "Cero tráfico orgánico de plataformas de verificación",
+        "point2": "Confianza del cliente construida desde cero en cada venta",
+        "point3": "Sin diferenciación de operaciones fraudulentas"
+      },
+      "verified": {
+        "title": "Socio ChemVerify",
+        "badge": "VERIFICADO",
+        "point1": "Destacado en búsquedas de compradores de alta intención",
+        "point2": "Credibilidad instantánea con insignia de auditoría",
+        "point3": "Backlinks directos impulsando la autoridad SEO"
+      }
+    },
+    "benefits": {
+      "title": "Por qué los socios eligen ChemVerify",
+      "traffic": {
+        "title": "Tráfico directo de alta intención",
+        "description": "Compradores que buscan activamente niveles de pureza específicos (99%+) y COA verificados llegan directamente a tu listado."
+      },
+      "badge": {
+        "title": "Autoridad de la insignia",
+        "description": "Muestra el sello 'ChemVerify Audit' en tu propio checkout. Señal de confianza instantánea para clientes indecisos."
+      },
+      "seo": {
+        "title": "Impulso SEO",
+        "description": "Backlinks do-follow de nuestro dominio de alta autoridad (DA 45+) mejoran directamente tus rankings en Google."
+      }
+    },
+    "process": {
+      "title": "Verificación simple en 3 pasos",
+      "subtitle": "De la solicitud al listado en vivo en menos de 7 días.",
+      "step1": {
+        "title": "Enviar COAs",
+        "description": "Sube tus últimos Certificados de Análisis de Janoshik, MZ Biolabs o laboratorios equivalentes."
+      },
+      "step2": {
+        "title": "Verificación cruzada independiente",
+        "description": "Nuestro equipo verifica los números de lote directamente con el laboratorio de pruebas vía API."
+      },
+      "step3": {
+        "title": "Listado en vivo",
+        "description": "Tu perfil verificado aparece en los resultados de búsqueda regionales con la insignia de auditoría oficial."
+      }
+    },
+    "form": {
+      "title": "Solicitar verificación",
+      "subtitle": "Únete a la red confiada por investigadores profesionales en todo el mundo.",
+      "name_label": "Nombre de contacto",
+      "name_placeholder": "Juan García",
+      "url_label": "Sitio web de la empresa",
+      "url_placeholder": "https://tuempresa.com",
+      "telegram_label": "ID de Telegram (opcional)",
+      "telegram_placeholder": "@tuhandle",
+      "submit": "Enviar solicitud",
+      "success": "¡Solicitud enviada! Nos pondremos en contacto en 48 horas.",
+      "error_required": "Por favor completa todos los campos requeridos.",
+      "privacy_note": "Nunca compartiremos tu información. Respuesta en 48 horas."
+    }
   }
 }

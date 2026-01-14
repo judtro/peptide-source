@@ -144,6 +144,83 @@
     "description": "Die definitive Verifizierungsplattform für Forschungspeptidquellen. Drittanbieter-COA-verifiziert und weltweit von Laboratorien vertraut.",
     "quick_links": "Schnelllinks",
     "testing_partners": "Drittanbieter-Testpartner",
-    "copyright": "© {{year}} ChemVerify. Alle Rechte vorbehalten. Nur für Forschungszwecke."
+    "copyright": "© {{year}} ChemVerify. Alle Rechte vorbehalten. Nur für Forschungszwecke.",
+    "for_vendors": "Für Anbieter"
+  },
+  "partners": {
+    "hero": {
+      "badge": "B2B PARTNERPROGRAMM",
+      "title": "Verwandeln Sie Transparenz in Umsatz.",
+      "subtitle": "Treten Sie dem verifizierten Netzwerk bei. Über 100.000 monatliche Forscher nutzen ChemVerify zur Auswahl ihrer Lieferanten.",
+      "cta": "Verifizierung beantragen"
+    },
+    "stats": {
+      "researchers": "Monatliche Forscher",
+      "conversion": "Höhere Konversion",
+      "domain": "Domain-Autorität"
+    },
+    "problem": {
+      "title": "Vertrauen ist die einzige Währung",
+      "subtitle": "In einem unregulierten Markt sind Sie unsichtbar, wenn Sie nicht verifiziert sind.",
+      "unverified": {
+        "title": "Generischer nicht verifizierter Anbieter",
+        "subtitle": "Keine Drittanbieter-Validierung",
+        "point1": "Kein organischer Traffic von Verifizierungsplattformen",
+        "point2": "Kundenvertrauen muss bei jedem Verkauf neu aufgebaut werden",
+        "point3": "Keine Differenzierung von Betrugsoperationen"
+      },
+      "verified": {
+        "title": "ChemVerify Partner",
+        "badge": "VERIFIZIERT",
+        "point1": "Featured in Käufersuchen mit hoher Kaufabsicht",
+        "point2": "Sofortige Glaubwürdigkeit mit Audit-Abzeichen",
+        "point3": "Direkte Backlinks steigern SEO-Autorität"
+      }
+    },
+    "benefits": {
+      "title": "Warum Partner ChemVerify wählen",
+      "traffic": {
+        "title": "Direkter High-Intent Traffic",
+        "description": "Käufer, die aktiv nach bestimmten Reinheitsgraden (99%+) und verifizierten COAs suchen, landen direkt auf Ihrem Listing."
+      },
+      "badge": {
+        "title": "Abzeichen-Autorität",
+        "description": "Zeigen Sie das 'ChemVerify Audit'-Siegel auf Ihrer eigenen Checkout-Seite. Sofortiges Vertrauenssignal für zögernde Kunden."
+      },
+      "seo": {
+        "title": "SEO-Boost",
+        "description": "Do-follow Backlinks von unserer hochautoritativen Domain (DA 45+) verbessern direkt Ihre Google-Rankings."
+      }
+    },
+    "process": {
+      "title": "Einfache 3-Schritte-Verifizierung",
+      "subtitle": "Von der Bewerbung bis zum Live-Listing in unter 7 Tagen.",
+      "step1": {
+        "title": "COAs einreichen",
+        "description": "Laden Sie Ihre neuesten Analysezertifikate von Janoshik, MZ Biolabs oder gleichwertigen Labors hoch."
+      },
+      "step2": {
+        "title": "Unabhängige Kreuzprüfung",
+        "description": "Unser Team verifiziert Chargennummern direkt mit dem Testlabor über API."
+      },
+      "step3": {
+        "title": "Listing geht live",
+        "description": "Ihr verifiziertes Profil erscheint in regionalen Suchergebnissen mit dem offiziellen Audit-Abzeichen."
+      }
+    },
+    "form": {
+      "title": "Verifizierung beantragen",
+      "subtitle": "Treten Sie dem Netzwerk bei, dem professionelle Forscher weltweit vertrauen.",
+      "name_label": "Kontaktname",
+      "name_placeholder": "Max Mustermann",
+      "url_label": "Firmenwebsite",
+      "url_placeholder": "https://ihrefirma.de",
+      "telegram_label": "Telegram ID (optional)",
+      "telegram_placeholder": "@ihrhandle",
+      "submit": "Bewerbung absenden",
+      "success": "Bewerbung eingereicht! Wir melden uns innerhalb von 48 Stunden.",
+      "error_required": "Bitte füllen Sie alle Pflichtfelder aus.",
+      "privacy_note": "Wir teilen Ihre Informationen niemals. Antwort innerhalb von 48 Stunden."
+    }
   }
 }
