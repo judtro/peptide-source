@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "vendors": "Proveedores Verificados",
+    "products": "Moléculas",
+    "verify": "Verificar Lote",
+    "calculator": "Calculadora",
+    "about": "Acerca de"
+  },
+  "hero": {
+    "title": "El Estándar Global para la Verificación de Péptidos",
+    "subtitle": "Auditorías independientes, datos HPLC y transparencia de origen para investigadores profesionales.",
+    "cta": "Ver Proveedores Verificados",
+    "secondary": "Explorar Productos"
+  },
+  "region": {
+    "detected": "Detectamos que estás en",
+    "confirm": "¿Es correcto?",
+    "stay": "Quedarse en tienda {{region}}",
+    "switch": "Cambiar Región",
+    "us": "Estados Unidos",
+    "eu": "Unión Europea"
+  },
+  "vendors": {
+    "title": "Proveedores Verificados",
+    "subtitle": "Fuentes de péptidos verificadas con COA y pruebas de terceros",
+    "name": "Proveedor",
+    "region": "Región",
+    "purity": "Pureza",
+    "coa": "COA Verificado",
+    "price": "Precio/mg",
+    "status": "Estado",
+    "action": "Visitar Sitio",
+    "verified": "Verificado",
+    "warning": "Advertencia",
+    "scam": "Estafa"
+  },
+  "products": {
+    "title": "Péptidos de Investigación",
+    "subtitle": "Información molecular detallada y listados de proveedores verificados"
+  },
+  "calculator": {
+    "title": "Calculadora de Reconstitución",
+    "peptideAmount": "Cantidad de Péptido",
+    "waterVolume": "Agua Bacteriostática",
+    "result": "Concentración",
+    "perUnit": "por 0.1ml (10 unidades)"
+  },
+  "compliance": {
+    "warning": "SOLO PARA USO EN INVESTIGACIÓN DE LABORATORIO. NO PARA CONSUMO HUMANO. DEBE SER MAYOR DE 18 AÑOS."
+  },
+  "footer": {
+    "privacy": "Política de Privacidad",
+    "legal": "Aviso Legal",
+    "disclaimer": "Descargo de Responsabilidad",
+    "sitemap": "Mapa del Sitio"
+  }
+}

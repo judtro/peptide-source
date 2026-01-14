@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Strona główna",
+    "vendors": "Zweryfikowani Dostawcy",
+    "products": "Molekuły",
+    "verify": "Zweryfikuj Partię",
+    "calculator": "Kalkulator",
+    "about": "O nas"
+  },
+  "hero": {
+    "title": "Światowy Standard Weryfikacji Peptydów",
+    "subtitle": "Niezależne audyty, dane HPLC i przejrzystość źródeł dla profesjonalnych badaczy.",
+    "cta": "Zobacz Zweryfikowanych Dostawców",
+    "secondary": "Przeglądaj Produkty"
+  },
+  "region": {
+    "detected": "Wykryliśmy, że jesteś z",
+    "confirm": "Czy to prawda?",
+    "stay": "Zostań w sklepie {{region}}",
+    "switch": "Zmień Region",
+    "us": "Stany Zjednoczone",
+    "eu": "Unia Europejska"
+  },
+  "vendors": {
+    "title": "Zweryfikowani Dostawcy",
+    "subtitle": "Źródła peptydów z testami zewnętrznymi i zweryfikowanymi COA",
+    "name": "Dostawca",
+    "region": "Region",
+    "purity": "Czystość",
+    "coa": "COA Zweryfikowane",
+    "price": "Cena/mg",
+    "status": "Status",
+    "action": "Odwiedź Stronę",
+    "verified": "Zweryfikowany",
+    "warning": "Ostrzeżenie",
+    "scam": "Oszustwo"
+  },
+  "products": {
+    "title": "Peptydy Badawcze",
+    "subtitle": "Szczegółowe informacje molekularne i listy zweryfikowanych dostawców"
+  },
+  "calculator": {
+    "title": "Kalkulator Rekonstytucji",
+    "peptideAmount": "Ilość Peptydu",
+    "waterVolume": "Woda Bakteriostatyczna",
+    "result": "Stężenie",
+    "perUnit": "na 0.1ml (10 jednostek)"
+  },
+  "compliance": {
+    "warning": "WYŁĄCZNIE DO BADAŃ LABORATORYJNYCH. NIE DO SPOŻYCIA. WYMAGANE 18+ LAT."
+  },
+  "footer": {
+    "privacy": "Polityka Prywatności",
+    "legal": "Informacje Prawne",
+    "disclaimer": "Zastrzeżenia",
+    "sitemap": "Mapa Strony"
+  }
+}

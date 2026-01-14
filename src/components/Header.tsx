@@ -121,14 +121,20 @@ export const Header = () => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                  English
+                <DropdownMenuItem onClick={() => changeLanguage('en')} className="gap-2">
+                  <span className="text-lg">🇬🇧</span> English
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => changeLanguage('de')}>
-                  Deutsch
+                <DropdownMenuItem onClick={() => changeLanguage('de')} className="gap-2">
+                  <span className="text-lg">🇩🇪</span> Deutsch
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => changeLanguage('fr')}>
-                  Français
+                <DropdownMenuItem onClick={() => changeLanguage('fr')} className="gap-2">
+                  <span className="text-lg">🇫🇷</span> Français
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage('es')} className="gap-2">
+                  <span className="text-lg">🇪🇸</span> Español
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage('pl')} className="gap-2">
+                  <span className="text-lg">🇵🇱</span> Polski
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
