@@ -65,12 +65,7 @@ export const Header = () => {
   return (
     <>
       {/* ===== TOP BAR: Utility Layer (Dark) ===== */}
-      <div 
-        className={cn(
-          "sticky top-[36px] z-50 h-10 bg-slate-900 transition-all duration-300",
-          isScrolled && "h-0 overflow-hidden opacity-0"
-        )}
-      >
+      <div className="sticky top-[36px] z-50 h-10 bg-slate-900">
         <div className="container mx-auto flex h-full items-center justify-between px-4">
           {/* Left: Professional Research Text */}
           <span className="text-xs text-slate-300">
@@ -139,12 +134,7 @@ export const Header = () => {
       </div>
 
       {/* ===== MAIN NAVBAR: Clean Navigation (Light/Glassmorphism) ===== */}
-      <header 
-        className={cn(
-          "sticky z-40 border-b border-border bg-card/95 backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-card/90",
-          isScrolled ? "top-[36px]" : "top-[76px]"
-        )}
-      >
+      <header className="sticky top-[76px] z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <nav className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Left: Logo */}
           <Link to="/" className="flex items-center" aria-label="ChemVerify Home">
