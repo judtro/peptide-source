@@ -30,7 +30,6 @@ interface CommandSearchProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-// Simple fuzzy search: checks if query letters appear in order in the target
 const fuzzyMatch = (query: string, target: string): boolean => {
   const normalizedQuery = query.toLowerCase().trim();
   const normalizedTarget = target.toLowerCase();
@@ -38,7 +37,6 @@ const fuzzyMatch = (query: string, target: string): boolean => {
   if (!normalizedQuery) return true;
   if (normalizedTarget.includes(normalizedQuery)) return true;
   
-  // Fuzzy: check if all characters appear in order
   let queryIndex = 0;
   for (let i = 0; i < normalizedTarget.length && queryIndex < normalizedQuery.length; i++) {
     if (normalizedTarget[i] === normalizedQuery[queryIndex]) {
@@ -48,17 +46,15 @@ const fuzzyMatch = (query: string, target: string): boolean => {
   return queryIndex === normalizedQuery.length;
 };
 
-// Calculate match score for sorting (higher = better match)
 const getMatchScore = (query: string, target: string): number => {
   const normalizedQuery = query.toLowerCase().trim();
   const normalizedTarget = target.toLowerCase();
   
   if (!normalizedQuery) return 0;
-  if (normalizedTarget === normalizedQuery) return 100; // Exact match
-  if (normalizedTarget.startsWith(normalizedQuery)) return 80; // Starts with
-  if (normalizedTarget.includes(normalizedQuery)) return 60; // Contains
+  if (normalizedTarget === normalizedQuery) return 100;
+  if (normalizedTarget.startsWith(normalizedQuery)) return 80;
+  if (normalizedTarget.includes(normalizedQuery)) return 60;
   
-  // Fuzzy match score
   let matchedChars = 0;
   let queryIndex = 0;
   for (let i = 0; i < normalizedTarget.length && queryIndex < normalizedQuery.length; i++) {
@@ -78,7 +74,6 @@ export const CommandSearch = ({ open, onOpenChange }: CommandSearchProps) => {
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
 
-  // Global keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -91,35 +86,23 @@ export const CommandSearch = ({ open, onOpenChange }: CommandSearchProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, setIsOpen]);
 
-  // Reset query when dialog closes
   useEffect(() => {
     if (!isOpen) {
       setQuery('');
     }
   }, [isOpen]);
 
-  // Filter and sort results
   const filteredProducts = useMemo(() => {
     if (!query.trim()) return products.slice(0, 5);
     
     return products
       .filter(p => 
         fuzzyMatch(query, p.name) || 
-        fuzzyMatch(query, p.fullName) || 
-        fuzzyMatch(query, p.casNumber) ||
         fuzzyMatch(query, p.category)
       )
       .sort((a, b) => {
-        const scoreA = Math.max(
-          getMatchScore(query, a.name),
-          getMatchScore(query, a.fullName),
-          getMatchScore(query, a.casNumber)
-        );
-        const scoreB = Math.max(
-          getMatchScore(query, b.name),
-          getMatchScore(query, b.fullName),
-          getMatchScore(query, b.casNumber)
-        );
+        const scoreA = Math.max(getMatchScore(query, a.name), getMatchScore(query, a.category));
+        const scoreB = Math.max(getMatchScore(query, b.name), getMatchScore(query, b.category));
         return scoreB - scoreA;
       })
       .slice(0, 5);
@@ -233,11 +216,11 @@ export const CommandSearch = ({ open, onOpenChange }: CommandSearchProps) => {
                 <div className="flex flex-1 flex-col">
                   <span className="font-medium">{product.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {product.casNumber} • {product.category}
+                    {product.molecularWeight} • {product.category}
                   </span>
                 </div>
                 <Badge variant="secondary" className="text-xs">
-                  {product.researchAreas[0]}
+                  {product.category}
                 </Badge>
               </CommandItem>
             ))}
@@ -333,7 +316,6 @@ export const CommandSearch = ({ open, onOpenChange }: CommandSearchProps) => {
   );
 };
 
-// Export a trigger button component for the header
 export const CommandSearchTrigger = ({ onClick }: { onClick: () => void }) => {
   const [isMac, setIsMac] = useState(false);
 
@@ -359,7 +341,6 @@ export const CommandSearchTrigger = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-// Mobile trigger
 export const CommandSearchTriggerMobile = ({ onClick }: { onClick: () => void }) => {
   return (
     <Button

@@ -7,50 +7,26 @@
 // PRODUCT TYPES
 // ============================================
 
-export interface Study {
-  title: string;
-  url: string;
-  year: string;
-}
-
-export type ResearchArea =
-  | 'Tissue Regeneration'
-  | 'Metabolic Research'
-  | 'Hormonal Regulation'
-  | 'Dermal & Cosmetic Research'
-  | 'Cognitive Studies'
-  | 'Peptide Signaling';
-
 export interface Product {
   id: string;
   name: string;
-  fullName: string;
-  scientificName: string;
-  casNumber: string;
-  molarMass: string;
-  molecularFormula: string;
-  sequence: string;
+  slug: string;
   category: string;
-  researchAreas: ResearchArea[];
   description: string;
-  mechanismOfAction: string;
-  researchFindings: string[];
-  researchOutcomes: string[];
-  adverseEffects: string[];
-  studies: Study[];
-  storageInstructions: {
-    lyophilized: string;
-    reconstituted: string;
-  };
-  researchApplications: string[];
-  videoUrl?: string; // YouTube video ID for educational mechanism content
+  molecularWeight: string;
+  purityStandard: string;
+  sequence: string;
+  synonyms: string[];
+  halfLife: string;
+  isPopular: boolean;
+  videoUrl?: string;
 }
 
 // ============================================
 // VENDOR TYPES
 // ============================================
 
-export type VendorStatus = 'verified' | 'warning' | 'scam';
+export type VendorStatus = 'verified' | 'warning' | 'pending' | 'scam';
 export type Region = 'US' | 'EU' | 'UK' | 'CA';
 
 export interface Vendor {
