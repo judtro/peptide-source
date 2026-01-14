@@ -63,6 +63,11 @@ export const Footer = () => {
                   {t('footer.disclaimer')}
                 </Link>
               </li>
+              <li>
+                <Link to="/partners" className="text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {t('footer.for_vendors')}
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

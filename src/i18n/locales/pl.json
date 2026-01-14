@@ -144,6 +144,83 @@
     "description": "Ostateczna platforma weryfikacyjna dla źródeł peptydów badawczych. Zweryfikowana przez COA stron trzecich i zaufana przez laboratoria na całym świecie.",
     "quick_links": "Szybkie linki",
     "testing_partners": "Partnerzy testujący stron trzecich",
-    "copyright": "© {{year}} ChemVerify. Wszelkie prawa zastrzeżone. Wyłącznie do celów badawczych."
+    "copyright": "© {{year}} ChemVerify. Wszelkie prawa zastrzeżone. Wyłącznie do celów badawczych.",
+    "for_vendors": "Dla dostawców"
+  },
+  "partners": {
+    "hero": {
+      "badge": "PROGRAM PARTNERSKI B2B",
+      "title": "Zamień przejrzystość w przychody.",
+      "subtitle": "Dołącz do zweryfikowanej sieci. Ponad 100 000 miesięcznych badaczy korzysta z ChemVerify, aby wybrać swoich dostawców.",
+      "cta": "Złóż wniosek o weryfikację"
+    },
+    "stats": {
+      "researchers": "Miesięczni badacze",
+      "conversion": "Wyższa konwersja",
+      "domain": "Autorytet domeny"
+    },
+    "problem": {
+      "title": "Zaufanie to jedyna waluta",
+      "subtitle": "Na nieregulowanym rynku, jeśli nie jesteś zweryfikowany, jesteś niewidoczny.",
+      "unverified": {
+        "title": "Ogólny niezweryfikowany dostawca",
+        "subtitle": "Brak walidacji przez stronę trzecią",
+        "point1": "Zero organicznego ruchu z platform weryfikacyjnych",
+        "point2": "Zaufanie klienta budowane od zera przy każdej sprzedaży",
+        "point3": "Brak różnicowania od operacji oszukańczych"
+      },
+      "verified": {
+        "title": "Partner ChemVerify",
+        "badge": "ZWERYFIKOWANY",
+        "point1": "Wyróżniony w wyszukiwaniach kupujących o wysokiej intencji",
+        "point2": "Natychmiastowa wiarygodność dzięki odznace audytu",
+        "point3": "Bezpośrednie backlinki wzmacniające autorytet SEO"
+      }
+    },
+    "benefits": {
+      "title": "Dlaczego partnerzy wybierają ChemVerify",
+      "traffic": {
+        "title": "Bezpośredni ruch o wysokiej intencji",
+        "description": "Kupujący aktywnie szukający określonych poziomów czystości (99%+) i zweryfikowanych COA trafiają bezpośrednio na Twoją listę."
+      },
+      "badge": {
+        "title": "Autorytet odznaki",
+        "description": "Wyświetlaj pieczęć 'ChemVerify Audit' na własnej stronie kasy. Natychmiastowy sygnał zaufania dla niezdecydowanych klientów."
+      },
+      "seo": {
+        "title": "Wzrost SEO",
+        "description": "Backlinki do-follow z naszej domeny o wysokim autorytecie (DA 45+) bezpośrednio poprawiają Twoje rankingi w Google."
+      }
+    },
+    "process": {
+      "title": "Prosta 3-etapowa weryfikacja",
+      "subtitle": "Od aplikacji do aktywnego wpisu w mniej niż 7 dni.",
+      "step1": {
+        "title": "Prześlij COA",
+        "description": "Prześlij swoje najnowsze Certyfikaty Analizy z Janoshik, MZ Biolabs lub równoważnych laboratoriów."
+      },
+      "step2": {
+        "title": "Niezależna weryfikacja krzyżowa",
+        "description": "Nasz zespół weryfikuje numery partii bezpośrednio z laboratorium testowym przez API."
+      },
+      "step3": {
+        "title": "Wpis aktywny",
+        "description": "Twój zweryfikowany profil pojawia się w regionalnych wynikach wyszukiwania z oficjalną odznaką audytu."
+      }
+    },
+    "form": {
+      "title": "Złóż wniosek o weryfikację",
+      "subtitle": "Dołącz do sieci zaufanej przez profesjonalnych badaczy na całym świecie.",
+      "name_label": "Imię i nazwisko kontaktu",
+      "name_placeholder": "Jan Kowalski",
+      "url_label": "Strona internetowa firmy",
+      "url_placeholder": "https://twojafirma.pl",
+      "telegram_label": "ID Telegram (opcjonalnie)",
+      "telegram_placeholder": "@twojhandle",
+      "submit": "Wyślij wniosek",
+      "success": "Wniosek wysłany! Skontaktujemy się w ciągu 48 godzin.",
+      "error_required": "Proszę wypełnić wszystkie wymagane pola.",
+      "privacy_note": "Nigdy nie udostępnimy Twoich informacji. Odpowiedź w ciągu 48 godzin."
+    }
   }
 }
