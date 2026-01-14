@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VendorStatus } from '@/types';
 
@@ -31,6 +31,11 @@ export const StatusBadge = ({
       icon: AlertTriangle,
       label: t('vendors.warning'),
       className: 'bg-warning text-warning-foreground hover:bg-warning/90',
+    },
+    pending: {
+      icon: Clock,
+      label: t('vendors.pending_audit', 'Pending Audit'),
+      className: 'bg-muted text-muted-foreground hover:bg-muted/90',
     },
     scam: {
       icon: XCircle,

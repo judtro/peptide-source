@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/data/products';
+import { Product } from '@/types';
 import { ArrowRight, Dna, ShieldCheck } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -25,16 +25,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {product.category}
           </Badge>
         </div>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {product.researchAreas.map((area) => (
-            <Badge key={area} variant="secondary" className="text-xs">
-              {area}
-            </Badge>
-          ))}
-        </div>
         <CardTitle className="mt-3 flex items-center gap-2 text-xl font-bold">
           {product.name}
-          {/* Lab Tested Badge - Show for verified products */}
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="inline-flex items-center">
@@ -46,17 +38,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </TooltipContent>
           </Tooltip>
         </CardTitle>
-        <p className="text-sm text-muted-foreground">{product.fullName}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2 rounded-lg bg-muted/50 p-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t('common.cas')}</span>
-            <span className="font-mono">{product.casNumber}</span>
+            <span className="text-muted-foreground">{t('common.molecular_weight')}</span>
+            <span className="font-mono text-xs">{product.molecularWeight}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t('common.molar_mass')}</span>
-            <span className="font-mono text-xs">{product.molarMass}</span>
+            <span className="text-muted-foreground">{t('common.purity')}</span>
+            <span className="font-mono text-xs">{product.purityStandard}</span>
           </div>
         </div>
         <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>

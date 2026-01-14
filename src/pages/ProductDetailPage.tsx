@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
@@ -13,24 +13,15 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
   Dna,
   ArrowLeft,
-  Thermometer,
-  Snowflake,
   FlaskConical,
-  Microscope,
-  BookOpen,
-  ExternalLink,
-  ShieldAlert,
   Atom,
   ShieldCheck,
   ArrowDown,
   ArrowUp,
-  Beaker,
-  AlertTriangle,
   Play,
+  ShieldAlert,
 } from 'lucide-react';
 import { DiscountBadge } from '@/components/DiscountBadge';
-import { ArticleTooltip } from '@/components/ArticleTooltip';
-import { generateProductSchema, generateBreadcrumbSchema } from '@/components/SEOHead';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const ProductDetailPage = () => {
@@ -52,30 +43,6 @@ const ProductDetailPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Generate JSON-LD schemas for SEO
-  const jsonLdSchemas = useMemo(() => {
-    if (!product) return [];
-    
-    const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    
-    const productSchema = generateProductSchema({
-      name: product.name,
-      description: product.mechanismOfAction,
-      casNumber: product.casNumber,
-      category: product.category,
-      molecularFormula: product.molecularFormula,
-      molarMass: product.molarMass,
-    });
-
-    const breadcrumbSchema = generateBreadcrumbSchema([
-      { name: 'Home', url: siteUrl },
-      { name: 'Products', url: `${siteUrl}/products` },
-      { name: product.name, url: `${siteUrl}/product/${product.id}` },
-    ]);
-
-    return [productSchema, breadcrumbSchema];
-  }, [product]);
-
   if (!product) {
     return (
       <Layout 
@@ -95,12 +62,10 @@ const ProductDetailPage = () => {
   return (
     <Layout
       title={`${product.name} Research Data & Verified Sources | ChemVerify`}
-      description={product.mechanismOfAction.slice(0, 155)}
+      description={product.description.slice(0, 155)}
       type="product"
-      jsonLd={jsonLdSchemas}
     >
       <article className="container mx-auto max-w-7xl px-4 py-8">
-        {/* Breadcrumb Navigation */}
         <Breadcrumbs 
           items={[
             { label: 'Products', href: '/products' },
@@ -108,11 +73,9 @@ const ProductDetailPage = () => {
           ]} 
         />
 
-        {/* === HEADER: Chemical Abstract === */}
         <header className="mb-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex items-start gap-5">
-              {/* Molecule Card Placeholder */}
               <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30">
                 <Atom className="h-10 w-10 text-primary/60" />
                 <span className="mt-1 text-[10px] text-muted-foreground">2D Structure</span>
@@ -121,10 +84,9 @@ const ProductDetailPage = () => {
                 <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                   {product.name}
                 </h1>
-                <p className="mt-1 text-lg text-muted-foreground">{product.scientificName}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className="font-mono text-xs">
-                    CAS: {product.casNumber}
+                    {product.molecularWeight}
                   </Badge>
                   <Badge variant="outline" className="font-mono text-xs">
                     {product.category}
@@ -133,9 +95,7 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* Right Side: CTA + Compliance Badge */}
             <div className="flex flex-col items-start gap-3 lg:items-end">
-              {/* CTA Button */}
               <Button
                 className="gap-2"
                 size="lg"
@@ -162,9 +122,7 @@ const ProductDetailPage = () => {
         </header>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* === MAIN CONTENT === */}
           <div className="space-y-8 lg:col-span-2">
-            {/* Molecular Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -176,21 +134,19 @@ const ProductDetailPage = () => {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="rounded-lg bg-muted/50 p-4">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      CAS Number
+                      Molecular Weight
                     </p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{product.casNumber}</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{product.molecularWeight}</p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-4">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Molar Mass
+                      Purity Standard
                     </p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{product.molarMass}</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{product.purityStandard}</p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Formula</p>
-                    <p className="mt-1 font-mono text-lg font-semibold">
-                      {product.molecularFormula}
-                    </p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Half-Life</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{product.halfLife}</p>
                   </div>
                 </div>
 
@@ -206,298 +162,133 @@ const ProductDetailPage = () => {
                     </code>
                   </div>
                 </div>
+
+                {product.synonyms.length > 0 && (
+                  <>
+                    <Separator className="my-6" />
+                    <div>
+                      <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                        Also Known As
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.synonyms.map((syn, i) => (
+                          <Badge key={i} variant="secondary">{syn}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
-            {/* === MECHANISM VIDEO SECTION (Educational) === */}
             {product.videoUrl && (
               <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="h-5 w-5 text-primary" />
-                    {t('products.video_section_title')}
+                    Educational Video
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Video Player - Lecture Hall Style (16:9) */}
                   <div className="overflow-hidden rounded-lg border border-border shadow-lg">
                     <AspectRatio ratio={16 / 9}>
                       <iframe
                         src={`https://www.youtube.com/embed/${product.videoUrl}?rel=0&modestbranding=1`}
-                        title={`${product.name} - ${t('products.video_section_title')}`}
+                        title={`${product.name} - Educational Video`}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className="h-full w-full"
                       />
                     </AspectRatio>
                   </div>
-                  
-                  {/* Compliance Disclaimer */}
                   <p className="text-xs text-muted-foreground">
-                    {t('products.video_disclaimer')}
+                    Educational content for research purposes only.
                   </p>
                 </CardContent>
               </Card>
             )}
 
-            {/* === SECTION A: Mechanism & Research Findings === */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Microscope className="h-5 w-5 text-primary" />
-                  Observed Research Properties
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Mechanism of Action */}
-                <div>
-                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Mechanism of Action
-                  </h3>
-                  <p className="leading-relaxed text-foreground">{product.mechanismOfAction}</p>
-                </div>
-
-                <Separator />
-
-                {/* Research Findings */}
-                <div>
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    Key Research Findings
-                  </h3>
-                  <ul className="grid gap-3 sm:grid-cols-1">
-                    {product.researchFindings.map((finding, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-3"
-                      >
-                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                          {i + 1}
-                        </div>
-                        <p className="text-sm text-foreground">{finding}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* === SECTION B: Primary Literature === */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                  Primary Literature
+                  <Dna className="h-5 w-5 text-primary" />
+                  Description
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {product.studies.map((study, i) => (
-                    <a
-                      key={i}
-                      href={study.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-start gap-3 rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-muted/30"
-                    >
-                      <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-foreground group-hover:text-primary">
-                          {study.title}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          PubMed • {study.year}
-                        </p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-                <p className="mt-4 text-xs text-muted-foreground">
-                  * External links to PubMed/NCBI. ChemVerify is not affiliated with these
-                  publications.
-                </p>
+                <p className="leading-relaxed text-foreground">{product.description}</p>
               </CardContent>
             </Card>
 
-            {/* === RESEARCH PROFILE: Observations & Safety Analysis === */}
-            <section>
-              <div className="mb-4 flex items-center gap-3">
-                <FlaskConical className="h-6 w-6 text-primary" />
-                <h2 className="text-xl font-semibold">Research Profile: Observations & Safety Analysis</h2>
-              </div>
-              
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Column 1: Documented Research Outcomes */}
-                <Card className="border-primary/30">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-base text-primary">
-                      <Beaker className="h-4 w-4" />
-                      Documented Research Outcomes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {product.researchOutcomes.map((outcome, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <Beaker className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" />
-                          <span className="text-sm text-foreground">{outcome}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="mt-4 text-xs italic text-muted-foreground">
-                      Based on in-vitro and animal model studies.
-                    </p>
-                  </CardContent>
-                </Card>
+            <ReconstitutionCalculator />
 
-                {/* Column 2: Potential Adverse Effects & Safety Risks */}
-                <Card className="border-amber-500/30">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-base text-amber-600 dark:text-amber-500">
-                      <AlertTriangle className="h-4 w-4" />
-                      Potential Adverse Effects & Safety Risks
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {product.adverseEffects.map((effect, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500/60" />
-                          <span className="text-sm text-foreground">{effect}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Disclaimer */}
-              <div className="mt-4 rounded-lg bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Note:</strong> This data is compiled from available clinical trials and laboratory reports. 
-                  It is provided for educational research purposes only and does not constitute medical advice or a 
-                  safety guarantee for human consumption.
-                </p>
-              </div>
-            </section>
-
-            {/* Calculator with Article Link */}
-            <div className="relative">
-              <div className="mb-2 text-sm text-muted-foreground">
-                <ArticleTooltip 
-                  articleSlug="proper-reconstitution-protocols" 
-                  tooltipText="Unsure how to mix? Learn the proper technique."
-                >
-                  Need help with reconstitution?
-                </ArticleTooltip>
-              </div>
-              <ReconstitutionCalculator />
-            </div>
-
-            {/* === SECTION C: Verified Supply Chain === */}
             <section id="vendor-table" className="scroll-mt-32">
               <div className="mb-4 flex items-center gap-3">
                 <ShieldCheck className="h-6 w-6 text-primary" />
                 <h2 className="text-xl font-semibold">Verified Sources for {product.name}</h2>
               </div>
               <p className="mb-4 text-sm text-muted-foreground">
-                Third-party COA verified vendors that stock {product.name}. Use code CHEM10 for 10%
-                off.
+                Third-party COA verified vendors that stock {product.name}. Use code CHEM10 for 10% off.
               </p>
               <VendorTable filterByPeptide={product.id} showMarketToggle />
             </section>
           </div>
 
-          {/* === SIDEBAR === */}
           <aside className="space-y-6">
-            {/* Storage Instructions */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Thermometer className="h-4 w-4 text-primary" />
-                  Storage Instructions
-                </CardTitle>
+                <CardTitle className="text-base">Quick Facts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-lg border border-border p-3">
-                  <div className="mb-2 flex items-center gap-2">
-                    <Snowflake className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Lyophilized</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {product.storageInstructions.lyophilized}
-                  </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Category</span>
+                  <span className="font-medium">{product.category}</span>
                 </div>
-                <div className="rounded-lg border border-border p-3">
-                  <div className="mb-2 flex items-center gap-2">
-                    <FlaskConical className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Reconstituted</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {product.storageInstructions.reconstituted}
-                  </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Molecular Weight</span>
+                  <span className="font-mono">{product.molecularWeight}</span>
                 </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Purity</span>
+                  <span className="font-mono">{product.purityStandard}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Half-Life</span>
+                  <span className="font-mono">{product.halfLife}</span>
+                </div>
+                {product.isPopular && (
+                  <Badge className="w-full justify-center">Popular Research Compound</Badge>
+                )}
               </CardContent>
             </Card>
 
-            {/* Quick Reference */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Quick Reference</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Category</dt>
-                    <dd className="font-medium">{product.category}</dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">CAS Number</dt>
-                    <dd className="font-mono text-xs">{product.casNumber}</dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Molar Mass</dt>
-                    <dd className="font-mono text-xs">{product.molarMass}</dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Studies</dt>
-                    <dd className="font-medium">{product.studies.length} cited</dd>
-                  </div>
-                </dl>
-              </CardContent>
-            </Card>
-
-            {/* Research Applications */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Dna className="h-4 w-4 text-primary" />
-                  Research Applications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {product.researchApplications.map((app, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      {app}
-                    </li>
-                  ))}
-                </ul>
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+              <CardContent className="p-4 text-center">
+                <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-primary" />
+                <h3 className="mb-1 font-semibold">Verified Sources</h3>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  All vendors are third-party tested
+                </p>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    document.getElementById('vendor-table')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  View Vendors
+                </Button>
               </CardContent>
             </Card>
           </aside>
         </div>
 
-        {/* Back to Top Button */}
         {showBackToTop && (
           <Button
-            onClick={scrollToTop}
+            variant="outline"
             size="icon"
-            className="fixed bottom-20 right-6 z-50 h-12 w-12 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-            aria-label="Back to top"
+            className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+            onClick={scrollToTop}
           >
             <ArrowUp className="h-5 w-5" />
           </Button>

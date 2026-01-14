@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { findBatchById, BatchRecord, batches } from '@/data/batches';
+import { findBatchById, batches } from '@/data/batches';
+import type { BatchRecord } from '@/types';
 import {
   Search,
   ShieldCheck,
@@ -19,8 +20,10 @@ import {
   Microscope,
   QrCode,
   AlertCircle,
+  FileQuestion,
 } from 'lucide-react';
 import { z } from 'zod';
+import { Link } from 'react-router-dom';
 
 type SearchState = 'idle' | 'found' | 'not-found';
 
@@ -73,6 +76,8 @@ const BatchVerifyPage = () => {
     });
   };
 
+  const hasRecentBatches = batches.length > 0;
+
   return (
     <Layout
       title="Verify Your Batch | ChemVerify"
@@ -102,7 +107,7 @@ const BatchVerifyPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Enter batch number (e.g., BPC-004-23)"
+                  placeholder="Enter batch number (e.g., BPC-001-24)"
                   className="h-14 pl-12 pr-4 font-mono text-lg"
                   aria-label="Batch number search"
                 />
@@ -140,18 +145,9 @@ const BatchVerifyPage = () => {
             <p className="text-muted-foreground">
               Enter your batch number found on the vial label to verify its authenticity.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <Badge variant="outline" className="font-mono text-xs">
-                BPC-004-23
-              </Badge>
-              <Badge variant="outline" className="font-mono text-xs">
-                TB5-007-23
-              </Badge>
-              <Badge variant="outline" className="font-mono text-xs">
-                GHK-003-24
-              </Badge>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">Sample batch numbers</p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Batch numbers typically follow formats like: BPC-001-24, TB5-007-23
+            </p>
           </div>
         )}
 
@@ -298,42 +294,59 @@ const BatchVerifyPage = () => {
           </div>
         )}
 
-        {/* Recent Verifications */}
+        {/* Recent Verifications or Empty State */}
         <div className="mt-12">
           <h2 className="mb-4 text-lg font-semibold text-foreground">
             Recently Verified Batches
           </h2>
-          <div className="space-y-2">
-            {[...batches].slice(0, 3).map((batch) => (
-              <button
-                key={batch.batchId}
-                onClick={() => {
-                  setSearchQuery(batch.batchId);
-                  const result = findBatchById(batch.batchId);
-                  if (result) {
-                    setFoundBatch(result);
-                    setSearchState('found');
-                  }
-                }}
-                className="flex w-full items-center justify-between rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-primary/50 hover:bg-accent"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10">
-                    <ShieldCheck className="h-4 w-4 text-success" />
+          
+          {hasRecentBatches ? (
+            <div className="space-y-2">
+              {[...batches].slice(0, 3).map((batch) => (
+                <button
+                  key={batch.batchId}
+                  onClick={() => {
+                    setSearchQuery(batch.batchId);
+                    const result = findBatchById(batch.batchId);
+                    if (result) {
+                      setFoundBatch(result);
+                      setSearchState('found');
+                    }
+                  }}
+                  className="flex w-full items-center justify-between rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-primary/50 hover:bg-accent"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10">
+                      <ShieldCheck className="h-4 w-4 text-success" />
+                    </div>
+                    <div>
+                      <p className="font-mono text-sm font-medium">{batch.batchId}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {batch.productName} • {batch.vendorName}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-mono text-sm font-medium">{batch.batchId}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {batch.productName} • {batch.vendorName}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="outline" className="font-mono text-success">
-                  {batch.purityResult}%
-                </Badge>
-              </button>
-            ))}
-          </div>
+                  <Badge variant="outline" className="font-mono text-success">
+                    {batch.purityResult}%
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+              <FileQuestion className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+              <p className="font-medium text-foreground">No public audits available currently</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                We are actively collecting verified COA submissions from trusted vendors.
+              </p>
+              <Link to="/vendors">
+                <Button variant="outline" className="mt-4 gap-2">
+                  Browse Verified Vendors
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
