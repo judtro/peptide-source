@@ -1,58 +1,149 @@
 {
+  "common": {
+    "search_placeholder": "Buscar moléculas, proveedores o datos...",
+    "verify_batch_btn": "Verificar lote",
+    "view_details": "Ver detalles",
+    "visit_site": "Visitar sitio",
+    "loading": "Cargando...",
+    "no_results": "No se encontraron resultados.",
+    "view_all_products": "Ver todos los productos →",
+    "details": "Detalles",
+    "visit": "Visitar",
+    "delivers_to": "Entrega a:",
+    "purity": "Pureza:",
+    "price": "Precio:",
+    "ships_to": "Envía a:",
+    "warehouse_location": "Ubicación del almacén:",
+    "lab_tested": "Probado en laboratorio y verificado",
+    "cas": "CAS:",
+    "molar_mass": "Masa molar:",
+    "professional_research": "Solo datos de investigación profesional",
+    "discount_code": "Código de descuento:"
+  },
   "nav": {
     "home": "Inicio",
-    "vendors": "Proveedores Verificados",
-    "products": "Moléculas",
-    "verify": "Verificar Lote",
+    "vendors": "Proveedores verificados",
+    "products": "Productos",
+    "verify": "Verificar lote",
     "calculator": "Calculadora",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "knowledge_hub": "Centro de conocimiento",
+    "research_tools": "Herramientas de investigación",
+    "information": "Información",
+    "reconstitution_calculator": "Calculadora de reconstitución",
+    "batch_search": "Búsqueda de lote"
   },
   "hero": {
-    "title": "El Estándar Global para la Verificación de Péptidos",
-    "subtitle": "Auditorías independientes, datos HPLC y transparencia de origen para investigadores profesionales.",
-    "cta": "Ver Proveedores Verificados",
-    "secondary": "Explorar Productos"
+    "title": "El estándar global para la verificación de péptidos.",
+    "subtitle": "Auditorías independientes, datos HPLC y transparencia de abastecimiento para investigadores profesionales.",
+    "cta_primary": "Verificar un lote",
+    "cta_secondary": "Explorar proveedores verificados",
+    "region_label": "Región:",
+    "stats": {
+      "verified_vendors": "Proveedores verificados",
+      "max_purity": "Pureza máx.",
+      "research_peptides": "Péptidos de investigación",
+      "regions": "Regiones"
+    }
   },
   "region": {
-    "detected": "Detectamos que estás en",
+    "detected": "Detectamos que eres de",
     "confirm": "¿Es correcto?",
-    "stay": "Quedarse en tienda {{region}}",
-    "switch": "Cambiar Región",
+    "stay": "Quedarse en la tienda {{region}}",
+    "switch": "Cambiar región",
     "us": "Estados Unidos",
-    "eu": "Unión Europea"
+    "eu": "Unión Europea",
+    "uk": "Reino Unido",
+    "ca": "Canadá"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Verificado",
+      "description": "Todos los proveedores pasan por verificación de certificado de análisis de terceros"
+    },
+    "region_filtered": {
+      "title": "Filtrado por región",
+      "description": "Filtrado automáticamente por tu región para acceso relevante a proveedores"
+    },
+    "purity_tested": {
+      "title": "Pureza probada",
+      "description": "Las pruebas HPLC y MS confirman la identidad y pureza de los péptidos"
+    },
+    "anonymous_access": {
+      "title": "Acceso anónimo",
+      "description": "No se requiere cuenta. Tu privacidad de investigación está protegida"
+    }
   },
   "vendors": {
-    "title": "Proveedores Verificados",
-    "subtitle": "Fuentes de péptidos verificadas con COA y pruebas de terceros",
+    "title": "Proveedores verificados",
+    "subtitle": "Fuentes de péptidos probadas por terceros y verificadas con COA",
     "name": "Proveedor",
     "region": "Región",
     "purity": "Pureza",
     "coa": "COA Verificado",
     "price": "Precio/mg",
     "status": "Estado",
-    "action": "Visitar Sitio",
+    "action": "Visitar sitio",
     "verified": "Verificado",
     "warning": "Advertencia",
-    "scam": "Estafa"
+    "scam": "Estafa",
+    "warehouse": "Almacén",
+    "ships_to": "Envía a",
+    "no_vendors_title": "No hay proveedores disponibles",
+    "no_vendors_description": "Actualmente no hay proveedores que envíen al mercado {{region}} para este producto."
   },
   "products": {
-    "title": "Péptidos de Investigación",
+    "title": "Péptidos de investigación",
     "subtitle": "Información molecular detallada y listados de proveedores verificados"
   },
   "calculator": {
-    "title": "Calculadora de Reconstitución",
-    "peptideAmount": "Cantidad de Péptido",
-    "waterVolume": "Agua Bacteriostática",
+    "title": "Calculadora de reconstitución de péptidos",
+    "peptideAmount": "Cantidad de péptido",
+    "waterVolume": "Agua bacteriostática",
     "result": "Concentración",
     "perUnit": "por 0.1ml (10 unidades)"
   },
   "compliance": {
-    "warning": "SOLO PARA USO EN INVESTIGACIÓN DE LABORATORIO. NO PARA CONSUMO HUMANO. DEBE SER MAYOR DE 18 AÑOS."
+    "warning": "SOLO PARA INVESTIGACIÓN DE LABORATORIO. NO PARA CONSUMO HUMANO. DEBE SER MAYOR DE 18."
+  },
+  "faq": {
+    "title": "Preguntas frecuentes sobre verificación de investigación",
+    "subtitle": "Comprender nuestra plataforma, cumplimiento y estándares de verificación.",
+    "still_questions": "¿Aún tienes preguntas? Consulta nuestro centro de conocimiento para guías detalladas.",
+    "visit_hub": "Visitar centro de conocimiento",
+    "q1": {
+      "question": "¿ChemVerify vende péptidos directamente?",
+      "answer": "No. ChemVerify es una plataforma independiente de agregación de datos y auditoría. No fabricamos, almacenamos ni vendemos compuestos químicos. Revisamos y listamos proveedores de terceros que cumplen con nuestros estrictos estándares de prueba."
+    },
+    "q2": {
+      "question": "¿Son estos productos seguros para el consumo humano?",
+      "answer": "Absolutamente no. Todos los compuestos listados son estrictamente para propósitos de investigación y desarrollo de laboratorio únicamente (estudios in vitro o en modelos animales). No están aprobados por la FDA para uso humano, y cualquier mención de uso personal está estrictamente prohibida en esta plataforma."
+    },
+    "q3": {
+      "question": "¿Cómo funciona su proceso de verificación?",
+      "answer": "Auditamos a los proveedores en función de su transparencia. Para ser listado como 'Verificado', un proveedor debe proporcionar Certificados de Análisis (COA) actualizados de laboratorios de terceros de buena reputación (como Janoshik o MZ Biolabs) que coincidan con números de lote específicos."
+    },
+    "q4": {
+      "question": "Vivo en la UE/Europa. ¿Puedo pedir de forma segura?",
+      "answer": "Las regulaciones aduaneras varían según el país. Recomendamos encarecidamente usar nuestro 'Filtro de región' (toggle en la parte superior de la página) para seleccionar 'Mercado UE'. Esto filtra la base de datos para mostrar solo proveedores que envían desde la Unión Europea, reduciendo significativamente los riesgos aduaneros."
+    },
+    "q5": {
+      "question": "¿Qué es un 'número de lote'?",
+      "answer": "Un número de lote es un código único impreso en un vial que identifica una producción específica. Puedes usar nuestra herramienta 'Búsqueda de lote' para verificar si el vial específico que tienes ha sido probado y ver su informe de laboratorio correspondiente."
+    },
+    "q6": {
+      "question": "¿Por qué varían los niveles de pureza (ej. 98% vs 99%)?",
+      "answer": "En la síntesis química, pueden quedar subproductos menores o humedad. Una pureza del 98%+ generalmente se considera el 'Estándar de oro' para péptidos de grado de investigación. Una pureza menor puede afectar la precisión de tus datos de investigación."
+    }
   },
   "footer": {
-    "privacy": "Política de Privacidad",
-    "legal": "Aviso Legal",
-    "disclaimer": "Descargo de Responsabilidad",
-    "sitemap": "Mapa del Sitio"
+    "privacy": "Política de privacidad",
+    "legal": "Aviso legal",
+    "disclaimer": "Descargo de responsabilidad",
+    "sitemap": "Mapa del sitio",
+    "description": "La plataforma de verificación definitiva para fuentes de péptidos de investigación. Verificada por COA de terceros y confiada por laboratorios en todo el mundo.",
+    "quick_links": "Enlaces rápidos",
+    "testing_partners": "Socios de pruebas de terceros",
+    "copyright": "© {{year}} ChemVerify. Todos los derechos reservados. Solo para fines de investigación."
   }
 }

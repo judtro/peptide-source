@@ -1,17 +1,50 @@
 {
+  "common": {
+    "search_placeholder": "Rechercher des molécules, fournisseurs ou données...",
+    "verify_batch_btn": "Vérifier un lot",
+    "view_details": "Voir les détails",
+    "visit_site": "Visiter le site",
+    "loading": "Chargement...",
+    "no_results": "Aucun résultat trouvé.",
+    "view_all_products": "Voir tous les produits →",
+    "details": "Détails",
+    "visit": "Visiter",
+    "delivers_to": "Livre vers:",
+    "purity": "Pureté:",
+    "price": "Prix:",
+    "ships_to": "Expédie vers:",
+    "warehouse_location": "Emplacement de l'entrepôt:",
+    "lab_tested": "Testé en laboratoire & Vérifié",
+    "cas": "CAS:",
+    "molar_mass": "Masse molaire:",
+    "professional_research": "Données de recherche professionnelle uniquement",
+    "discount_code": "Code promo:"
+  },
   "nav": {
     "home": "Accueil",
-    "vendors": "Vendeurs Vérifiés",
+    "vendors": "Fournisseurs vérifiés",
     "products": "Produits",
-    "verify": "Vérifier Lot",
-    "calculator": "Calculatrice",
-    "about": "À propos"
+    "verify": "Vérifier un lot",
+    "calculator": "Calculateur",
+    "about": "À propos",
+    "knowledge_hub": "Centre de connaissances",
+    "research_tools": "Outils de recherche",
+    "information": "Informations",
+    "reconstitution_calculator": "Calculateur de reconstitution",
+    "batch_search": "Recherche de lot"
   },
   "hero": {
-    "title": "Arrêtez d'injecter des produits chimiques inconnus",
-    "subtitle": "La plateforme de vérification définitive pour les sources de peptides de recherche. COA vérifié par des tiers. Filtré par région. Approuvé par des laboratoires du monde entier.",
-    "cta": "Voir les vendeurs vérifiés",
-    "secondary": "Parcourir les produits"
+    "title": "La norme mondiale pour la vérification des peptides.",
+    "subtitle": "Audits indépendants, données HPLC et transparence d'approvisionnement pour les chercheurs professionnels.",
+    "cta_primary": "Vérifier un lot",
+    "cta_secondary": "Parcourir les fournisseurs vérifiés",
+    "region_label": "Région:",
+    "stats": {
+      "verified_vendors": "Fournisseurs vérifiés",
+      "max_purity": "Pureté max.",
+      "research_peptides": "Peptides de recherche",
+      "regions": "Régions"
+    }
   },
   "region": {
     "detected": "Nous avons détecté que vous êtes de",
@@ -19,12 +52,32 @@
     "stay": "Rester dans la boutique {{region}}",
     "switch": "Changer de région",
     "us": "États-Unis",
-    "eu": "Union Européenne"
+    "eu": "Union européenne",
+    "uk": "Royaume-Uni",
+    "ca": "Canada"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Vérifié",
+      "description": "Tous les fournisseurs subissent une vérification de certificat d'analyse tiers"
+    },
+    "region_filtered": {
+      "title": "Filtré par région",
+      "description": "Filtré automatiquement par votre région pour un accès pertinent aux fournisseurs"
+    },
+    "purity_tested": {
+      "title": "Pureté testée",
+      "description": "Les tests HPLC et MS confirment l'identité et la pureté des peptides"
+    },
+    "anonymous_access": {
+      "title": "Accès anonyme",
+      "description": "Aucun compte requis. Votre confidentialité de recherche est protégée"
+    }
   },
   "vendors": {
-    "title": "Vendeurs Vérifiés",
+    "title": "Fournisseurs vérifiés",
     "subtitle": "Sources de peptides testées par des tiers et vérifiées COA",
-    "name": "Vendeur",
+    "name": "Fournisseur",
     "region": "Région",
     "purity": "Pureté",
     "coa": "COA Vérifié",
@@ -32,27 +85,65 @@
     "status": "Statut",
     "action": "Visiter le site",
     "verified": "Vérifié",
-    "warning": "Attention",
-    "scam": "Arnaque"
+    "warning": "Avertissement",
+    "scam": "Arnaque",
+    "warehouse": "Entrepôt",
+    "ships_to": "Expédie vers",
+    "no_vendors_title": "Aucun fournisseur disponible",
+    "no_vendors_description": "Aucun fournisseur n'expédie actuellement vers le marché {{region}} pour ce produit."
   },
   "products": {
-    "title": "Peptides de Recherche",
-    "subtitle": "Informations moléculaires détaillées et listes de vendeurs vérifiés"
+    "title": "Peptides de recherche",
+    "subtitle": "Informations moléculaires détaillées et listes de fournisseurs vérifiés"
   },
   "calculator": {
-    "title": "Calculatrice de Reconstitution",
-    "peptideAmount": "Quantité de Peptide",
-    "waterVolume": "Eau Bactériostatique",
+    "title": "Calculateur de reconstitution de peptides",
+    "peptideAmount": "Quantité de peptide",
+    "waterVolume": "Eau bactériostatique",
     "result": "Concentration",
     "perUnit": "par 0,1ml (10 unités)"
   },
   "compliance": {
-    "warning": "UNIQUEMENT POUR LA RECHERCHE EN LABORATOIRE. NON DESTINÉ À LA CONSOMMATION HUMAINE. 18 ANS MINIMUM."
+    "warning": "POUR LA RECHERCHE EN LABORATOIRE UNIQUEMENT. NON DESTINÉ À LA CONSOMMATION HUMAINE. 18+ REQUIS."
+  },
+  "faq": {
+    "title": "Questions fréquentes sur la vérification de recherche",
+    "subtitle": "Comprendre notre plateforme, la conformité et les normes de vérification.",
+    "still_questions": "Vous avez encore des questions? Consultez notre centre de connaissances pour des guides détaillés.",
+    "visit_hub": "Visiter le centre de connaissances",
+    "q1": {
+      "question": "ChemVerify vend-il des peptides directement?",
+      "answer": "Non. ChemVerify est une plateforme indépendante d'agrégation de données et d'audit. Nous ne fabriquons, ne stockons ni ne vendons de composés chimiques. Nous examinons et listons des fournisseurs tiers qui répondent à nos normes de test strictes."
+    },
+    "q2": {
+      "question": "Ces produits sont-ils sûrs pour la consommation humaine?",
+      "answer": "Absolument pas. Tous les composés listés sont strictement destinés à des fins de recherche et développement en laboratoire uniquement (études in vitro ou sur modèles animaux). Ils ne sont pas approuvés par la FDA pour l'usage humain, et toute mention d'usage personnel est strictement interdite sur cette plateforme."
+    },
+    "q3": {
+      "question": "Comment fonctionne votre processus de vérification?",
+      "answer": "Nous auditons les fournisseurs en fonction de leur transparence. Pour être listé comme 'Vérifié', un fournisseur doit fournir des certificats d'analyse (COA) à jour provenant de laboratoires tiers réputés (tels que Janoshik ou MZ Biolabs) correspondant à des numéros de lot spécifiques."
+    },
+    "q4": {
+      "question": "J'habite dans l'UE/Europe. Puis-je commander en toute sécurité?",
+      "answer": "Les réglementations douanières varient selon les pays. Nous recommandons fortement d'utiliser notre 'Filtre de région' (bascule en haut de la page) pour sélectionner 'Marché UE'. Cela filtre la base de données pour afficher uniquement les fournisseurs expédiant depuis l'Union européenne, réduisant considérablement les risques douaniers."
+    },
+    "q5": {
+      "question": "Qu'est-ce qu'un 'numéro de lot'?",
+      "answer": "Un numéro de lot est un code unique imprimé sur un flacon qui identifie un cycle de production spécifique. Vous pouvez utiliser notre outil 'Recherche de lot' pour vérifier si le flacon spécifique que vous détenez a été testé et consulter le rapport de laboratoire correspondant."
+    },
+    "q6": {
+      "question": "Pourquoi les niveaux de pureté varient-ils (ex: 98% vs 99%)?",
+      "answer": "Dans la synthèse chimique, des sous-produits mineurs ou de l'humidité peuvent subsister. Une pureté de 98%+ est généralement considérée comme le 'Gold Standard' pour les peptides de recherche. Une pureté inférieure peut affecter l'exactitude de vos données de recherche."
+    }
   },
   "footer": {
     "privacy": "Politique de confidentialité",
     "legal": "Mentions légales",
     "disclaimer": "Avertissement",
-    "sitemap": "Plan du site"
+    "sitemap": "Plan du site",
+    "description": "La plateforme de vérification définitive pour les sources de peptides de recherche. Vérifiée COA par des tiers et approuvée par les laboratoires du monde entier.",
+    "quick_links": "Liens rapides",
+    "testing_partners": "Partenaires de test tiers",
+    "copyright": "© {{year}} ChemVerify. Tous droits réservés. À des fins de recherche uniquement."
   }
 }

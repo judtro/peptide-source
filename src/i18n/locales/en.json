@@ -1,17 +1,50 @@
 {
+  "common": {
+    "search_placeholder": "Search molecules, vendors, or data...",
+    "verify_batch_btn": "Verify Batch",
+    "view_details": "View Details",
+    "visit_site": "Visit Site",
+    "loading": "Loading...",
+    "no_results": "No results found.",
+    "view_all_products": "View All Products →",
+    "details": "Details",
+    "visit": "Visit",
+    "delivers_to": "Delivers to:",
+    "purity": "Purity:",
+    "price": "Price:",
+    "ships_to": "Ships to:",
+    "warehouse_location": "Warehouse location:",
+    "lab_tested": "Lab Tested & Verified",
+    "cas": "CAS:",
+    "molar_mass": "Molar Mass:",
+    "professional_research": "Professional Research Data Only",
+    "discount_code": "Discount Code:"
+  },
   "nav": {
     "home": "Home",
     "vendors": "Verified Vendors",
     "products": "Products",
     "verify": "Verify Batch",
     "calculator": "Calculator",
-    "about": "About"
+    "about": "About",
+    "knowledge_hub": "Knowledge Hub",
+    "research_tools": "Research Tools",
+    "information": "Information",
+    "reconstitution_calculator": "Reconstitution Calculator",
+    "batch_search": "Batch Search"
   },
   "hero": {
-    "title": "Stop Injecting Mystery Chemicals",
-    "subtitle": "The definitive verification platform for research peptide sources. Third-party COA verified. Region-filtered. Trusted by laboratories worldwide.",
-    "cta": "View Verified Vendors",
-    "secondary": "Browse Products"
+    "title": "The Global Standard for Peptide Verification.",
+    "subtitle": "Independent audits, HPLC data, and sourcing transparency for professional researchers.",
+    "cta_primary": "Verify a Batch",
+    "cta_secondary": "Browse Verified Vendors",
+    "region_label": "Region:",
+    "stats": {
+      "verified_vendors": "Verified Vendors",
+      "max_purity": "Max Purity",
+      "research_peptides": "Research Peptides",
+      "regions": "Regions"
+    }
   },
   "region": {
     "detected": "We detected you are from",
@@ -19,7 +52,27 @@
     "stay": "Stay in {{region}} Store",
     "switch": "Switch Region",
     "us": "United States",
-    "eu": "European Union"
+    "eu": "European Union",
+    "uk": "United Kingdom",
+    "ca": "Canada"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Verified",
+      "description": "All vendors undergo third-party certificate of analysis verification"
+    },
+    "region_filtered": {
+      "title": "Region Filtered",
+      "description": "Automatically filtered by your region for relevant vendor access"
+    },
+    "purity_tested": {
+      "title": "Purity Tested",
+      "description": "HPLC and MS testing confirms peptide identity and purity"
+    },
+    "anonymous_access": {
+      "title": "Anonymous Access",
+      "description": "No account required. Your research privacy is protected"
+    }
   },
   "vendors": {
     "title": "Verified Vendors",
@@ -33,14 +86,18 @@
     "action": "Visit Site",
     "verified": "Verified",
     "warning": "Warning",
-    "scam": "Scam"
+    "scam": "Scam",
+    "warehouse": "Warehouse",
+    "ships_to": "Ships To",
+    "no_vendors_title": "No vendors available",
+    "no_vendors_description": "No vendors currently ship to the {{region}} market for this product."
   },
   "products": {
     "title": "Research Peptides",
     "subtitle": "Detailed molecular information and verified vendor listings"
   },
   "calculator": {
-    "title": "Reconstitution Calculator",
+    "title": "Peptide Reconstitution Calculator",
     "peptideAmount": "Peptide Amount",
     "waterVolume": "Bacteriostatic Water",
     "result": "Concentration",
@@ -49,10 +106,44 @@
   "compliance": {
     "warning": "FOR LABORATORY RESEARCH USE ONLY. NOT FOR HUMAN CONSUMPTION. MUST BE 18+."
   },
+  "faq": {
+    "title": "Common Questions about Research Verification",
+    "subtitle": "Understanding our platform, compliance, and verification standards.",
+    "still_questions": "Still have questions? Check our Knowledge Hub for detailed guides.",
+    "visit_hub": "Visit Knowledge Hub",
+    "q1": {
+      "question": "Does ChemVerify sell peptides directly?",
+      "answer": "No. ChemVerify is an independent data aggregation and audit platform. We do not manufacture, stock, or sell any chemical compounds. We review and list third-party vendors that meet our strict testing standards."
+    },
+    "q2": {
+      "question": "Are these products safe for human consumption?",
+      "answer": "Absolutely not. All listed compounds are strictly for laboratory research and development purposes only (in-vitro or animal model studies). They are not approved by the FDA for human use, and any mention of personal use is strictly prohibited on this platform."
+    },
+    "q3": {
+      "question": "How does your verification process work?",
+      "answer": "We audit vendors based on their transparency. To be listed as 'Verified', a vendor must provide up-to-date Certificates of Analysis (COAs) from reputable third-party laboratories (such as Janoshik or MZ Biolabs) that match specific batch numbers."
+    },
+    "q4": {
+      "question": "I live in the EU/Europe. Can I order safely?",
+      "answer": "Customs regulations vary by country. We strongly recommend using our 'Region Filter' (toggle at the top of the page) to select 'EU Market'. This filters the database to show only vendors shipping from within the European Union, significantly reducing customs risks."
+    },
+    "q5": {
+      "question": "What is a 'Batch Number'?",
+      "answer": "A batch number is a unique code printed on a vial that identifies a specific production run. You can use our 'Batch Search' tool to verify if the specific vial you hold has been tested and view its corresponding lab report."
+    },
+    "q6": {
+      "question": "Why do purity levels vary (e.g., 98% vs 99%)?",
+      "answer": "In chemical synthesis, minor byproducts or moisture can remain. A purity of 98%+ is generally considered the 'Gold Standard' for research grade peptides. Lower purity may affect the accuracy of your research data."
+    }
+  },
   "footer": {
     "privacy": "Privacy Policy",
     "legal": "Legal Notice",
     "disclaimer": "Disclaimer",
-    "sitemap": "Sitemap"
+    "sitemap": "Sitemap",
+    "description": "The definitive verification platform for research peptide sources. Third-party COA verified and trusted by laboratories worldwide.",
+    "quick_links": "Quick Links",
+    "testing_partners": "Third-Party Testing Partners",
+    "copyright": "© {{year}} ChemVerify. All rights reserved. For research purposes only."
   }
 }

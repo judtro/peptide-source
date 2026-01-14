@@ -122,7 +122,7 @@ export const VendorTable = ({
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-xs">
-            Ships to: {vendor.shippingRegions.join(', ')}
+            {t('common.ships_to')} {vendor.shippingRegions.join(', ')}
           </p>
         </TooltipContent>
       </Tooltip>
@@ -149,7 +149,7 @@ export const VendorTable = ({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="text-xs text-muted-foreground">Delivers to:</span>
+        <span className="text-xs text-muted-foreground">{t('common.delivers_to')}</span>
         {vendor.shippingRegions.map((sr) => (
           <span 
             key={sr} 
@@ -163,11 +163,11 @@ export const VendorTable = ({
       
       <div className="mt-3 flex items-center gap-4 text-sm">
         <div>
-          <span className="text-muted-foreground">Purity: </span>
+          <span className="text-muted-foreground">{t('common.purity')} </span>
           <span className="font-mono font-semibold text-success">{vendor.purityScore}%</span>
         </div>
         <div>
-          <span className="text-muted-foreground">Price: </span>
+          <span className="text-muted-foreground">{t('common.price')} </span>
           <span className="font-mono">${vendor.pricePerMg.toFixed(2)}/mg</span>
         </div>
         {vendor.coaVerified && (
@@ -185,12 +185,12 @@ export const VendorTable = ({
           className="min-h-[44px] flex-1 gap-1"
           onClick={() => window.open(vendor.website, '_blank')}
         >
-          Visit
+          {t('common.visit')}
           <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </Button>
         <Link to={`/vendor/${vendor.slug}`}>
           <Button size="sm" variant="outline" className="min-h-[44px] gap-1">
-            Details
+            {t('common.details')}
             <ArrowRight className="h-3 w-3" aria-hidden="true" />
           </Button>
         </Link>
@@ -218,9 +218,9 @@ export const VendorTable = ({
         {sortedVendors.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center sm:p-8">
             <Truck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" aria-hidden="true" />
-            <p className="font-medium text-foreground">No vendors available</p>
+            <p className="font-medium text-foreground">{t('vendors.no_vendors_title')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              No vendors currently ship to the {region} market for this product.
+              {t('vendors.no_vendors_description', { region })}
             </p>
           </div>
         ) : (
@@ -248,8 +248,8 @@ export const VendorTable = ({
                           <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
                         </button>
                       </TableHead>
-                      <TableHead className="hidden lg:table-cell">Warehouse</TableHead>
-                      <TableHead className="hidden xl:table-cell">Ships To</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t('vendors.warehouse')}</TableHead>
+                      <TableHead className="hidden xl:table-cell">{t('vendors.ships_to')}</TableHead>
                       <TableHead>
                         <button
                           className="flex min-h-[44px] w-full items-center gap-1 rounded-md px-2 py-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -297,7 +297,7 @@ export const VendorTable = ({
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p className="text-xs">Warehouse location: {vendor.region}</p>
+                              <p className="text-xs">{t('common.warehouse_location')} {vendor.region}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TableCell>

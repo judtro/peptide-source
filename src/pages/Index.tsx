@@ -26,62 +26,73 @@ import {
 } from 'lucide-react';
 import { generateFAQSchema } from '@/components/SEOHead';
 
-const FAQ_DATA = [
-  {
-    question: 'Does ChemVerify sell peptides directly?',
-    answer: 'No. ChemVerify is an independent data aggregation and audit platform. We do not manufacture, stock, or sell any chemical compounds. We review and list third-party vendors that meet our strict testing standards.',
-  },
-  {
-    question: 'Are these products safe for human consumption?',
-    answer: 'Absolutely not. All listed compounds are strictly for laboratory research and development purposes only (in-vitro or animal model studies). They are not approved by the FDA for human use, and any mention of personal use is strictly prohibited on this platform.',
-  },
-  {
-    question: 'How does your verification process work?',
-    answer: "We audit vendors based on their transparency. To be listed as 'Verified', a vendor must provide up-to-date Certificates of Analysis (COAs) from reputable third-party laboratories (such as Janoshik or MZ Biolabs) that match specific batch numbers.",
-  },
-  {
-    question: 'I live in the EU/Europe. Can I order safely?',
-    answer: "Customs regulations vary by country. We strongly recommend using our 'Region Filter' (toggle at the top of the page) to select 'EU Market'. This filters the database to show only vendors shipping from within the European Union, significantly reducing customs risks.",
-  },
-  {
-    question: "What is a 'Batch Number'?",
-    answer: "A batch number is a unique code printed on a vial that identifies a specific production run. You can use our 'Batch Search' tool to verify if the specific vial you hold has been tested and view its corresponding lab report.",
-  },
-  {
-    question: 'Why do purity levels vary (e.g., 98% vs 99%)?',
-    answer: "In chemical synthesis, minor byproducts or moisture can remain. A purity of 98%+ is generally considered the 'Gold Standard' for research grade peptides. Lower purity may affect the accuracy of your research data.",
-  },
-];
-
-// Generate FAQ Schema for SEO
-const faqSchema = generateFAQSchema(FAQ_DATA);
-
 const Index = () => {
   const { t } = useTranslation();
   const { region } = useRegion();
 
+  // FAQ data using translations
+  const FAQ_DATA = [
+    {
+      question: t('faq.q1.question'),
+      answer: t('faq.q1.answer'),
+    },
+    {
+      question: t('faq.q2.question'),
+      answer: t('faq.q2.answer'),
+    },
+    {
+      question: t('faq.q3.question'),
+      answer: t('faq.q3.answer'),
+    },
+    {
+      question: t('faq.q4.question'),
+      answer: t('faq.q4.answer'),
+    },
+    {
+      question: t('faq.q5.question'),
+      answer: t('faq.q5.answer'),
+    },
+    {
+      question: t('faq.q6.question'),
+      answer: t('faq.q6.answer'),
+    },
+  ];
+
+  // Generate FAQ Schema for SEO
+  const faqSchema = generateFAQSchema(FAQ_DATA);
+
   const features = [
     {
       icon: ShieldCheck,
-      title: 'COA Verified',
-      description: 'All vendors undergo third-party certificate of analysis verification',
+      title: t('features.coa_verified.title'),
+      description: t('features.coa_verified.description'),
     },
     {
       icon: Globe2,
-      title: 'Region Filtered',
-      description: 'Automatically filtered by your region for relevant vendor access',
+      title: t('features.region_filtered.title'),
+      description: t('features.region_filtered.description'),
     },
     {
       icon: Microscope,
-      title: 'Purity Tested',
-      description: 'HPLC and MS testing confirms peptide identity and purity',
+      title: t('features.purity_tested.title'),
+      description: t('features.purity_tested.description'),
     },
     {
       icon: Lock,
-      title: 'Anonymous Access',
-      description: 'No account required. Your research privacy is protected',
+      title: t('features.anonymous_access.title'),
+      description: t('features.anonymous_access.description'),
     },
   ];
+
+  const getRegionDisplay = () => {
+    switch (region) {
+      case 'US': return `🇺🇸 ${t('region.us')}`;
+      case 'EU': return `🇪🇺 ${t('region.eu')}`;
+      case 'UK': return `🇬🇧 ${t('region.uk')}`;
+      case 'CA': return `🇨🇦 ${t('region.ca')}`;
+      default: return `🇺🇸 ${t('region.us')}`;
+    }
+  };
 
   return (
     <Layout
@@ -103,19 +114,19 @@ const Index = () => {
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="outline" className="mb-4 gap-2 border-white/20 bg-white/10 px-3 py-1 font-mono text-xs text-white/80 backdrop-blur-sm sm:mb-6 sm:px-4 sm:text-sm">
               <FlaskConical className="h-3 w-3" />
-              Region: {region === 'US' ? '🇺🇸 United States' : region === 'EU' ? '🇪🇺 European Union' : region === 'UK' ? '🇬🇧 United Kingdom' : '🇨🇦 Canada'}
+              {t('hero.region_label')} {getRegionDisplay()}
             </Badge>
             <h1 className="mb-4 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
-              The Global Standard for Peptide Verification.
+              {t('hero.title')}
             </h1>
             <p className="mx-auto mb-8 max-w-2xl text-base text-slate-300 sm:mb-10 sm:text-lg md:text-xl">
-              Independent audits, HPLC data, and sourcing transparency for professional researchers.
+              {t('hero.subtitle')}
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
               <Link to="/verify">
                 <Button size="lg" className="w-full gap-2 bg-cyan-600 text-white hover:bg-cyan-700 sm:w-auto">
                   <ShieldCheck className="h-5 w-5" />
-                  Verify a Batch
+                  {t('hero.cta_primary')}
                 </Button>
               </Link>
               <Link to="/vendors">
@@ -124,7 +135,7 @@ const Index = () => {
                   variant="outline" 
                   className="w-full gap-2 border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white sm:w-auto"
                 >
-                  Browse Verified Vendors
+                  {t('hero.cta_secondary')}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -133,10 +144,10 @@ const Index = () => {
             {/* Stats */}
             <div className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:mt-16 sm:gap-6 md:mt-20 md:grid-cols-4 md:gap-8">
               {[
-                { value: '10', label: 'Verified Vendors' },
-                { value: '99.9%', label: 'Max Purity' },
-                { value: '3', label: 'Research Peptides' },
-                { value: '4', label: 'Regions' },
+                { value: '10', label: t('hero.stats.verified_vendors') },
+                { value: '99.9%', label: t('hero.stats.max_purity') },
+                { value: '3', label: t('hero.stats.research_peptides') },
+                { value: '4', label: t('hero.stats.regions') },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
                   <div className="font-mono text-2xl font-bold text-cyan-400 sm:text-3xl md:text-4xl">
@@ -208,10 +219,10 @@ const Index = () => {
               <span className="text-xs font-medium text-primary sm:text-sm">FAQ</span>
             </div>
             <h2 className="mb-2 text-xl font-bold text-foreground sm:text-2xl md:text-3xl">
-              Common Questions about Research Verification
+              {t('faq.title')}
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              Understanding our platform, compliance, and verification standards.
+              {t('faq.subtitle')}
             </p>
           </div>
 
@@ -234,11 +245,11 @@ const Index = () => {
 
           <div className="mt-6 text-center sm:mt-8">
             <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">
-              Still have questions? Check our Knowledge Hub for detailed guides.
+              {t('faq.still_questions')}
             </p>
             <Link to="/education">
               <Button variant="outline" size="sm" className="gap-2">
-                Visit Knowledge Hub
+                {t('faq.visit_hub')}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

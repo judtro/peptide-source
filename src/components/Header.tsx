@@ -69,14 +69,14 @@ export const Header = () => {
         <div className="container mx-auto flex h-full items-center justify-between px-4">
           {/* Left: Professional Research Text */}
           <span className="text-xs text-slate-300">
-            Professional Research Data Only
+            {t('common.professional_research')}
           </span>
 
           {/* Right: Region, Language, Discount */}
           <div className="flex items-center gap-3">
             {/* Discount Code */}
             <div className="flex items-center gap-2">
-              <span className="hidden text-xs text-slate-400 sm:inline">Discount Code:</span>
+              <span className="hidden text-xs text-slate-400 sm:inline">{t('common.discount_code')}</span>
               <DiscountBadge 
                 code="CHEM10" 
                 variant="compact" 
@@ -165,7 +165,7 @@ export const Header = () => {
                 className="gap-2 font-medium"
               >
                 <Building2 className="h-4 w-4" aria-hidden="true" />
-                Vendors
+                {t('nav.vendors')}
               </Button>
             </Link>
 
@@ -211,7 +211,7 @@ export const Header = () => {
                           to="/products"
                           className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                         >
-                          View All Products →
+                          {t('common.view_all_products')}
                         </Link>
                       </NavigationMenuLink>
                     </div>
@@ -227,7 +227,7 @@ export const Header = () => {
                 className="gap-2 font-medium"
               >
                 <BookOpen className="h-4 w-4" aria-hidden="true" />
-                Knowledge Hub
+                {t('nav.knowledge_hub')}
               </Button>
             </Link>
           </div>
@@ -241,7 +241,7 @@ export const Header = () => {
               aria-label="Open search dialog"
             >
               <Search className="h-4 w-4" aria-hidden="true" />
-              <span className="min-w-[100px] text-left">Search...</span>
+              <span className="min-w-[100px] text-left">{t('common.search_placeholder').substring(0, 10)}...</span>
               <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground" aria-hidden="true">
                 {isMac ? '⌘K' : 'Ctrl+K'}
               </kbd>
@@ -262,12 +262,12 @@ export const Header = () => {
             <Link to="/verify" className="hidden sm:block">
               <Button className="gap-2 font-medium">
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                Verify Batch
+                {t('common.verify_batch_btn')}
               </Button>
             </Link>
 
             {/* Verify Batch Icon - Mobile */}
-            <Link to="/verify" className="sm:hidden" aria-label="Verify Batch">
+            <Link to="/verify" className="sm:hidden" aria-label={t('common.verify_batch_btn')}>
               <Button size="icon" className="min-h-[44px] min-w-[44px]">
                 <ShieldCheck className="h-5 w-5" aria-hidden="true" />
               </Button>
@@ -285,7 +285,7 @@ export const Header = () => {
                   {/* Research Tools Section */}
                   <div>
                     <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Research Tools
+                      {t('nav.research_tools')}
                     </h3>
                     <div className="flex flex-col gap-1">
                       <Link to="/calculator" onClick={() => setMobileMenuOpen(false)}>
@@ -294,7 +294,7 @@ export const Header = () => {
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
                           <Beaker className="h-5 w-5" aria-hidden="true" />
-                          Reconstitution Calculator
+                          {t('nav.reconstitution_calculator')}
                         </Button>
                       </Link>
                       <Link to="/verify" onClick={() => setMobileMenuOpen(false)}>
@@ -303,7 +303,7 @@ export const Header = () => {
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
                           <FileCheck className="h-5 w-5" aria-hidden="true" />
-                          Batch Search
+                          {t('nav.batch_search')}
                         </Button>
                       </Link>
                     </div>
@@ -312,7 +312,7 @@ export const Header = () => {
                   {/* Information Section */}
                   <div>
                     <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Information
+                      {t('nav.information')}
                     </h3>
                     <div className="flex flex-col gap-1">
                       <Link to="/" onClick={() => setMobileMenuOpen(false)}>
@@ -321,7 +321,7 @@ export const Header = () => {
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
                           <Home className="h-5 w-5" aria-hidden="true" />
-                          Home
+                          {t('nav.home')}
                         </Button>
                       </Link>
 
@@ -331,7 +331,7 @@ export const Header = () => {
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
                           <Building2 className="h-5 w-5" aria-hidden="true" />
-                          Verified Vendors
+                          {t('nav.vendors')}
                         </Button>
                       </Link>
 
@@ -369,7 +369,7 @@ export const Header = () => {
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="mt-1 flex min-h-[44px] items-center justify-center rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                               >
-                                View All →
+                                {t('common.view_all_products')}
                               </Link>
                             </div>
                           </AccordionContent>
@@ -378,79 +378,24 @@ export const Header = () => {
 
                       <Link to="/education" onClick={() => setMobileMenuOpen(false)}>
                         <Button
-                          variant={isActive('/education') ? 'secondary' : 'ghost'}
+                          variant={isActive('/education') || location.pathname.startsWith('/education/') ? 'secondary' : 'ghost'}
                           className="min-h-[48px] w-full justify-start gap-3 text-base"
                         >
                           <BookOpen className="h-5 w-5" aria-hidden="true" />
-                          Knowledge Hub
+                          {t('nav.knowledge_hub')}
                         </Button>
                       </Link>
                     </div>
                   </div>
-
-                  {/* Settings Section */}
-                  <div className="mt-4 border-t border-border pt-4">
-                    <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Settings
-                    </h3>
-                    <div className="flex flex-col gap-2 px-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Region</span>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="min-h-[44px] gap-2">
-                              <span>{region === 'US' ? '🇺🇸' : '🇪🇺'}</span>
-                              {region}
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setRegion('US')} className="gap-2">
-                              <span className="text-lg">🇺🇸</span> {t('region.us')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setRegion('EU')} className="gap-2">
-                              <span className="text-lg">🇪🇺</span> {t('region.eu')}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Language</span>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="min-h-[44px] gap-2">
-                              <Languages className="h-4 w-4" aria-hidden="true" />
-                              <span className="uppercase">{i18n.language}</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                              English
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => changeLanguage('de')}>
-                              Deutsch
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => changeLanguage('fr')}>
-                              Français
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Discount Code */}
-                  <div className="mt-4 px-4">
-                    <DiscountBadge code="CHEM10" className="w-full justify-center" />
-                  </div>
                 </nav>
               </SheetContent>
             </Sheet>
-
-            {/* Command Search Dialog */}
-            <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
           </div>
         </nav>
       </header>
+
+      {/* Command Search */}
+      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </>
   );
 };

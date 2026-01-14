@@ -1,29 +1,82 @@
 {
+  "common": {
+    "search_placeholder": "Moleküle, Anbieter oder Daten suchen...",
+    "verify_batch_btn": "Charge verifizieren",
+    "view_details": "Details anzeigen",
+    "visit_site": "Website besuchen",
+    "loading": "Laden...",
+    "no_results": "Keine Ergebnisse gefunden.",
+    "view_all_products": "Alle Produkte anzeigen →",
+    "details": "Details",
+    "visit": "Besuchen",
+    "delivers_to": "Liefert nach:",
+    "purity": "Reinheit:",
+    "price": "Preis:",
+    "ships_to": "Liefert nach:",
+    "warehouse_location": "Lagerstandort:",
+    "lab_tested": "Laborgetestet & Verifiziert",
+    "cas": "CAS:",
+    "molar_mass": "Molmasse:",
+    "professional_research": "Nur für professionelle Forschungsdaten",
+    "discount_code": "Rabattcode:"
+  },
   "nav": {
     "home": "Startseite",
     "vendors": "Verifizierte Anbieter",
     "products": "Produkte",
-    "verify": "Charge Prüfen",
+    "verify": "Charge verifizieren",
     "calculator": "Rechner",
-    "about": "Über uns"
+    "about": "Über uns",
+    "knowledge_hub": "Wissenszentrum",
+    "research_tools": "Forschungswerkzeuge",
+    "information": "Informationen",
+    "reconstitution_calculator": "Rekonstitutionsrechner",
+    "batch_search": "Chargensuche"
   },
   "hero": {
-    "title": "Keine unbekannten Chemikalien mehr",
-    "subtitle": "Die definitive Verifizierungsplattform für Forschungspeptid-Quellen. Drittanbieter-COA verifiziert. Regionsfilter. Von Laboren weltweit vertraut.",
-    "cta": "Verifizierte Anbieter anzeigen",
-    "secondary": "Produkte durchsuchen"
+    "title": "Der globale Standard für Peptidverifizierung.",
+    "subtitle": "Unabhängige Audits, HPLC-Daten und Beschaffungstransparenz für professionelle Forscher.",
+    "cta_primary": "Charge verifizieren",
+    "cta_secondary": "Verifizierte Anbieter durchsuchen",
+    "region_label": "Region:",
+    "stats": {
+      "verified_vendors": "Verifizierte Anbieter",
+      "max_purity": "Max. Reinheit",
+      "research_peptides": "Forschungspeptide",
+      "regions": "Regionen"
+    }
   },
   "region": {
     "detected": "Wir haben erkannt, dass Sie aus",
     "confirm": "Ist das korrekt?",
-    "stay": "Im {{region}} Store bleiben",
+    "stay": "Im {{region}} Shop bleiben",
     "switch": "Region wechseln",
     "us": "Vereinigte Staaten",
-    "eu": "Europäische Union"
+    "eu": "Europäische Union",
+    "uk": "Vereinigtes Königreich",
+    "ca": "Kanada"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Verifiziert",
+      "description": "Alle Anbieter durchlaufen eine Drittanbieter-Analysezertifikat-Verifizierung"
+    },
+    "region_filtered": {
+      "title": "Regional gefiltert",
+      "description": "Automatisch nach Ihrer Region gefiltert für relevanten Anbieterzugang"
+    },
+    "purity_tested": {
+      "title": "Reinheit getestet",
+      "description": "HPLC- und MS-Tests bestätigen Peptididentität und -reinheit"
+    },
+    "anonymous_access": {
+      "title": "Anonymer Zugang",
+      "description": "Kein Konto erforderlich. Ihre Forschungsprivatsphäre ist geschützt"
+    }
   },
   "vendors": {
     "title": "Verifizierte Anbieter",
-    "subtitle": "Drittanbieter-getestet und COA-verifizierte Peptidquellen",
+    "subtitle": "Drittanbietergetestete und COA-verifizierte Peptidquellen",
     "name": "Anbieter",
     "region": "Region",
     "purity": "Reinheit",
@@ -33,26 +86,64 @@
     "action": "Website besuchen",
     "verified": "Verifiziert",
     "warning": "Warnung",
-    "scam": "Betrug"
+    "scam": "Betrug",
+    "warehouse": "Lager",
+    "ships_to": "Liefert nach",
+    "no_vendors_title": "Keine Anbieter verfügbar",
+    "no_vendors_description": "Derzeit liefern keine Anbieter in den {{region}}-Markt für dieses Produkt."
   },
   "products": {
     "title": "Forschungspeptide",
     "subtitle": "Detaillierte molekulare Informationen und verifizierte Anbieterlisten"
   },
   "calculator": {
-    "title": "Rekonstitutionsrechner",
+    "title": "Peptid-Rekonstitutionsrechner",
     "peptideAmount": "Peptidmenge",
     "waterVolume": "Bakteriostatisches Wasser",
     "result": "Konzentration",
     "perUnit": "pro 0,1ml (10 Einheiten)"
   },
   "compliance": {
-    "warning": "NUR FÜR LABORFORSCHUNGSZWECKE. NICHT FÜR DEN MENSCHLICHEN VERZEHR. MINDESTALTER 18 JAHRE."
+    "warning": "NUR FÜR LABORFORSCHUNG. NICHT ZUM MENSCHLICHEN VERZEHR. AB 18 JAHREN."
+  },
+  "faq": {
+    "title": "Häufige Fragen zur Forschungsverifizierung",
+    "subtitle": "Verstehen Sie unsere Plattform, Compliance und Verifizierungsstandards.",
+    "still_questions": "Noch Fragen? Besuchen Sie unser Wissenszentrum für detaillierte Anleitungen.",
+    "visit_hub": "Wissenszentrum besuchen",
+    "q1": {
+      "question": "Verkauft ChemVerify Peptide direkt?",
+      "answer": "Nein. ChemVerify ist eine unabhängige Datenaggregations- und Audit-Plattform. Wir stellen keine chemischen Verbindungen her, lagern oder verkaufen sie. Wir überprüfen und listen Drittanbieter, die unsere strengen Teststandards erfüllen."
+    },
+    "q2": {
+      "question": "Sind diese Produkte sicher für den menschlichen Verzehr?",
+      "answer": "Absolut nicht. Alle aufgeführten Verbindungen sind ausschließlich für Laborforschungs- und Entwicklungszwecke bestimmt (In-vitro- oder Tiermodellstudien). Sie sind nicht von der FDA für den menschlichen Gebrauch zugelassen, und jede Erwähnung des persönlichen Gebrauchs ist auf dieser Plattform strengstens verboten."
+    },
+    "q3": {
+      "question": "Wie funktioniert Ihr Verifizierungsprozess?",
+      "answer": "Wir prüfen Anbieter auf der Grundlage ihrer Transparenz. Um als 'Verifiziert' gelistet zu werden, muss ein Anbieter aktuelle Analysezertifikate (COAs) von renommierten Drittlaboratorien (wie Janoshik oder MZ Biolabs) vorlegen, die mit bestimmten Chargennummern übereinstimmen."
+    },
+    "q4": {
+      "question": "Ich lebe in der EU/Europa. Kann ich sicher bestellen?",
+      "answer": "Die Zollbestimmungen variieren je nach Land. Wir empfehlen dringend, unseren 'Regionsfilter' (Toggle oben auf der Seite) zu verwenden und 'EU-Markt' auszuwählen. Dies filtert die Datenbank, um nur Anbieter anzuzeigen, die aus der Europäischen Union versenden, was die Zollrisiken erheblich reduziert."
+    },
+    "q5": {
+      "question": "Was ist eine 'Chargennummer'?",
+      "answer": "Eine Chargennummer ist ein eindeutiger Code auf einer Flasche, der einen bestimmten Produktionslauf identifiziert. Sie können unser 'Chargensuche'-Tool verwenden, um zu überprüfen, ob die spezifische Flasche, die Sie besitzen, getestet wurde, und den entsprechenden Laborbericht anzuzeigen."
+    },
+    "q6": {
+      "question": "Warum variieren die Reinheitsgrade (z.B. 98% vs 99%)?",
+      "answer": "Bei der chemischen Synthese können geringfügige Nebenprodukte oder Feuchtigkeit verbleiben. Eine Reinheit von 98%+ gilt allgemein als 'Goldstandard' für Forschungspeptide. Eine geringere Reinheit kann die Genauigkeit Ihrer Forschungsdaten beeinträchtigen."
+    }
   },
   "footer": {
-    "privacy": "Datenschutz",
-    "legal": "Impressum",
+    "privacy": "Datenschutzerklärung",
+    "legal": "Rechtlicher Hinweis",
     "disclaimer": "Haftungsausschluss",
-    "sitemap": "Sitemap"
+    "sitemap": "Sitemap",
+    "description": "Die definitive Verifizierungsplattform für Forschungspeptidquellen. Drittanbieter-COA-verifiziert und weltweit von Laboratorien vertraut.",
+    "quick_links": "Schnelllinks",
+    "testing_partners": "Drittanbieter-Testpartner",
+    "copyright": "© {{year}} ChemVerify. Alle Rechte vorbehalten. Nur für Forschungszwecke."
   }
 }
