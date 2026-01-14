@@ -74,12 +74,15 @@ export const Header = () => {
 
           {/* Right: Region, Language, Discount */}
           <div className="flex items-center gap-3">
-            {/* Discount Badge */}
-            <DiscountBadge 
-              code="CHEM10" 
-              variant="compact" 
-              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" 
-            />
+            {/* Discount Code */}
+            <div className="flex items-center gap-2">
+              <span className="hidden text-xs text-slate-400 sm:inline">Discount Code:</span>
+              <DiscountBadge 
+                code="CHEM10" 
+                variant="compact" 
+                className="min-h-0 border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-400 hover:bg-emerald-500/20" 
+              />
+            </div>
 
             <span className="h-3 w-px bg-slate-700" aria-hidden="true" />
 
