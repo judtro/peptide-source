@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RegionProvider } from "@/context/RegionContext";
+import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "@/i18n/config";
 
@@ -29,6 +30,7 @@ const EducationPage = lazy(() => import("./pages/EducationPage"));
 const ArticlePage = lazy(() => import("./pages/ArticlePage"));
 const VideoGalleryPage = lazy(() => import("./pages/VideoGalleryPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
+const AdminRoute = lazy(() => import("./pages/admin/AdminRoute"));
 
 const queryClient = new QueryClient();
 
@@ -60,32 +62,35 @@ const App = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <RegionProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/vendors" element={<VendorsPage />} />
-                  <Route path="/vendor/:slug" element={<VendorDetailPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/product/:id" element={<ProductDetailPage />} />
-                  <Route path="/verify" element={<BatchVerifyPage />} />
-                  <Route path="/calculator" element={<CalculatorPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/disclaimer" element={<DisclaimerPage />} />
-                  <Route path="/legal" element={<LegalPage />} />
-                  <Route path="/education" element={<EducationPage />} />
-                  <Route path="/education/videos" element={<VideoGalleryPage />} />
-                  <Route path="/education/:slug" element={<ArticlePage />} />
-                  <Route path="/partners" element={<PartnersPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </RegionProvider>
+          <AdminAuthProvider>
+            <RegionProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <ScrollToTop />
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/vendors" element={<VendorsPage />} />
+                    <Route path="/vendor/:slug" element={<VendorDetailPage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/product/:id" element={<ProductDetailPage />} />
+                    <Route path="/verify" element={<BatchVerifyPage />} />
+                    <Route path="/calculator" element={<CalculatorPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/disclaimer" element={<DisclaimerPage />} />
+                    <Route path="/legal" element={<LegalPage />} />
+                    <Route path="/education" element={<EducationPage />} />
+                    <Route path="/education/videos" element={<VideoGalleryPage />} />
+                    <Route path="/education/:slug" element={<ArticlePage />} />
+                    <Route path="/partners" element={<PartnersPage />} />
+                    <Route path="/admin" element={<AdminRoute />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </RegionProvider>
+          </AdminAuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
