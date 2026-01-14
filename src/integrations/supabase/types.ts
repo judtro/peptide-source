@@ -14,16 +14,283 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          author_name: string | null
+          author_role: string | null
+          category: string
+          category_label: string | null
+          citations: Json | null
+          content: Json | null
+          created_at: string
+          id: string
+          published_date: string | null
+          read_time: number | null
+          related_peptides: string[] | null
+          slug: string
+          summary: string | null
+          table_of_contents: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          author_role?: string | null
+          category: string
+          category_label?: string | null
+          citations?: Json | null
+          content?: Json | null
+          created_at?: string
+          id?: string
+          published_date?: string | null
+          read_time?: number | null
+          related_peptides?: string[] | null
+          slug: string
+          summary?: string | null
+          table_of_contents?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          author_role?: string | null
+          category?: string
+          category_label?: string | null
+          citations?: Json | null
+          content?: Json | null
+          created_at?: string
+          id?: string
+          published_date?: string | null
+          read_time?: number | null
+          related_peptides?: string[] | null
+          slug?: string
+          summary?: string | null
+          table_of_contents?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      batches: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          lab_name: string | null
+          product_id: string | null
+          product_name: string
+          purity_result: number
+          report_url: string | null
+          test_date: string
+          test_method: string | null
+          vendor_id: string | null
+          vendor_name: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          lab_name?: string | null
+          product_id?: string | null
+          product_name: string
+          purity_result: number
+          report_url?: string | null
+          test_date: string
+          test_method?: string | null
+          vendor_id?: string | null
+          vendor_name: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          lab_name?: string | null
+          product_id?: string | null
+          product_name?: string
+          purity_result?: number
+          report_url?: string | null
+          test_date?: string
+          test_method?: string | null
+          vendor_id?: string | null
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "batches_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batches_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          half_life: string | null
+          id: string
+          is_popular: boolean | null
+          molecular_weight: string | null
+          name: string
+          purity_standard: string | null
+          sequence: string | null
+          slug: string
+          synonyms: string[] | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          half_life?: string | null
+          id?: string
+          is_popular?: boolean | null
+          molecular_weight?: string | null
+          name: string
+          purity_standard?: string | null
+          sequence?: string | null
+          slug: string
+          synonyms?: string[] | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          half_life?: string | null
+          id?: string
+          is_popular?: boolean | null
+          molecular_weight?: string | null
+          name?: string
+          purity_standard?: string | null
+          sequence?: string | null
+          slug?: string
+          synonyms?: string[] | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          coa_verified: boolean | null
+          created_at: string
+          description: string | null
+          discount_code: string | null
+          id: string
+          last_verified: string | null
+          location: string | null
+          logo_url: string | null
+          name: string
+          payment_methods: string[] | null
+          peptides: string[] | null
+          price_per_mg: number | null
+          purity_score: number | null
+          region: string
+          shipping_methods: string[] | null
+          shipping_regions: string[] | null
+          slug: string
+          status: string
+          updated_at: string
+          website: string | null
+          year_founded: string | null
+        }
+        Insert: {
+          coa_verified?: boolean | null
+          created_at?: string
+          description?: string | null
+          discount_code?: string | null
+          id?: string
+          last_verified?: string | null
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          payment_methods?: string[] | null
+          peptides?: string[] | null
+          price_per_mg?: number | null
+          purity_score?: number | null
+          region?: string
+          shipping_methods?: string[] | null
+          shipping_regions?: string[] | null
+          slug: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: string | null
+        }
+        Update: {
+          coa_verified?: boolean | null
+          created_at?: string
+          description?: string | null
+          discount_code?: string | null
+          id?: string
+          last_verified?: string | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          payment_methods?: string[] | null
+          peptides?: string[] | null
+          price_per_mg?: number | null
+          purity_score?: number | null
+          region?: string
+          shipping_methods?: string[] | null
+          shipping_regions?: string[] | null
+          slug?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +417,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

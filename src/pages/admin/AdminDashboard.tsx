@@ -30,11 +30,11 @@ const navItems = [
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<AdminSection>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { adminLogout } = useAdminAuth();
+  const { adminLogout, user } = useAdminAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    adminLogout();
+  const handleLogout = async () => {
+    await adminLogout();
     navigate('/admin');
   };
 
@@ -99,8 +99,13 @@ export default function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Logout */}
+        {/* User Info & Logout */}
         <div className="p-4 border-t border-[hsl(215,25%,20%)]">
+          {sidebarOpen && user && (
+            <p className="text-xs text-[hsl(215,20%,50%)] mb-3 truncate">
+              {user.email}
+            </p>
+          )}
           <button
             onClick={handleLogout}
             className={cn(

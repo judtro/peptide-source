@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -35,11 +35,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { vendors as initialVendors } from '@/data/vendors';
-import type { Vendor, VendorStatus, Region } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+import type { VendorStatus, Region } from '@/types';
 import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+
+interface DbVendor {
+  id: string;
+  name: string;
+  slug: string;
+  region: string;
+  status: string;
+  website: string | null;
+  discount_code: string | null;
+}
 
 const statusConfig: Record<VendorStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
   verified: { icon: CheckCircle2, color: 'text-success', label: 'Verified' },
@@ -68,22 +78,45 @@ const emptyFormData: VendorFormData = {
 };
 
 export default function AdminVendors() {
-  const [vendorList, setVendorList] = useState<Vendor[]>(initialVendors);
+  const [vendorList, setVendorList] = useState<DbVendor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [deleteVendor, setDeleteVendor] = useState<Vendor | null>(null);
+  const [editingVendor, setEditingVendor] = useState<DbVendor | null>(null);
+  const [deleteVendor, setDeleteVendor] = useState<DbVendor | null>(null);
   const [formData, setFormData] = useState<VendorFormData>(emptyFormData);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleOpenForm = (vendor?: Vendor) => {
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('id, name, slug, region, status, website, discount_code')
+        .order('name');
+
+      if (error) throw error;
+      setVendorList(data || []);
+    } catch (err) {
+      console.error('Error fetching vendors:', err);
+      toast.error('Failed to load vendors');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenForm = (vendor?: DbVendor) => {
     if (vendor) {
       setEditingVendor(vendor);
       setFormData({
         name: vendor.name,
-        region: vendor.region,
-        website: vendor.website,
-        status: vendor.status,
-        discountCode: vendor.discountCode,
+        region: vendor.region as Region,
+        website: vendor.website || '',
+        status: vendor.status as VendorStatus,
+        discountCode: vendor.discount_code || '',
       });
     } else {
       setEditingVendor(null);
@@ -98,55 +131,82 @@ export default function AdminVendors() {
     setFormData(emptyFormData);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingVendor) {
-      // Update existing vendor
-      setVendorList(prev =>
-        prev.map(v =>
-          v.id === editingVendor.id
-            ? { ...v, ...formData }
-            : v
-        )
-      );
-      toast.success(`Vendor "${formData.name}" updated successfully`);
-    } else {
-      // Add new vendor
-      const newVendor: Vendor = {
-        id: `vendor-${Date.now()}`,
-        slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
-        name: formData.name,
-        region: formData.region,
-        shippingRegions: [formData.region],
-        purityScore: 0,
-        coaVerified: false,
-        pricePerMg: 0,
-        status: formData.status,
-        website: formData.website,
-        peptides: [],
-        lastVerified: new Date().toISOString().split('T')[0],
-        discountCode: formData.discountCode,
-        description: '',
-        location: formData.region,
-        yearFounded: new Date().getFullYear().toString(),
-        shippingMethods: [],
-        paymentMethods: [],
-      };
-      setVendorList(prev => [...prev, newVendor]);
-      toast.success(`Vendor "${formData.name}" added successfully`);
+    setIsSaving(true);
+
+    try {
+      const slug = formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      if (editingVendor) {
+        const { error } = await supabase
+          .from('vendors')
+          .update({
+            name: formData.name,
+            slug,
+            region: formData.region,
+            website: formData.website || null,
+            status: formData.status,
+            discount_code: formData.discountCode || null,
+          })
+          .eq('id', editingVendor.id);
+
+        if (error) throw error;
+        toast.success(`Vendor "${formData.name}" updated successfully`);
+      } else {
+        const { error } = await supabase
+          .from('vendors')
+          .insert({
+            name: formData.name,
+            slug,
+            region: formData.region,
+            website: formData.website || null,
+            status: formData.status,
+            discount_code: formData.discountCode || null,
+          });
+
+        if (error) throw error;
+        toast.success(`Vendor "${formData.name}" added successfully`);
+      }
+
+      handleCloseForm();
+      fetchVendors();
+    } catch (err: any) {
+      console.error('Error saving vendor:', err);
+      toast.error(err.message || 'Failed to save vendor');
+    } finally {
+      setIsSaving(false);
     }
-    handleCloseForm();
   };
 
-  const handleDelete = () => {
-    if (deleteVendor) {
-      setVendorList(prev => prev.filter(v => v.id !== deleteVendor.id));
+  const handleDelete = async () => {
+    if (!deleteVendor) return;
+
+    try {
+      const { error } = await supabase
+        .from('vendors')
+        .delete()
+        .eq('id', deleteVendor.id);
+
+      if (error) throw error;
+      
       toast.success(`Vendor "${deleteVendor.name}" deleted`);
       setDeleteVendor(null);
       setIsDeleteOpen(false);
+      fetchVendors();
+    } catch (err: any) {
+      console.error('Error deleting vendor:', err);
+      toast.error(err.message || 'Failed to delete vendor');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -175,70 +235,82 @@ export default function AdminVendors() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {vendorList.map((vendor) => {
-                const statusInfo = statusConfig[vendor.status];
-                const StatusIcon = statusInfo.icon;
-                return (
-                  <TableRow key={vendor.id} className="border-[hsl(215,25%,20%)] hover:bg-[hsl(215,25%,15%)]">
-                    <TableCell className="font-medium text-[hsl(210,40%,98%)]">
-                      {vendor.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="border-[hsl(215,25%,30%)] text-[hsl(210,40%,98%)]">
-                        {vendor.region}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
-                        <span className={statusInfo.color}>{statusInfo.label}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {vendor.discountCode ? (
-                        <code className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-mono">
-                          {vendor.discountCode}
-                        </code>
-                      ) : (
-                        <span className="text-[hsl(215,20%,50%)]">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <a
-                        href={vendor.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline inline-flex items-center gap-1"
-                      >
-                        Visit <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenForm(vendor)}
-                          className="text-[hsl(215,20%,70%)] hover:text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,20%)]"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setDeleteVendor(vendor);
-                            setIsDeleteOpen(true);
-                          }}
-                          className="text-[hsl(215,20%,70%)] hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {vendorList.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-[hsl(215,20%,60%)]">
+                    No vendors found. Add your first vendor to get started.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                vendorList.map((vendor) => {
+                  const statusInfo = statusConfig[vendor.status as VendorStatus] || statusConfig.pending;
+                  const StatusIcon = statusInfo.icon;
+                  return (
+                    <TableRow key={vendor.id} className="border-[hsl(215,25%,20%)] hover:bg-[hsl(215,25%,15%)]">
+                      <TableCell className="font-medium text-[hsl(210,40%,98%)]">
+                        {vendor.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="border-[hsl(215,25%,30%)] text-[hsl(210,40%,98%)]">
+                          {vendor.region}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
+                          <span className={statusInfo.color}>{statusInfo.label}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {vendor.discount_code ? (
+                          <code className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-mono">
+                            {vendor.discount_code}
+                          </code>
+                        ) : (
+                          <span className="text-[hsl(215,20%,50%)]">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {vendor.website ? (
+                          <a
+                            href={vendor.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline inline-flex items-center gap-1"
+                          >
+                            Visit <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <span className="text-[hsl(215,20%,50%)]">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenForm(vendor)}
+                            className="text-[hsl(215,20%,70%)] hover:text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,20%)]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setDeleteVendor(vendor);
+                              setIsDeleteOpen(true);
+                            }}
+                            className="text-[hsl(215,20%,70%)] hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -309,7 +381,6 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
                 placeholder="https://example.com"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
-                required
               />
             </div>
 
@@ -327,8 +398,10 @@ export default function AdminVendors() {
               <Button type="button" variant="outline" onClick={handleCloseForm}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {editingVendor ? 'Save Changes' : 'Add Vendor'}
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : editingVendor ? 'Save Changes' : 'Add Vendor'}
               </Button>
             </div>
           </form>
