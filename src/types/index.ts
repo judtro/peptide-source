@@ -43,6 +43,7 @@ export interface Product {
     reconstituted: string;
   };
   researchApplications: string[];
+  videoUrl?: string; // YouTube video ID for educational mechanism content
 }
 
 // ============================================

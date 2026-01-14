@@ -94,7 +94,9 @@
   },
   "products": {
     "title": "Peptydy badawcze",
-    "subtitle": "Szczegółowe informacje molekularne i listy zweryfikowanych dostawców"
+    "subtitle": "Szczegółowe informacje molekularne i listy zweryfikowanych dostawców",
+    "video_section_title": "Mechanizm działania (Edukacyjny)",
+    "video_disclaimer": "Ten materiał jest udostępniany wyłącznie jako edukacyjne odniesienie do chemicznego mechanizmu działania. Nie stanowi porady medycznej ani rekomendacji do spożycia przez ludzi."
   },
   "calculator": {
     "title": "Kalkulator rekonstytucji peptydów",

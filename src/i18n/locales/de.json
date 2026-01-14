@@ -94,7 +94,9 @@
   },
   "products": {
     "title": "Forschungspeptide",
-    "subtitle": "Detaillierte molekulare Informationen und verifizierte Anbieterlisten"
+    "subtitle": "Detaillierte molekulare Informationen und verifizierte Anbieterlisten",
+    "video_section_title": "Wirkmechanismus (Bildung)",
+    "video_disclaimer": "Dieses Medium dient nur als pädagogische Referenz zum chemischen Wirkmechanismus. Es stellt keine medizinische Beratung oder Empfehlung für den menschlichen Verzehr dar."
   },
   "calculator": {
     "title": "Peptid-Rekonstitutionsrechner",

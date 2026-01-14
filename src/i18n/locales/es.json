@@ -94,7 +94,9 @@
   },
   "products": {
     "title": "Péptidos de investigación",
-    "subtitle": "Información molecular detallada y listados de proveedores verificados"
+    "subtitle": "Información molecular detallada y listados de proveedores verificados",
+    "video_section_title": "Mecanismo de acción (Educativo)",
+    "video_disclaimer": "Este medio se proporciona únicamente como referencia educativa sobre el mecanismo de acción químico. No constituye consejo médico ni una aprobación para el consumo humano."
   },
   "calculator": {
     "title": "Calculadora de reconstitución de péptidos",

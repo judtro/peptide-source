@@ -94,7 +94,9 @@
   },
   "products": {
     "title": "Peptides de recherche",
-    "subtitle": "Informations moléculaires détaillées et listes de fournisseurs vérifiés"
+    "subtitle": "Informations moléculaires détaillées et listes de fournisseurs vérifiés",
+    "video_section_title": "Mécanisme d'action (Éducatif)",
+    "video_disclaimer": "Ce média est fourni à titre de référence éducative concernant le mécanisme d'action chimique uniquement. Il ne constitue pas un avis médical ni une approbation pour la consommation humaine."
   },
   "calculator": {
     "title": "Calculateur de reconstitution de peptides",
