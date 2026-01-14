@@ -1,40 +1,86 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { vendors } from '@/data/vendors';
-import { batches } from '@/data/batches';
-import { articles } from '@/data/articles';
-import { products } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
 import { Store, FileCheck, FileText, FlaskConical, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
 
-export default function AdminOverview() {
-  const verifiedVendors = vendors.filter(v => v.status === 'verified').length;
-  const pendingVendors = vendors.filter(v => v.status === 'pending').length;
-  const warningVendors = vendors.filter(v => v.status === 'warning').length;
+interface Stats {
+  totalVendors: number;
+  totalBatches: number;
+  totalProducts: number;
+  totalArticles: number;
+  verifiedVendors: number;
+  pendingVendors: number;
+  warningVendors: number;
+}
 
-  const stats = [
+export default function AdminOverview() {
+  const [stats, setStats] = useState<Stats>({
+    totalVendors: 0,
+    totalBatches: 0,
+    totalProducts: 0,
+    totalArticles: 0,
+    verifiedVendors: 0,
+    pendingVendors: 0,
+    warningVendors: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [vendorsRes, batchesRes, productsRes, articlesRes] = await Promise.all([
+        supabase.from('vendors').select('status'),
+        supabase.from('batches').select('id', { count: 'exact', head: true }),
+        supabase.from('products').select('id', { count: 'exact', head: true }),
+        supabase.from('articles').select('id', { count: 'exact', head: true }),
+      ]);
+
+      const vendors = vendorsRes.data || [];
+      
+      setStats({
+        totalVendors: vendors.length,
+        totalBatches: batchesRes.count || 0,
+        totalProducts: productsRes.count || 0,
+        totalArticles: articlesRes.count || 0,
+        verifiedVendors: vendors.filter(v => v.status === 'verified').length,
+        pendingVendors: vendors.filter(v => v.status === 'pending').length,
+        warningVendors: vendors.filter(v => v.status === 'warning').length,
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const statCards = [
     {
       title: 'Total Vendors',
-      value: vendors.length,
+      value: stats.totalVendors,
       icon: Store,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
     {
       title: 'Total Audits',
-      value: batches.length,
+      value: stats.totalBatches,
       icon: FileCheck,
       color: 'text-success',
       bgColor: 'bg-success/10',
     },
     {
       title: 'Products',
-      value: products.length,
+      value: stats.totalProducts,
       icon: FlaskConical,
       color: 'text-[hsl(201,96%,50%)]',
       bgColor: 'bg-[hsl(201,96%,50%,0.1)]',
     },
     {
       title: 'Articles',
-      value: articles.length,
+      value: stats.totalArticles,
       icon: FileText,
       color: 'text-[hsl(45,93%,47%)]',
       bgColor: 'bg-[hsl(45,93%,47%,0.1)]',
@@ -42,16 +88,24 @@ export default function AdminOverview() {
   ];
 
   const vendorBreakdown = [
-    { label: 'Verified', value: verifiedVendors, icon: CheckCircle2, color: 'text-success' },
-    { label: 'Pending Review', value: pendingVendors, icon: Clock, color: 'text-[hsl(45,93%,47%)]' },
-    { label: 'Warning Status', value: warningVendors, icon: AlertTriangle, color: 'text-destructive' },
+    { label: 'Verified', value: stats.verifiedVendors, icon: CheckCircle2, color: 'text-success' },
+    { label: 'Pending Review', value: stats.pendingVendors, icon: Clock, color: 'text-[hsl(45,93%,47%)]' },
+    { label: 'Warning Status', value: stats.warningVendors, icon: AlertTriangle, color: 'text-destructive' },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <Card key={stat.title} className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-[hsl(215,20%,70%)]">
@@ -91,7 +145,7 @@ export default function AdminOverview() {
         </CardContent>
       </Card>
 
-      {/* Recent Activity Placeholder */}
+      {/* Quick Actions */}
       <Card className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
         <CardHeader>
           <CardTitle className="text-[hsl(210,40%,98%)]">Quick Actions</CardTitle>

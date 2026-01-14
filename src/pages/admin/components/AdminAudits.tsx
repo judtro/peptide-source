@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -25,16 +25,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { batches as initialBatches } from '@/data/batches';
-import { vendors } from '@/data/vendors';
-import { products } from '@/data/products';
-import type { BatchRecord } from '@/types';
-import { Plus, ExternalLink, FileCheck, FlaskConical, Calendar } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, ExternalLink, FileCheck, FlaskConical, Calendar, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+interface DbBatch {
+  id: string;
+  batch_id: string;
+  vendor_name: string;
+  product_name: string;
+  test_date: string;
+  purity_result: number;
+  report_url: string | null;
+  lab_name: string | null;
+  test_method: string | null;
+}
+
+interface DbVendor {
+  id: string;
+  name: string;
+}
+
+interface DbProduct {
+  id: string;
+  name: string;
+}
 
 interface AuditFormData {
+  vendorId: string;
   vendorName: string;
+  productId: string;
   productName: string;
   testDate: string;
   purityResult: string;
@@ -44,7 +75,9 @@ interface AuditFormData {
 }
 
 const emptyFormData: AuditFormData = {
+  vendorId: '',
   vendorName: '',
+  productId: '',
   productName: '',
   testDate: new Date().toISOString().split('T')[0],
   purityResult: '',
@@ -54,32 +87,120 @@ const emptyFormData: AuditFormData = {
 };
 
 export default function AdminAudits() {
-  const [auditList, setAuditList] = useState<BatchRecord[]>(initialBatches);
+  const [auditList, setAuditList] = useState<DbBatch[]>([]);
+  const [vendors, setVendors] = useState<DbVendor[]>([]);
+  const [products, setProducts] = useState<DbProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState<AuditFormData>(emptyFormData);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deleteAudit, setDeleteAudit] = useState<DbBatch | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [batchesRes, vendorsRes, productsRes] = await Promise.all([
+        supabase.from('batches').select('*').order('test_date', { ascending: false }),
+        supabase.from('vendors').select('id, name').order('name'),
+        supabase.from('products').select('id, name').order('name'),
+      ]);
+
+      if (batchesRes.error) throw batchesRes.error;
+      if (vendorsRes.error) throw vendorsRes.error;
+      if (productsRes.error) throw productsRes.error;
+
+      setAuditList(batchesRes.data || []);
+      setVendors(vendorsRes.data || []);
+      setProducts(productsRes.data || []);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      toast.error('Failed to load data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setFormData(emptyFormData);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleVendorChange = (vendorId: string) => {
+    const vendor = vendors.find(v => v.id === vendorId);
+    setFormData(prev => ({
+      ...prev,
+      vendorId,
+      vendorName: vendor?.name || '',
+    }));
+  };
+
+  const handleProductChange = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    setFormData(prev => ({
+      ...prev,
+      productId,
+      productName: product?.name || '',
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const newAudit: BatchRecord = {
-      batchId: `BATCH-${Date.now()}`,
-      vendorName: formData.vendorName,
-      productName: formData.productName,
-      testDate: formData.testDate,
-      purityResult: parseFloat(formData.purityResult),
-      reportUrl: formData.reportUrl,
-      labName: formData.labName,
-      testMethod: formData.testMethod,
-    };
-    
-    setAuditList(prev => [newAudit, ...prev]);
-    toast.success(`Audit for ${formData.productName} logged successfully`);
-    handleCloseForm();
+    setIsSaving(true);
+
+    try {
+      const batchId = `BATCH-${Date.now()}`;
+      
+      const { error } = await supabase
+        .from('batches')
+        .insert({
+          batch_id: batchId,
+          vendor_id: formData.vendorId || null,
+          vendor_name: formData.vendorName,
+          product_id: formData.productId || null,
+          product_name: formData.productName,
+          test_date: formData.testDate,
+          purity_result: parseFloat(formData.purityResult),
+          report_url: formData.reportUrl || null,
+          lab_name: formData.labName || null,
+          test_method: formData.testMethod || null,
+        });
+
+      if (error) throw error;
+      
+      toast.success(`Audit for ${formData.productName} logged successfully`);
+      handleCloseForm();
+      fetchData();
+    } catch (err: any) {
+      console.error('Error saving audit:', err);
+      toast.error(err.message || 'Failed to save audit');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteAudit) return;
+
+    try {
+      const { error } = await supabase
+        .from('batches')
+        .delete()
+        .eq('id', deleteAudit.id);
+
+      if (error) throw error;
+      
+      toast.success(`Audit "${deleteAudit.batch_id}" deleted`);
+      setDeleteAudit(null);
+      setIsDeleteOpen(false);
+      fetchData();
+    } catch (err: any) {
+      console.error('Error deleting audit:', err);
+      toast.error(err.message || 'Failed to delete audit');
+    }
   };
 
   const getPurityColor = (purity: number) => {
@@ -87,6 +208,14 @@ export default function AdminAudits() {
     if (purity >= 97) return 'text-[hsl(45,93%,47%)]';
     return 'text-destructive';
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -128,42 +257,60 @@ export default function AdminAudits() {
                   <TableHead className="text-[hsl(215,20%,70%)]">Purity</TableHead>
                   <TableHead className="text-[hsl(215,20%,70%)]">Lab</TableHead>
                   <TableHead className="text-[hsl(215,20%,70%)]">Report</TableHead>
+                  <TableHead className="text-[hsl(215,20%,70%)] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {auditList.map((audit) => (
-                  <TableRow key={audit.batchId} className="border-[hsl(215,25%,20%)] hover:bg-[hsl(215,25%,15%)]">
+                  <TableRow key={audit.id} className="border-[hsl(215,25%,20%)] hover:bg-[hsl(215,25%,15%)]">
                     <TableCell>
-                      <code className="text-xs font-mono text-primary">{audit.batchId}</code>
+                      <code className="text-xs font-mono text-primary">{audit.batch_id}</code>
                     </TableCell>
-                    <TableCell className="text-[hsl(210,40%,98%)]">{audit.vendorName}</TableCell>
+                    <TableCell className="text-[hsl(210,40%,98%)]">{audit.vendor_name}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="border-[hsl(215,25%,30%)] text-[hsl(210,40%,98%)]">
                         <FlaskConical className="h-3 w-3 mr-1" />
-                        {audit.productName}
+                        {audit.product_name}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-[hsl(215,20%,70%)]">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {audit.testDate}
+                        {audit.test_date}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`font-mono font-bold ${getPurityColor(audit.purityResult)}`}>
-                        {audit.purityResult.toFixed(1)}%
+                      <span className={`font-mono font-bold ${getPurityColor(audit.purity_result)}`}>
+                        {audit.purity_result.toFixed(1)}%
                       </span>
                     </TableCell>
-                    <TableCell className="text-[hsl(215,20%,70%)]">{audit.labName}</TableCell>
+                    <TableCell className="text-[hsl(215,20%,70%)]">{audit.lab_name || '—'}</TableCell>
                     <TableCell>
-                      <a
-                        href={audit.reportUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline inline-flex items-center gap-1"
+                      {audit.report_url ? (
+                        <a
+                          href={audit.report_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          View <ExternalLink className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <span className="text-[hsl(215,20%,50%)]">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setDeleteAudit(audit);
+                          setIsDeleteOpen(true);
+                        }}
+                        className="text-[hsl(215,20%,70%)] hover:text-destructive hover:bg-destructive/10"
                       >
-                        View <ExternalLink className="h-3 w-3" />
-                      </a>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -187,16 +334,15 @@ export default function AdminAudits() {
               <div className="space-y-2">
                 <Label>Vendor</Label>
                 <Select
-                  value={formData.vendorName}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, vendorName: value }))}
-                  required
+                  value={formData.vendorId}
+                  onValueChange={handleVendorChange}
                 >
                   <SelectTrigger className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]">
                     <SelectValue placeholder="Select vendor" />
                   </SelectTrigger>
                   <SelectContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
                     {vendors.map(v => (
-                      <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>
+                      <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -205,16 +351,15 @@ export default function AdminAudits() {
               <div className="space-y-2">
                 <Label>Product</Label>
                 <Select
-                  value={formData.productName}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, productName: value }))}
-                  required
+                  value={formData.productId}
+                  onValueChange={handleProductChange}
                 >
                   <SelectTrigger className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]">
                     <SelectValue placeholder="Select product" />
                   </SelectTrigger>
                   <SelectContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
                     {products.map(p => (
-                      <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -293,7 +438,6 @@ export default function AdminAudits() {
                 onChange={(e) => setFormData(prev => ({ ...prev, reportUrl: e.target.value }))}
                 placeholder="https://example.com/report.pdf"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
-                required
               />
             </div>
 
@@ -301,14 +445,41 @@ export default function AdminAudits() {
               <Button type="button" variant="outline" onClick={handleCloseForm}>
                 Cancel
               </Button>
-              <Button type="submit">
-                <FileCheck className="mr-2 h-4 w-4" />
-                Log Audit
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <>
+                    <FileCheck className="mr-2 h-4 w-4" />
+                    Log Audit
+                  </>
+                )}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[hsl(210,40%,98%)]">Delete Audit?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[hsl(215,20%,60%)]">
+              This action cannot be undone. This will permanently remove audit{' '}
+              <strong className="text-[hsl(210,40%,98%)]">{deleteAudit?.batch_id}</strong>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-[hsl(215,25%,25%)] text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,17%)]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

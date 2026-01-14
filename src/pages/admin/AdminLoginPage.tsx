@@ -21,14 +21,12 @@ export default function AdminLoginPage() {
     setError('');
     setIsLoading(true);
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const success = adminLogin(email, password);
-    if (success) {
-      navigate('/admin');
+    const result = await adminLogin(email, password);
+    
+    if (result.error) {
+      setError(result.error);
     } else {
-      setError('Invalid credentials. Access denied.');
+      navigate('/admin');
     }
     setIsLoading(false);
   };
