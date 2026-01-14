@@ -98,6 +98,21 @@
     "video_section_title": "Mechanism of Action (Educational)",
     "video_disclaimer": "This media is provided for educational reference regarding the chemical mechanism of action only. It does not constitute medical advice or an endorsement for human consumption."
   },
+  "video_gallery": {
+    "title": "Scientific Video Library",
+    "subtitle": "Curated educational content explaining the mechanisms of action, research applications, and clinical findings for research peptides.",
+    "search_placeholder": "Search videos by compound name...",
+    "all_videos": "All Educational Videos",
+    "videos_available": "Videos Available",
+    "research_areas": "Research Areas",
+    "educational": "Educational",
+    "watch_now": "Watch Now",
+    "view_full_profile": "View Full Profile",
+    "no_videos_found": "No Videos Found",
+    "try_adjusting": "Try adjusting your search or filter criteria.",
+    "clear_filters": "Clear Filters",
+    "back_to_hub": "Back to Knowledge Hub"
+  },
   "calculator": {
     "title": "Peptide Reconstitution Calculator",
     "peptideAmount": "Peptide Amount",

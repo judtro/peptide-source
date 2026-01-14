@@ -98,6 +98,21 @@
     "video_section_title": "Mecanismo de acción (Educativo)",
     "video_disclaimer": "Este medio se proporciona únicamente como referencia educativa sobre el mecanismo de acción químico. No constituye consejo médico ni una aprobación para el consumo humano."
   },
+  "video_gallery": {
+    "title": "Videoteca científica",
+    "subtitle": "Contenido educativo seleccionado que explica los mecanismos de acción, aplicaciones de investigación y hallazgos clínicos de los péptidos de investigación.",
+    "search_placeholder": "Buscar videos por nombre del compuesto...",
+    "all_videos": "Todos los videos educativos",
+    "videos_available": "Videos disponibles",
+    "research_areas": "Áreas de investigación",
+    "educational": "Educativo",
+    "watch_now": "Ver ahora",
+    "view_full_profile": "Ver perfil completo",
+    "no_videos_found": "No se encontraron videos",
+    "try_adjusting": "Intenta ajustar tus criterios de búsqueda o filtro.",
+    "clear_filters": "Limpiar filtros",
+    "back_to_hub": "Volver al centro de conocimiento"
+  },
   "calculator": {
     "title": "Calculadora de reconstitución de péptidos",
     "peptideAmount": "Cantidad de péptido",

@@ -29,6 +29,8 @@ import {
   Atom,
   Thermometer,
   TestTube,
+  Video,
+  Play,
 } from 'lucide-react';
 
 const PILLAR_ICONS = {
@@ -323,24 +325,48 @@ const EducationPage = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="mt-10 rounded-xl border border-border bg-gradient-to-br from-primary/5 to-primary/10 p-6 text-center sm:mt-16 sm:p-8">
-          <div className="mx-auto max-w-md">
-            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 sm:mb-4 sm:h-12 sm:w-12">
-              <Microscope className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
-            </div>
-            <h3 className="mb-2 text-base font-semibold sm:text-lg">Verify Your Research Compounds</h3>
-            <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">
-              Apply your knowledge by verifying batch authenticity with our COA database.
-              Cross-reference your peptides with third-party analytical reports.
-            </p>
-            <Link to="/verify">
-              <Button size="sm" className="gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Verify a Batch
-              </Button>
-            </Link>
-          </div>
+        {/* Video Gallery CTA */}
+        <section className="mt-10 grid gap-6 sm:mt-16 md:grid-cols-2">
+          {/* Video Library Card */}
+          <Link to="/education/videos">
+            <Card className="group h-full cursor-pointer overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 transition-all hover:border-primary/50 hover:shadow-lg">
+              <CardContent className="flex h-full flex-col items-center justify-center p-6 text-center sm:p-8">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/20 transition-transform group-hover:scale-110">
+                  <Video className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold sm:text-xl">Educational Video Library</h3>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Browse curated scientific videos explaining peptide mechanisms, 
+                  research applications, and clinical findings.
+                </p>
+                <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                  <Play className="h-4 w-4" />
+                  Watch Now
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Batch Verification Card */}
+          <Card className="h-full border-border bg-muted/30">
+            <CardContent className="flex h-full flex-col items-center justify-center p-6 text-center sm:p-8">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <Microscope className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold sm:text-xl">Verify Your Research Compounds</h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Apply your knowledge by verifying batch authenticity with our COA database.
+                Cross-reference your peptides with third-party analytical reports.
+              </p>
+              <Link to="/verify">
+                <Button size="sm" className="gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  Verify a Batch
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </section>
 
         <Separator className="my-10 sm:my-16" />
