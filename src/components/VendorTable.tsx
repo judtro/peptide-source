@@ -11,11 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  vendors,
-  getVendorsByShippingRegion,
-  getVendorsByPeptideAndMarket,
-} from '@/data/vendors';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useVendors, filterVendorsByShippingRegion, filterVendorsByPeptide, filterVendorsByPeptideAndMarket } from '@/hooks/useVendors';
 import type { Vendor } from '@/types';
 import { useRegion } from '@/context/RegionContext';
 import {
@@ -26,7 +23,7 @@ import {
   Truck,
   ArrowRight,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MarketToggle } from './MarketToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiscountBadge } from './DiscountBadge';
@@ -51,29 +48,37 @@ export const VendorTable = ({
   const [sortKey, setSortKey] = useState<SortKey>('purityScore');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  // Determine which vendors to show
-  let filteredVendors: Vendor[];
+  const { data: allVendors = [], isLoading } = useVendors();
 
-  if (showAllRegions || showAllMarkets) {
-    filteredVendors = filterByPeptide
-      ? vendors.filter((v) => v.peptides.includes(filterByPeptide))
-      : vendors;
-  } else if (filterByPeptide) {
-    filteredVendors = getVendorsByPeptideAndMarket(filterByPeptide, region);
-  } else {
-    filteredVendors = getVendorsByShippingRegion(region);
-  }
+  // Determine which vendors to show based on filters
+  const filteredVendors = useMemo(() => {
+    let result: Vendor[];
 
-  const sortedVendors = [...filteredVendors].sort((a, b) => {
-    const aVal = a[sortKey];
-    const bVal = b[sortKey];
-    const multiplier = sortDirection === 'asc' ? 1 : -1;
-
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return aVal.localeCompare(bVal) * multiplier;
+    if (showAllRegions || showAllMarkets) {
+      result = filterByPeptide
+        ? filterVendorsByPeptide(allVendors, filterByPeptide)
+        : allVendors;
+    } else if (filterByPeptide) {
+      result = filterVendorsByPeptideAndMarket(allVendors, filterByPeptide, region);
+    } else {
+      result = filterVendorsByShippingRegion(allVendors, region);
     }
-    return ((aVal as number) - (bVal as number)) * multiplier;
-  });
+
+    return result;
+  }, [allVendors, showAllRegions, showAllMarkets, filterByPeptide, region]);
+
+  const sortedVendors = useMemo(() => {
+    return [...filteredVendors].sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      const multiplier = sortDirection === 'asc' ? 1 : -1;
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return aVal.localeCompare(bVal) * multiplier;
+      }
+      return ((aVal as number) - (bVal as number)) * multiplier;
+    });
+  }, [filteredVendors, sortKey, sortDirection]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -197,6 +202,25 @@ export const VendorTable = ({
       </div>
     </article>
   );
+
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <Card className="border-border">
+        <CardHeader className="p-4 sm:p-6">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-72 mt-2" />
+        </CardHeader>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-border">

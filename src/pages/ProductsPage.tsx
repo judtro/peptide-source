@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { ProductCard } from '@/components/ProductCard';
-import { products } from '@/data/products';
-import { vendors } from '@/data/vendors';
-import { Product } from '@/types';
+import { useProducts } from '@/hooks/useProducts';
+import { useVendors } from '@/hooks/useVendors';
+import { Product, Vendor } from '@/types';
 import {
   Dna,
   LayoutGrid,
@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sheet,
   SheetContent,
@@ -46,25 +47,6 @@ import { cn } from '@/lib/utils';
 type ViewMode = 'grid' | 'list';
 type SortOption = 'relevance' | 'name-asc' | 'price-low' | 'molecular-weight';
 
-// Get unique categories from products
-const CATEGORIES = [...new Set(products.map(p => p.category))];
-
-const getLowestPrice = (productId: string): number => {
-  const vendorsWithProduct = vendors.filter(v => v.peptides.includes(productId));
-  if (vendorsWithProduct.length === 0) return 0;
-  return Math.min(...vendorsWithProduct.map(v => v.pricePerMg));
-};
-
-const getPriceRangeText = (productId: string): string => {
-  const vendorsWithProduct = vendors.filter(v => v.peptides.includes(productId));
-  if (vendorsWithProduct.length === 0) return 'N/A';
-  const prices = vendorsWithProduct.map(v => v.pricePerMg);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  if (min === max) return `$${min.toFixed(2)}/mg`;
-  return `$${min.toFixed(2)} - $${max.toFixed(2)}/mg`;
-};
-
 const getMolecularWeightNumber = (mw: string): number => {
   const match = mw.match(/[\d.]+/);
   return match ? parseFloat(match[0]) : 0;
@@ -72,6 +54,8 @@ const getMolecularWeightNumber = (mw: string): number => {
 
 const ProductsPage = () => {
   const { t } = useTranslation();
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: vendors = [], isLoading: vendorsLoading } = useVendors();
   
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = localStorage.getItem('chemverify-view-mode');
@@ -85,6 +69,19 @@ const ProductsPage = () => {
   const [categoriesExpanded, setCategoriesExpanded] = useState(true);
   const [priceExpanded, setPriceExpanded] = useState(true);
 
+  const isLoading = productsLoading || vendorsLoading;
+
+  // Get unique categories from products
+  const categories = useMemo(() => {
+    return [...new Set(products.map(p => p.category))].sort();
+  }, [products]);
+
+  const getLowestPrice = (productId: string): number => {
+    const vendorsWithProduct = vendors.filter(v => v.peptides.includes(productId));
+    if (vendorsWithProduct.length === 0) return 0;
+    return Math.min(...vendorsWithProduct.map(v => v.pricePerMg));
+  };
+
   useEffect(() => {
     localStorage.setItem('chemverify-view-mode', viewMode);
   }, [viewMode]);
@@ -97,7 +94,7 @@ const ProductsPage = () => {
       min: Math.min(...allPrices, 0),
       max: Math.max(...allPrices, 1),
     };
-  }, []);
+  }, [products, vendors]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -129,7 +126,7 @@ const ProductsPage = () => {
     }
 
     return result;
-  }, [selectedCategories, priceRange, sortBy, priceBounds]);
+  }, [products, selectedCategories, priceRange, sortBy, priceBounds, vendors]);
 
   const hasActiveFilters = selectedCategories.length > 0 || 
     priceRange[0] > priceBounds.min || priceRange[1] < priceBounds.max;
@@ -156,7 +153,7 @@ const ProductsPage = () => {
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
           <div className="space-y-2">
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <div key={category} className="flex items-center gap-2">
                 <Checkbox
                   id={`category-${category}`}
@@ -218,6 +215,28 @@ const ProductsPage = () => {
       )}
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <Layout
+        title="Research Peptides Database | ChemVerify"
+        description="Browse verified research peptides with detailed molecular information and verified vendor listings."
+      >
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <Skeleton className="h-12 w-12 rounded-lg" />
+            <Skeleton className="h-8 w-48 mt-4" />
+            <Skeleton className="h-4 w-72 mt-2" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-64 w-full" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout

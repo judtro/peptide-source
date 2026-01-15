@@ -1,15 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Layout } from '@/components/Layout';
-import { getVendorBySlug, Vendor } from '@/data/vendors';
-import { products } from '@/data/products';
-import type { Product } from '@/types';
+import { useVendor } from '@/hooks/useVendors';
+import { useProducts } from '@/hooks/useProducts';
+import type { Product, Vendor } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { DiscountBadge } from '@/components/DiscountBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -29,7 +30,10 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 const VendorDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const vendor = slug ? getVendorBySlug(slug) : undefined;
+  const { data: vendor, isLoading: vendorLoading } = useVendor(slug || '');
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+
+  const isLoading = vendorLoading || productsLoading;
 
   // Generate JSON-LD schemas for SEO
   const jsonLdSchemas = useMemo(() => {
@@ -59,6 +63,28 @@ const VendorDetailPage = () => {
     return [breadcrumbSchema, organizationSchema];
   }, [vendor]);
 
+  if (isLoading) {
+    return (
+      <Layout
+        title="Loading... | ChemVerify"
+        description="Loading vendor details."
+      >
+        <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
+            <div className="lg:col-span-2">
+              <Skeleton className="h-48 w-full mb-6" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+            <div className="lg:col-span-1">
+              <Skeleton className="h-80 w-full" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!vendor) {
     return (
       <Layout
@@ -87,7 +113,13 @@ const VendorDetailPage = () => {
   );
 
   const getRegionFlag = (region: string) => {
-    return region === 'US' ? '🇺🇸' : '🇪🇺';
+    switch (region) {
+      case 'US': return '🇺🇸';
+      case 'EU': return '🇪🇺';
+      case 'UK': return '🇬🇧';
+      case 'CA': return '🇨🇦';
+      default: return '🌍';
+    }
   };
 
   const getStatusInfo = (status: Vendor['status']) => {
@@ -297,11 +329,11 @@ const VendorDetailPage = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-lg font-semibold">
-                      {new Date(vendor.lastVerified).toLocaleDateString('en-US', {
+                      {vendor.lastVerified ? new Date(vendor.lastVerified).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
-                      })}
+                      }) : 'N/A'}
                     </p>
                   </CardContent>
                 </Card>

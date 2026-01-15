@@ -5,13 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { articles, EDUCATION_PILLARS, getArticleCountByCategory } from '@/data/articles';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useArticles, getArticleCountByCategory } from '@/hooks/useArticles';
+import { EDUCATION_PILLARS } from '@/data/articles';
 import type { Article } from '@/types';
 import {
   Beaker,
@@ -45,10 +41,27 @@ const CATEGORY_COLORS: Record<Article['category'], string> = {
 
 const EducationPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<Article['category'] | 'all'>('all');
+  const { data: articles = [], isLoading } = useArticles();
 
   const filteredArticles = selectedCategory === 'all' 
     ? articles 
     : articles.filter(a => a.category === selectedCategory);
+
+  if (isLoading) {
+    return (
+      <Layout title="Research Knowledge Hub | ChemVerify Education" description="Loading...">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="mb-8 text-center">
+            <Skeleton className="h-8 w-48 mx-auto mb-4" />
+            <Skeleton className="h-12 w-96 mx-auto" />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48" />)}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout
@@ -77,7 +90,7 @@ const EducationPage = () => {
           <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {EDUCATION_PILLARS.map((pillar) => {
               const IconComponent = PILLAR_ICONS[pillar.icon as keyof typeof PILLAR_ICONS] || Beaker;
-              const articleCount = getArticleCountByCategory(pillar.id as Article['category']);
+              const articleCount = getArticleCountByCategory(articles, pillar.id as Article['category']);
               const isSelected = selectedCategory === pillar.id;
               
               return (
@@ -127,12 +140,7 @@ const EducationPage = () => {
             </div>
             <div className="flex items-center gap-2">
               {selectedCategory !== 'all' && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setSelectedCategory('all')}
-                  className="gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => setSelectedCategory('all')} className="gap-2">
                   <Filter className="h-4 w-4" />
                   Clear Filter
                 </Button>
@@ -149,32 +157,21 @@ const EducationPage = () => {
               <Link key={article.id} to={`/education/${article.slug}`}>
                 <Card className="group h-full transition-all hover:border-primary/50 hover:shadow-md">
                   <div className="relative h-32 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/5 to-primary/10">
-                    <Badge 
-                      className={`absolute right-3 top-3 text-xs border ${CATEGORY_COLORS[article.category]}`}
-                      variant="outline"
-                    >
+                    <Badge className={`absolute right-3 top-3 text-xs border ${CATEGORY_COLORS[article.category]}`} variant="outline">
                       {article.categoryLabel}
                     </Badge>
                   </div>
-
                   <CardHeader className="pb-3">
-                    <CardTitle className="line-clamp-2 text-lg transition-colors group-hover:text-primary">
-                      {article.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2 text-sm">
-                      {article.summary}
-                    </CardDescription>
+                    <CardTitle className="line-clamp-2 text-lg transition-colors group-hover:text-primary">{article.title}</CardTitle>
+                    <CardDescription className="line-clamp-2 text-sm">{article.summary}</CardDescription>
                   </CardHeader>
-
                   <CardContent>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
                         {article.readTime} min read
                       </div>
-                      <span>
-                        {new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                      </span>
+                      <span>{new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -191,13 +188,8 @@ const EducationPage = () => {
                   <Video className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold sm:text-xl">Educational Video Library</h3>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  Browse curated scientific videos explaining peptide mechanisms and research applications.
-                </p>
-                <Button className="gap-2">
-                  <Play className="h-4 w-4" />
-                  Browse Videos
-                </Button>
+                <p className="mb-4 text-sm text-muted-foreground">Browse curated scientific videos explaining peptide mechanisms.</p>
+                <Button className="gap-2"><Play className="h-4 w-4" />Browse Videos</Button>
               </CardContent>
             </Card>
           </Link>
