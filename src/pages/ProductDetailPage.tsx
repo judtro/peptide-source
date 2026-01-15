@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
-import { getProductById } from '@/data/products';
+import { useProduct } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dna,
   ArrowLeft,
@@ -27,7 +28,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 const ProductDetailPage = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const product = getProductById(id || '');
+  const { data: product, isLoading } = useProduct(id || '');
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
@@ -42,6 +43,28 @@ const ProductDetailPage = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (isLoading) {
+    return (
+      <Layout 
+        title="Loading... | ChemVerify"
+        description="Loading product details."
+      >
+        <div className="container mx-auto max-w-7xl px-4 py-8">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="space-y-8 lg:col-span-2">
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+            <div className="space-y-6">
+              <Skeleton className="h-48 w-full" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!product) {
     return (
