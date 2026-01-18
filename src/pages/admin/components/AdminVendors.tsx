@@ -40,6 +40,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { VendorStatus, Region } from '@/types';
 import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -48,6 +49,7 @@ interface DbVendor {
   name: string;
   slug: string;
   region: string;
+  shipping_regions: string[] | null;
   status: string;
   website: string | null;
   discount_code: string | null;
@@ -72,6 +74,8 @@ const vendorSchema = z.object({
     .max(100, 'Vendor name must be less than 100 characters')
     .regex(/^[a-zA-Z0-9\s\-_.&']+$/, 'Vendor name contains invalid characters'),
   region: z.enum(['US', 'EU', 'UK', 'CA']),
+  shippingRegions: z.array(z.enum(['US', 'EU', 'UK', 'CA']))
+    .min(1, 'At least one shipping region is required'),
   website: z.string()
     .max(500, 'Website URL is too long')
     .refine(val => !val || /^https?:\/\/.+/.test(val), 'Website must be a valid URL starting with http:// or https://')
@@ -92,6 +96,7 @@ const vendorSchema = z.object({
 interface VendorFormData {
   name: string;
   region: Region;
+  shippingRegions: Region[];
   website: string;
   status: VendorStatus;
   discountCode: string;
@@ -101,6 +106,7 @@ interface VendorFormData {
 const emptyFormData: VendorFormData = {
   name: '',
   region: 'US',
+  shippingRegions: ['US'],
   website: '',
   status: 'pending',
   discountCode: '',
@@ -127,7 +133,7 @@ export default function AdminVendors() {
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, slug, region, status, website, discount_code, description')
+        .select('id, name, slug, region, shipping_regions, status, website, discount_code, description')
         .order('name');
 
       if (error) throw error;
@@ -147,6 +153,7 @@ export default function AdminVendors() {
       setFormData({
         name: vendor.name,
         region: vendor.region as Region,
+        shippingRegions: (vendor.shipping_regions || [vendor.region]) as Region[],
         website: vendor.website || '',
         status: vendor.status as VendorStatus,
         discountCode: vendor.discount_code || '',
@@ -238,6 +245,7 @@ export default function AdminVendors() {
             name: formData.name.trim(),
             slug,
             region: formData.region,
+            shipping_regions: formData.shippingRegions,
             website: formData.website.trim() || null,
             status: formData.status,
             discount_code: formData.discountCode.trim() || null,
@@ -254,6 +262,7 @@ export default function AdminVendors() {
             name: formData.name.trim(),
             slug,
             region: formData.region,
+            shipping_regions: formData.shippingRegions,
             website: formData.website.trim() || null,
             status: formData.status,
             discount_code: formData.discountCode.trim() || null,
@@ -438,7 +447,7 @@ export default function AdminVendors() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Region</Label>
+                <Label>Warehouse Region</Label>
                 <Select
                   value={formData.region}
                   onValueChange={(value: Region) => setFormData(prev => ({ ...prev, region: value }))}
@@ -470,6 +479,41 @@ export default function AdminVendors() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Ships To</Label>
+              <div className="flex flex-wrap gap-4 pt-1">
+                {regions.map(r => {
+                  const isChecked = formData.shippingRegions.includes(r);
+                  return (
+                    <div key={r} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`shipping-${r}`}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            shippingRegions: checked
+                              ? [...prev.shippingRegions, r]
+                              : prev.shippingRegions.filter(reg => reg !== r)
+                          }));
+                        }}
+                        className="border-[hsl(215,25%,30%)] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                      <label
+                        htmlFor={`shipping-${r}`}
+                        className="text-sm text-[hsl(210,40%,98%)] cursor-pointer"
+                      >
+                        {r}
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+              {formErrors.shippingRegions && (
+                <p className="text-xs text-destructive">{formErrors.shippingRegions}</p>
+              )}
             </div>
 
             <div className="space-y-2">
