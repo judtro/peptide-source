@@ -3,11 +3,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FlaskConical, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
-const ACCESS_PASSWORD = 'chem2026';
-const STORAGE_KEY = 'site_access';
+const STORAGE_KEY = 'site_access_token';
 
-const passwordSchema = z.string().min(1, 'Please enter a password');
+const passwordSchema = z.string().min(1, 'Please enter a password').max(100, 'Password too long');
 
 interface UnderConstructionProps {
   onAccessGranted: () => void;
@@ -18,7 +18,7 @@ const UnderConstruction = ({ onAccessGranted }: UnderConstructionProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -30,16 +30,27 @@ const UnderConstruction = ({ onAccessGranted }: UnderConstructionProps) => {
 
     setIsLoading(true);
 
-    // Simulate brief loading for UX
-    setTimeout(() => {
-      if (password === ACCESS_PASSWORD) {
-        localStorage.setItem(STORAGE_KEY, 'true');
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('verify-site-access', {
+        body: { password },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || 'Verification failed');
+      }
+
+      if (data?.success && data?.token) {
+        localStorage.setItem(STORAGE_KEY, data.token);
         onAccessGranted();
       } else {
-        setError('Invalid Credentials');
-        setIsLoading(false);
+        setError(data?.error || 'Invalid Credentials');
       }
-    }, 500);
+    } catch (err) {
+      console.error('Access verification error:', err);
+      setError('Verification failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
