@@ -34,7 +34,33 @@ const AdminRoute = lazy(() => import("./pages/admin/AdminRoute"));
 
 const queryClient = new QueryClient();
 
-const STORAGE_KEY = 'site_access';
+const STORAGE_KEY = 'site_access_token';
+const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// Validate the stored token format and expiration
+const isValidToken = (token: string | null): boolean => {
+  if (!token) return false;
+  
+  // Token format: timestamp:hash
+  const parts = token.split(':');
+  if (parts.length !== 2) return false;
+  
+  const timestamp = parseInt(parts[0], 10);
+  if (isNaN(timestamp)) return false;
+  
+  // Check if token has expired (24 hours)
+  const now = Date.now();
+  if (now - timestamp > TOKEN_EXPIRY_MS) {
+    localStorage.removeItem(STORAGE_KEY);
+    return false;
+  }
+  
+  // Verify hash exists and has correct length (32 hex chars)
+  const hash = parts[1];
+  if (!hash || hash.length !== 32 || !/^[a-f0-9]+$/.test(hash)) return false;
+  
+  return true;
+};
 
 // Loading fallback component
 const PageLoader = () => (
@@ -45,7 +71,8 @@ const PageLoader = () => (
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem(STORAGE_KEY) === 'true';
+    const token = localStorage.getItem(STORAGE_KEY);
+    return isValidToken(token);
   });
 
   const handleAccessGranted = () => {
