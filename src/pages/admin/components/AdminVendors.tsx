@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -37,7 +38,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import type { VendorStatus, Region } from '@/types';
-import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
@@ -49,6 +50,7 @@ interface DbVendor {
   status: string;
   website: string | null;
   discount_code: string | null;
+  description: string | null;
 }
 
 const statusConfig: Record<VendorStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
@@ -67,6 +69,7 @@ interface VendorFormData {
   website: string;
   status: VendorStatus;
   discountCode: string;
+  description: string;
 }
 
 const emptyFormData: VendorFormData = {
@@ -75,6 +78,7 @@ const emptyFormData: VendorFormData = {
   website: '',
   status: 'pending',
   discountCode: '',
+  description: '',
 };
 
 export default function AdminVendors() {
@@ -86,6 +90,7 @@ export default function AdminVendors() {
   const [deleteVendor, setDeleteVendor] = useState<DbVendor | null>(null);
   const [formData, setFormData] = useState<VendorFormData>(emptyFormData);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   useEffect(() => {
     fetchVendors();
@@ -95,7 +100,7 @@ export default function AdminVendors() {
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, slug, region, status, website, discount_code')
+        .select('id, name, slug, region, status, website, discount_code, description')
         .order('name');
 
       if (error) throw error;
@@ -117,6 +122,7 @@ export default function AdminVendors() {
         website: vendor.website || '',
         status: vendor.status as VendorStatus,
         discountCode: vendor.discount_code || '',
+        description: vendor.description || '',
       });
     } else {
       setEditingVendor(null);
@@ -129,6 +135,38 @@ export default function AdminVendors() {
     setIsFormOpen(false);
     setEditingVendor(null);
     setFormData(emptyFormData);
+  };
+
+  const generateDescription = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Please enter a vendor name first');
+      return;
+    }
+
+    setIsGeneratingDescription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vendor-description', {
+        body: {
+          vendorName: formData.name,
+          region: formData.region,
+          website: formData.website || undefined,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+        toast.success('Description generated!');
+      } else {
+        throw new Error('No description received');
+      }
+    } catch (err: any) {
+      console.error('Error generating description:', err);
+      toast.error(err.message || 'Failed to generate description');
+    } finally {
+      setIsGeneratingDescription(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,6 +186,7 @@ export default function AdminVendors() {
             website: formData.website || null,
             status: formData.status,
             discount_code: formData.discountCode || null,
+            description: formData.description || null,
           })
           .eq('id', editingVendor.id);
 
@@ -163,6 +202,7 @@ export default function AdminVendors() {
             website: formData.website || null,
             status: formData.status,
             discount_code: formData.discountCode || null,
+            description: formData.description || null,
           });
 
         if (error) throw error;
@@ -318,7 +358,7 @@ export default function AdminVendors() {
 
       {/* Add/Edit Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)] text-[hsl(210,40%,98%)]">
+        <DialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)] text-[hsl(210,40%,98%)] max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</DialogTitle>
             <DialogDescription className="text-[hsl(215,20%,60%)]">
@@ -391,6 +431,33 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, discountCode: e.target.value }))}
                 placeholder="e.g., CHEMVERIFY10"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Description</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={generateDescription}
+                  disabled={isGeneratingDescription || !formData.name.trim()}
+                  className="gap-2 text-xs"
+                >
+                  {isGeneratingDescription ? (
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : (
+                    <Sparkles className="h-3 w-3" />
+                  )}
+                  Generate with AI
+                </Button>
+              </div>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter vendor description or click 'Generate with AI' to auto-generate..."
+                className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)] min-h-[100px] resize-none"
               />
             </div>
 
