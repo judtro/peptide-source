@@ -46,7 +46,7 @@ const UnderConstruction = ({ onAccessGranted }: UnderConstructionProps) => {
         setError(data?.error || 'Invalid Credentials');
       }
     } catch (err) {
-      console.error('Access verification error:', err);
+      if (import.meta.env.DEV) console.error('Access verification error:', err);
       setError('Verification failed. Please try again.');
     } finally {
       setIsLoading(false);

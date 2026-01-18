@@ -39,6 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { z } from 'zod';
 
 interface DbBatch {
   id: string;
@@ -61,6 +62,28 @@ interface DbProduct {
   id: string;
   name: string;
 }
+
+// Zod validation schema
+const auditSchema = z.object({
+  vendorId: z.string().min(1, 'Vendor is required'),
+  vendorName: z.string().min(1, 'Vendor name is required'),
+  productId: z.string().min(1, 'Product is required'),
+  productName: z.string().min(1, 'Product name is required'),
+  testDate: z.string().min(1, 'Test date is required'),
+  purityResult: z.string()
+    .min(1, 'Purity result is required')
+    .refine(val => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 0 && num <= 100;
+    }, 'Purity must be between 0 and 100'),
+  reportUrl: z.string()
+    .max(500, 'Report URL is too long')
+    .refine(val => !val || /^https?:\/\/.+/.test(val), 'Report URL must be a valid URL starting with http:// or https://')
+    .optional()
+    .or(z.literal('')),
+  labName: z.string().max(100, 'Lab name is too long').optional(),
+  testMethod: z.string().max(50, 'Test method is too long').optional(),
+});
 
 interface AuditFormData {
   vendorId: string;
@@ -93,6 +116,7 @@ export default function AdminAudits() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState<AuditFormData>(emptyFormData);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [deleteAudit, setDeleteAudit] = useState<DbBatch | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -117,7 +141,7 @@ export default function AdminAudits() {
       setVendors(vendorsRes.data || []);
       setProducts(productsRes.data || []);
     } catch (err) {
-      console.error('Error fetching data:', err);
+      if (import.meta.env.DEV) console.error('Error fetching data:', err);
       toast.error('Failed to load data');
     } finally {
       setIsLoading(false);
@@ -127,6 +151,7 @@ export default function AdminAudits() {
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setFormData(emptyFormData);
+    setFormErrors({});
   };
 
   const handleVendorChange = (vendorId: string) => {
@@ -147,8 +172,29 @@ export default function AdminAudits() {
     }));
   };
 
+  const validateForm = (): boolean => {
+    const result = auditSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0] as string;
+        errors[field] = err.message;
+      });
+      setFormErrors(errors);
+      return false;
+    }
+    setFormErrors({});
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -164,7 +210,7 @@ export default function AdminAudits() {
           product_name: formData.productName,
           test_date: formData.testDate,
           purity_result: parseFloat(formData.purityResult),
-          report_url: formData.reportUrl || null,
+          report_url: formData.reportUrl.trim() || null,
           lab_name: formData.labName || null,
           test_method: formData.testMethod || null,
         });
@@ -175,8 +221,8 @@ export default function AdminAudits() {
       handleCloseForm();
       fetchData();
     } catch (err: any) {
-      console.error('Error saving audit:', err);
-      toast.error(err.message || 'Failed to save audit');
+      if (import.meta.env.DEV) console.error('Error saving audit:', err);
+      toast.error('Failed to save audit. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -198,8 +244,8 @@ export default function AdminAudits() {
       setIsDeleteOpen(false);
       fetchData();
     } catch (err: any) {
-      console.error('Error deleting audit:', err);
-      toast.error(err.message || 'Failed to delete audit');
+      if (import.meta.env.DEV) console.error('Error deleting audit:', err);
+      toast.error('Failed to delete audit. Please try again.');
     }
   };
 
@@ -224,7 +270,7 @@ export default function AdminAudits() {
           <h2 className="text-lg font-semibold text-[hsl(210,40%,98%)]">Audit Management</h2>
           <p className="text-sm text-[hsl(215,20%,60%)]">Log and track COA test results</p>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
+        <Button onClick={() => { setFormErrors({}); setIsFormOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />
           Log New Audit
         </Button>
@@ -238,7 +284,7 @@ export default function AdminAudits() {
             <p className="text-sm text-[hsl(215,20%,60%)] mb-6">
               Start logging COA test results to build your audit database.
             </p>
-            <Button onClick={() => setIsFormOpen(true)}>
+            <Button onClick={() => { setFormErrors({}); setIsFormOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" />
               Log First Audit
             </Button>
@@ -346,6 +392,9 @@ export default function AdminAudits() {
                     ))}
                   </SelectContent>
                 </Select>
+                {formErrors.vendorId && (
+                  <p className="text-xs text-destructive">{formErrors.vendorId}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -363,6 +412,9 @@ export default function AdminAudits() {
                     ))}
                   </SelectContent>
                 </Select>
+                {formErrors.productId && (
+                  <p className="text-xs text-destructive">{formErrors.productId}</p>
+                )}
               </div>
             </div>
 
@@ -376,6 +428,9 @@ export default function AdminAudits() {
                   className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
                   required
                 />
+                {formErrors.testDate && (
+                  <p className="text-xs text-destructive">{formErrors.testDate}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -391,6 +446,9 @@ export default function AdminAudits() {
                   className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
                   required
                 />
+                {formErrors.purityResult && (
+                  <p className="text-xs text-destructive">{formErrors.purityResult}</p>
+                )}
               </div>
             </div>
 
@@ -438,7 +496,11 @@ export default function AdminAudits() {
                 onChange={(e) => setFormData(prev => ({ ...prev, reportUrl: e.target.value }))}
                 placeholder="https://example.com/report.pdf"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                maxLength={500}
               />
+              {formErrors.reportUrl && (
+                <p className="text-xs text-destructive">{formErrors.reportUrl}</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
