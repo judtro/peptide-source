@@ -203,6 +203,66 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_products: {
+        Row: {
+          created_at: string | null
+          id: string
+          in_stock: boolean | null
+          last_synced_at: string | null
+          price: number | null
+          price_per_mg: number | null
+          product_id: string | null
+          product_name: string
+          size_mg: number | null
+          source_url: string | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          in_stock?: boolean | null
+          last_synced_at?: string | null
+          price?: number | null
+          price_per_mg?: number | null
+          product_id?: string | null
+          product_name: string
+          size_mg?: number | null
+          source_url?: string | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          in_stock?: boolean | null
+          last_synced_at?: string | null
+          price?: number | null
+          price_per_mg?: number | null
+          product_id?: string | null
+          product_name?: string
+          size_mg?: number | null
+          source_url?: string | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           coa_verified: boolean | null

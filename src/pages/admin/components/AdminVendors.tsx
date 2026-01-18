@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import type { VendorStatus, Region } from '@/types';
-import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle, Sparkles } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle, Sparkles, Link, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
@@ -118,12 +118,17 @@ export default function AdminVendors() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState<DbVendor | null>(null);
   const [deleteVendor, setDeleteVendor] = useState<DbVendor | null>(null);
   const [formData, setFormData] = useState<VendorFormData>(emptyFormData);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [vendorUrl, setVendorUrl] = useState('');
+  const [isScrapingUrl, setIsScrapingUrl] = useState(false);
+  const [isSyncingPrices, setIsSyncingPrices] = useState(false);
+  const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchVendors();
@@ -171,6 +176,109 @@ export default function AdminVendors() {
     setEditingVendor(null);
     setFormData(emptyFormData);
     setFormErrors({});
+  };
+
+  const handleOpenUrlDialog = () => {
+    setVendorUrl('');
+    setIsUrlDialogOpen(true);
+  };
+
+  const handleAddByUrl = async () => {
+    if (!vendorUrl.trim()) {
+      toast.error('Please enter a URL');
+      return;
+    }
+
+    setIsScrapingUrl(true);
+    try {
+      // Step 1: Scrape the website
+      toast.info('Scraping vendor website...');
+      const scrapeResponse = await supabase.functions.invoke('scrape-vendor-website', {
+        body: { url: vendorUrl.trim() }
+      });
+
+      if (scrapeResponse.error) throw scrapeResponse.error;
+      if (!scrapeResponse.data?.success) {
+        throw new Error(scrapeResponse.data?.error || 'Failed to scrape website');
+      }
+
+      // Step 2: Extract vendor data with AI
+      toast.info('Extracting vendor information with AI...');
+      const extractResponse = await supabase.functions.invoke('extract-vendor-data', {
+        body: {
+          url: scrapeResponse.data.url,
+          content: scrapeResponse.data.markdown
+        }
+      });
+
+      if (extractResponse.error) throw extractResponse.error;
+      if (!extractResponse.data?.success) {
+        throw new Error(extractResponse.data?.error || 'Failed to extract vendor data');
+      }
+
+      const extracted = extractResponse.data.data;
+
+      // Pre-fill the form with extracted data
+      setFormData({
+        name: extracted.name || '',
+        region: (extracted.region as Region) || 'US',
+        shippingRegions: (extracted.shippingRegions as Region[]) || ['US'],
+        website: extracted.sourceUrl || vendorUrl.trim(),
+        status: 'pending',
+        discountCode: '',
+        description: extracted.description || '',
+      });
+
+      setIsUrlDialogOpen(false);
+      setIsFormOpen(true);
+      toast.success(`Extracted data for "${extracted.name || 'vendor'}". Please review and save.`);
+
+      // Log extracted products for reference
+      if (extracted.products && extracted.products.length > 0) {
+        console.log('Extracted products:', extracted.products);
+        toast.info(`Found ${extracted.products.length} products. They will be saved after vendor creation.`);
+      }
+
+    } catch (err: any) {
+      console.error('Error adding vendor by URL:', err);
+      toast.error(err.message || 'Failed to extract vendor data from URL');
+    } finally {
+      setIsScrapingUrl(false);
+    }
+  };
+
+  const handleSyncPrices = async (vendorId?: string) => {
+    if (vendorId) {
+      setSyncingVendorId(vendorId);
+    } else {
+      setIsSyncingPrices(true);
+    }
+
+    try {
+      toast.info(vendorId ? 'Syncing prices for vendor...' : 'Syncing prices for all vendors...');
+      
+      const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
+        body: vendorId ? { vendorId } : { syncAll: true }
+      });
+
+      if (error) throw error;
+      if (!data?.success) {
+        throw new Error(data?.error || 'Sync failed');
+      }
+
+      const results = data.results || [];
+      const successCount = results.filter((r: any) => !r.error).length;
+      const totalProducts = results.reduce((sum: number, r: any) => sum + (r.productsUpdated || 0), 0);
+
+      toast.success(`Synced ${successCount} vendor(s), updated ${totalProducts} product prices`);
+
+    } catch (err: any) {
+      console.error('Error syncing prices:', err);
+      toast.error(err.message || 'Failed to sync prices');
+    } finally {
+      setSyncingVendorId(null);
+      setIsSyncingPrices(false);
+    }
   };
 
   const generateDescription = async () => {
@@ -319,10 +427,28 @@ export default function AdminVendors() {
           <h2 className="text-lg font-semibold text-[hsl(210,40%,98%)]">Vendor Management</h2>
           <p className="text-sm text-[hsl(215,20%,60%)]">Add, edit, and manage verified suppliers</p>
         </div>
-        <Button onClick={() => handleOpenForm()}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Vendor
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => handleSyncPrices()}
+            disabled={isSyncingPrices}
+          >
+            {isSyncingPrices ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Sync All Prices
+          </Button>
+          <Button variant="outline" onClick={handleOpenUrlDialog}>
+            <Link className="mr-2 h-4 w-4" />
+            Add by URL
+          </Button>
+          <Button onClick={() => handleOpenForm()}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Vendor
+          </Button>
+        </div>
       </div>
 
       <Card className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
@@ -393,6 +519,20 @@ export default function AdminVendors() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => handleSyncPrices(vendor.id)}
+                            disabled={syncingVendorId === vendor.id}
+                            className="text-[hsl(215,20%,70%)] hover:text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,20%)]"
+                            title="Sync prices"
+                          >
+                            {syncingVendorId === vendor.id ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            ) : (
+                              <RefreshCw className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleOpenForm(vendor)}
                             className="text-[hsl(215,20%,70%)] hover:text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,20%)]"
                           >
@@ -419,6 +559,56 @@ export default function AdminVendors() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add by URL Dialog */}
+      <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+        <DialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)] text-[hsl(210,40%,98%)] max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Vendor by URL</DialogTitle>
+            <DialogDescription className="text-[hsl(215,20%,60%)]">
+              Paste a vendor website URL and AI will automatically extract all relevant information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Vendor Website URL</Label>
+              <Input
+                type="url"
+                value={vendorUrl}
+                onChange={(e) => setVendorUrl(e.target.value)}
+                placeholder="https://vendor-site.com"
+                className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                disabled={isScrapingUrl}
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsUrlDialogOpen(false)}
+                disabled={isScrapingUrl}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddByUrl} 
+                disabled={isScrapingUrl || !vendorUrl.trim()}
+              >
+                {isScrapingUrl ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Extract Data
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add/Edit Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>

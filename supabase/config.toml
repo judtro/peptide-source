@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.verify-site-access]
 verify_jwt = false
+
+[functions.scrape-vendor-website]
+verify_jwt = false
+
+[functions.extract-vendor-data]
+verify_jwt = false
+
+[functions.sync-vendor-prices]
+verify_jwt = false
