@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.sync-vendor-prices]
 verify_jwt = false
+
+[functions.generate-article]
+verify_jwt = false
