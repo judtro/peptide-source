@@ -64,13 +64,13 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking admin role:', error);
+        if (import.meta.env.DEV) console.error('Error checking admin role:', error);
         setIsAdminAuthenticated(false);
       } else {
         setIsAdminAuthenticated(!!data);
       }
     } catch (err) {
-      console.error('Error checking admin role:', err);
+      if (import.meta.env.DEV) console.error('Error checking admin role:', err);
       setIsAdminAuthenticated(false);
     } finally {
       setIsLoading(false);
@@ -113,7 +113,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
       return { error: 'Login failed. Please try again.' };
     } catch (err) {
-      console.error('Login error:', err);
+      if (import.meta.env.DEV) console.error('Login error:', err);
       return { error: 'An unexpected error occurred.' };
     }
   };
@@ -143,7 +143,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
       return { error: 'Signup failed. Please try again.' };
     } catch (err) {
-      console.error('Signup error:', err);
+      if (import.meta.env.DEV) console.error('Signup error:', err);
       return { error: 'An unexpected error occurred.' };
     }
   };

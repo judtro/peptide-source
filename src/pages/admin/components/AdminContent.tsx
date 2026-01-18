@@ -40,6 +40,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 interface DbArticle {
   id: string;
@@ -51,6 +52,24 @@ interface DbArticle {
   published_date: string | null;
   read_time: number | null;
 }
+
+// Zod validation schema
+const articleSchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be less than 200 characters'),
+  summary: z.string()
+    .max(500, 'Summary must be less than 500 characters')
+    .optional()
+    .or(z.literal('')),
+  category: z.enum(['safety', 'handling', 'pharmacokinetics', 'verification', 'sourcing']),
+  readTime: z.string()
+    .refine(val => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 1 && num <= 60;
+    }, 'Read time must be between 1 and 60 minutes'),
+});
 
 interface ArticleFormData {
   title: string;
@@ -82,6 +101,7 @@ export default function AdminContent() {
   const [editingArticle, setEditingArticle] = useState<DbArticle | null>(null);
   const [deleteArticle, setDeleteArticle] = useState<DbArticle | null>(null);
   const [formData, setFormData] = useState<ArticleFormData>(emptyFormData);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -98,7 +118,7 @@ export default function AdminContent() {
       if (error) throw error;
       setArticleList(data || []);
     } catch (err) {
-      console.error('Error fetching articles:', err);
+      if (import.meta.env.DEV) console.error('Error fetching articles:', err);
       toast.error('Failed to load articles');
     } finally {
       setIsLoading(false);
@@ -106,6 +126,7 @@ export default function AdminContent() {
   };
 
   const handleOpenForm = (article?: DbArticle) => {
+    setFormErrors({});
     if (article) {
       setEditingArticle(article);
       setFormData({
@@ -125,23 +146,50 @@ export default function AdminContent() {
     setIsFormOpen(false);
     setEditingArticle(null);
     setFormData(emptyFormData);
+    setFormErrors({});
+  };
+
+  const validateForm = (): boolean => {
+    const result = articleSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0] as string;
+        errors[field] = err.message;
+      });
+      setFormErrors(errors);
+      return false;
+    }
+    setFormErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      const slug = formData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const slug = formData.title
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .substring(0, 100);
       const categoryLabel = categories.find(c => c.value === formData.category)?.label || formData.category;
 
       if (editingArticle) {
         const { error } = await supabase
           .from('articles')
           .update({
-            title: formData.title,
+            title: formData.title.trim(),
             slug,
-            summary: formData.summary || null,
+            summary: formData.summary.trim() || null,
             category: formData.category,
             category_label: categoryLabel,
             read_time: parseInt(formData.readTime),
@@ -154,9 +202,9 @@ export default function AdminContent() {
         const { error } = await supabase
           .from('articles')
           .insert({
-            title: formData.title,
+            title: formData.title.trim(),
             slug,
-            summary: formData.summary || null,
+            summary: formData.summary.trim() || null,
             category: formData.category,
             category_label: categoryLabel,
             read_time: parseInt(formData.readTime),
@@ -170,8 +218,8 @@ export default function AdminContent() {
       handleCloseForm();
       fetchArticles();
     } catch (err: any) {
-      console.error('Error saving article:', err);
-      toast.error(err.message || 'Failed to save article');
+      if (import.meta.env.DEV) console.error('Error saving article:', err);
+      toast.error('Failed to save article. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -193,8 +241,8 @@ export default function AdminContent() {
       setIsDeleteOpen(false);
       fetchArticles();
     } catch (err: any) {
-      console.error('Error deleting article:', err);
-      toast.error(err.message || 'Failed to delete article');
+      if (import.meta.env.DEV) console.error('Error deleting article:', err);
+      toast.error('Failed to delete article. Please try again.');
     }
   };
 
@@ -338,8 +386,12 @@ export default function AdminContent() {
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., Understanding Peptide Stability"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                maxLength={200}
                 required
               />
+              {formErrors.title && (
+                <p className="text-xs text-destructive">{formErrors.title}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -349,7 +401,11 @@ export default function AdminContent() {
                 onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
                 placeholder="Brief description of the article..."
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)] min-h-[100px]"
+                maxLength={500}
               />
+              {formErrors.summary && (
+                <p className="text-xs text-destructive">{formErrors.summary}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -381,6 +437,9 @@ export default function AdminContent() {
                   className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
                   required
                 />
+                {formErrors.readTime && (
+                  <p className="text-xs text-destructive">{formErrors.readTime}</p>
+                )}
               </div>
             </div>
 

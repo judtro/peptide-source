@@ -41,6 +41,7 @@ import type { VendorStatus, Region } from '@/types';
 import { Plus, Pencil, Trash2, ExternalLink, CheckCircle2, AlertTriangle, Clock, XCircle, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 interface DbVendor {
   id: string;
@@ -62,6 +63,31 @@ const statusConfig: Record<VendorStatus, { icon: typeof CheckCircle2; color: str
 
 const regions: Region[] = ['US', 'EU', 'UK', 'CA'];
 const statuses: VendorStatus[] = ['verified', 'pending', 'warning', 'scam'];
+
+// Zod validation schema
+const vendorSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(1, 'Vendor name is required')
+    .max(100, 'Vendor name must be less than 100 characters')
+    .regex(/^[a-zA-Z0-9\s\-_.&']+$/, 'Vendor name contains invalid characters'),
+  region: z.enum(['US', 'EU', 'UK', 'CA']),
+  website: z.string()
+    .max(500, 'Website URL is too long')
+    .refine(val => !val || /^https?:\/\/.+/.test(val), 'Website must be a valid URL starting with http:// or https://')
+    .optional()
+    .or(z.literal('')),
+  status: z.enum(['verified', 'pending', 'warning', 'scam']),
+  discountCode: z.string()
+    .max(50, 'Discount code must be less than 50 characters')
+    .regex(/^[a-zA-Z0-9\-_]*$/, 'Discount code can only contain letters, numbers, hyphens, and underscores')
+    .optional()
+    .or(z.literal('')),
+  description: z.string()
+    .max(1000, 'Description must be less than 1000 characters')
+    .optional()
+    .or(z.literal('')),
+});
 
 interface VendorFormData {
   name: string;
@@ -89,6 +115,7 @@ export default function AdminVendors() {
   const [editingVendor, setEditingVendor] = useState<DbVendor | null>(null);
   const [deleteVendor, setDeleteVendor] = useState<DbVendor | null>(null);
   const [formData, setFormData] = useState<VendorFormData>(emptyFormData);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
@@ -106,7 +133,7 @@ export default function AdminVendors() {
       if (error) throw error;
       setVendorList(data || []);
     } catch (err) {
-      console.error('Error fetching vendors:', err);
+      if (import.meta.env.DEV) console.error('Error fetching vendors:', err);
       toast.error('Failed to load vendors');
     } finally {
       setIsLoading(false);
@@ -114,6 +141,7 @@ export default function AdminVendors() {
   };
 
   const handleOpenForm = (vendor?: DbVendor) => {
+    setFormErrors({});
     if (vendor) {
       setEditingVendor(vendor);
       setFormData({
@@ -135,6 +163,7 @@ export default function AdminVendors() {
     setIsFormOpen(false);
     setEditingVendor(null);
     setFormData(emptyFormData);
+    setFormErrors({});
   };
 
   const generateDescription = async () => {
@@ -162,31 +191,57 @@ export default function AdminVendors() {
         throw new Error('No description received');
       }
     } catch (err: any) {
-      console.error('Error generating description:', err);
+      if (import.meta.env.DEV) console.error('Error generating description:', err);
       toast.error(err.message || 'Failed to generate description');
     } finally {
       setIsGeneratingDescription(false);
     }
   };
 
+  const validateForm = (): boolean => {
+    const result = vendorSchema.safeParse(formData);
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0] as string;
+        errors[field] = err.message;
+      });
+      setFormErrors(errors);
+      return false;
+    }
+    setFormErrors({});
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      const slug = formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const slug = formData.name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .substring(0, 100);
       
       if (editingVendor) {
         const { error } = await supabase
           .from('vendors')
           .update({
-            name: formData.name,
+            name: formData.name.trim(),
             slug,
             region: formData.region,
-            website: formData.website || null,
+            website: formData.website.trim() || null,
             status: formData.status,
-            discount_code: formData.discountCode || null,
-            description: formData.description || null,
+            discount_code: formData.discountCode.trim() || null,
+            description: formData.description.trim() || null,
           })
           .eq('id', editingVendor.id);
 
@@ -196,13 +251,13 @@ export default function AdminVendors() {
         const { error } = await supabase
           .from('vendors')
           .insert({
-            name: formData.name,
+            name: formData.name.trim(),
             slug,
             region: formData.region,
-            website: formData.website || null,
+            website: formData.website.trim() || null,
             status: formData.status,
-            discount_code: formData.discountCode || null,
-            description: formData.description || null,
+            discount_code: formData.discountCode.trim() || null,
+            description: formData.description.trim() || null,
           });
 
         if (error) throw error;
@@ -212,8 +267,8 @@ export default function AdminVendors() {
       handleCloseForm();
       fetchVendors();
     } catch (err: any) {
-      console.error('Error saving vendor:', err);
-      toast.error(err.message || 'Failed to save vendor');
+      if (import.meta.env.DEV) console.error('Error saving vendor:', err);
+      toast.error('Failed to save vendor. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -235,8 +290,8 @@ export default function AdminVendors() {
       setIsDeleteOpen(false);
       fetchVendors();
     } catch (err: any) {
-      console.error('Error deleting vendor:', err);
-      toast.error(err.message || 'Failed to delete vendor');
+      if (import.meta.env.DEV) console.error('Error deleting vendor:', err);
+      toast.error('Failed to delete vendor. Please try again.');
     }
   };
 
@@ -373,8 +428,12 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., PeptideLabs"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                maxLength={100}
                 required
               />
+              {formErrors.name && (
+                <p className="text-xs text-destructive">{formErrors.name}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -421,7 +480,11 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
                 placeholder="https://example.com"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                maxLength={500}
               />
+              {formErrors.website && (
+                <p className="text-xs text-destructive">{formErrors.website}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -431,7 +494,11 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, discountCode: e.target.value }))}
                 placeholder="e.g., CHEMVERIFY10"
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                maxLength={50}
               />
+              {formErrors.discountCode && (
+                <p className="text-xs text-destructive">{formErrors.discountCode}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -458,7 +525,11 @@ export default function AdminVendors() {
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter vendor description or click 'Generate with AI' to auto-generate..."
                 className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)] min-h-[100px] resize-none"
+                maxLength={1000}
               />
+              {formErrors.description && (
+                <p className="text-xs text-destructive">{formErrors.description}</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
