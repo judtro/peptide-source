@@ -86,22 +86,71 @@ serve(async (req) => {
       );
     }
 
+    // Input sanitization function to prevent prompt injection
+    const sanitizeInput = (input: string | undefined | null): string => {
+      if (!input) return "";
+      
+      return input
+        // Remove newlines and carriage returns
+        .replace(/[\n\r]/g, " ")
+        // Remove common prompt injection patterns
+        .replace(/ignore\s+(previous|all|above)/gi, "")
+        .replace(/instead\s+of/gi, "")
+        .replace(/actually[,\s]+/gi, "")
+        // Remove quotes that could break prompt structure
+        .replace(/["""''`]/g, "")
+        // Remove backslashes
+        .replace(/\\/g, "")
+        // Collapse multiple spaces
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    // Validate and sanitize inputs
+    const sanitizedName = sanitizeInput(vendorName);
+    const sanitizedRegion = sanitizeInput(region);
+    const sanitizedWebsite = sanitizeInput(website);
+
+    // Additional validation for sanitized inputs
+    if (!sanitizedName || sanitizedName.length > 100) {
+      return new Response(
+        JSON.stringify({ error: "Invalid vendor name" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (sanitizedWebsite && sanitizedWebsite.length > 500) {
+      return new Response(
+        JSON.stringify({ error: "Website URL too long" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const prompt = `Write a professional, concise description (2-3 sentences, max 150 words) for a peptide research vendor called "${vendorName}". 
-${region ? `They are based in the ${region} region.` : ''}
-${website ? `Their website is ${website}.` : ''}
+    // Build prompt with clear delimiters and sanitized inputs
+    const promptParts = [
+      "Write a professional, concise description (2-3 sentences, max 150 words) for a peptide research vendor.",
+      "",
+      "=== VENDOR DETAILS ===",
+      `Vendor Name: ${sanitizedName}`,
+      sanitizedRegion ? `Region: ${sanitizedRegion}` : "",
+      sanitizedWebsite ? `Website: ${sanitizedWebsite}` : "",
+      "=== END DETAILS ===",
+      "",
+      "Requirements:",
+      "- Sound professional and trustworthy",
+      "- Mention their focus on research-grade peptides",
+      "- Highlight quality assurance and customer service",
+      "- Be suitable for a vendor directory listing",
+      "",
+      "IMPORTANT: Only return the description text. Do not include quotes, formatting, or any text outside the description."
+    ].filter(Boolean).join("\n");
 
-The description should:
-- Sound professional and trustworthy
-- Mention their focus on research-grade peptides
-- Highlight quality assurance and customer service
-- Be suitable for a vendor directory listing
-
-Only return the description text, no quotes or additional formatting.`;
+    const prompt = promptParts;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

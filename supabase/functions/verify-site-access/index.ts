@@ -8,12 +8,78 @@ const corsHeaders = {
 // Store the password server-side - never expose to client
 const ACCESS_PASSWORD = Deno.env.get("SITE_ACCESS_PASSWORD") || "chem2026";
 
+// Rate limiting: track failed attempts per IP
+const failedAttempts = new Map<string, { count: number; lastAttempt: number }>();
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+
+// Periodically clean up old entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of failedAttempts.entries()) {
+    if (now - data.lastAttempt > LOCKOUT_DURATION_MS) {
+      failedAttempts.delete(ip);
+    }
+  }
+}, CLEANUP_INTERVAL_MS);
+
+// Check if IP is rate limited
+const isRateLimited = (ip: string): boolean => {
+  const data = failedAttempts.get(ip);
+  if (!data) return false;
+  
+  const now = Date.now();
+  if (now - data.lastAttempt > LOCKOUT_DURATION_MS) {
+    failedAttempts.delete(ip);
+    return false;
+  }
+  
+  return data.count >= MAX_FAILED_ATTEMPTS;
+};
+
+// Record failed attempt
+const recordFailedAttempt = (ip: string): void => {
+  const now = Date.now();
+  const data = failedAttempts.get(ip);
+  
+  if (data) {
+    // Reset count if lockout period has passed
+    if (now - data.lastAttempt > LOCKOUT_DURATION_MS) {
+      failedAttempts.set(ip, { count: 1, lastAttempt: now });
+    } else {
+      failedAttempts.set(ip, { count: data.count + 1, lastAttempt: now });
+    }
+  } else {
+    failedAttempts.set(ip, { count: 1, lastAttempt: now });
+  }
+};
+
+// Clear failed attempts on successful login
+const clearFailedAttempts = (ip: string): void => {
+  failedAttempts.delete(ip);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Get client IP for rate limiting
+  const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                   req.headers.get("cf-connecting-ip") || 
+                   "unknown";
+
   try {
+    // Check rate limiting
+    if (isRateLimited(clientIP)) {
+      console.log(`Rate limited IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ success: false, error: "Too many failed attempts. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { password } = await req.json();
 
     if (!password || typeof password !== "string") {
@@ -35,6 +101,9 @@ serve(async (req) => {
     const isValid = password === ACCESS_PASSWORD;
 
     if (isValid) {
+      // Clear failed attempts on success
+      clearFailedAttempts(clientIP);
+      
       // Generate a simple signed token (timestamp + hash)
       const timestamp = Date.now();
       const tokenData = `${timestamp}:verified`;
@@ -52,7 +121,9 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      console.log("Site access denied - invalid password");
+      // Record failed attempt
+      recordFailedAttempt(clientIP);
+      console.log(`Site access denied - invalid password (IP: ${clientIP})`);
       
       return new Response(
         JSON.stringify({ success: false, error: "Invalid credentials" }),
