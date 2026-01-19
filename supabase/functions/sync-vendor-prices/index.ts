@@ -120,11 +120,11 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
     console.log(`Found ${priorityProductUrls.length} priority product URLs`);
     console.log(`Found ${secondaryProductUrls.length} secondary/category URLs`);
     
-    // Take up to 15 priority product pages + 3 category pages + homepage
+    // Take up to 5 priority product pages + 2 category pages + homepage (reduced for timeout prevention)
     const selectedUrls = [
       websiteUrl,
-      ...priorityProductUrls.slice(0, 15),
-      ...secondaryProductUrls.slice(0, 3)
+      ...priorityProductUrls.slice(0, 5),
+      ...secondaryProductUrls.slice(0, 2)
     ];
     
     // Deduplicate
@@ -138,41 +138,52 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
   }
 }
 
+async function scrapeSinglePage(url: string, firecrawlKey: string): Promise<string | null> {
+  try {
+    console.log(`Scraping: ${url}`);
+    
+    const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${firecrawlKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['markdown'],
+        onlyMainContent: false,
+        waitFor: 1500, // Reduced from 3000 for faster scraping
+      }),
+    });
+
+    if (!scrapeResponse.ok) {
+      console.log(`Failed to scrape ${url}`);
+      return null;
+    }
+
+    const scrapeData = await scrapeResponse.json();
+    const content = scrapeData.data?.markdown || scrapeData.markdown || '';
+    
+    if (content) {
+      return `\n--- PAGE: ${url} ---\n${content}`;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error scraping ${url}:`, error);
+    return null;
+  }
+}
+
 async function scrapeMultiplePages(urls: string[], firecrawlKey: string): Promise<string> {
   const contents: string[] = [];
+  const batchSize = 3; // Scrape 3 pages in parallel
   
-  for (const url of urls) {
-    try {
-      console.log(`Scraping: ${url}`);
-      
-      const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${firecrawlKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          formats: ['markdown'],
-          onlyMainContent: false,
-          waitFor: 3000,
-        }),
-      });
-
-      if (!scrapeResponse.ok) {
-        console.log(`Failed to scrape ${url}`);
-        continue;
-      }
-
-      const scrapeData = await scrapeResponse.json();
-      const content = scrapeData.data?.markdown || scrapeData.markdown || '';
-      
-      if (content) {
-        contents.push(`\n--- PAGE: ${url} ---\n${content}`);
-      }
-    } catch (error) {
-      console.error(`Error scraping ${url}:`, error);
-    }
+  for (let i = 0; i < urls.length; i += batchSize) {
+    const batch = urls.slice(i, i + batchSize);
+    const batchResults = await Promise.all(
+      batch.map(url => scrapeSinglePage(url, firecrawlKey))
+    );
+    contents.push(...batchResults.filter((c): c is string => c !== null));
   }
   
   return contents.join('\n\n');
