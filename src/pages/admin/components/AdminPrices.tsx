@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useVendors } from '@/hooks/useVendors';
+// Vendors fetched directly with UUIDs for proper filtering
 import { useProducts } from '@/hooks/useProducts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,7 +76,18 @@ export default function AdminPrices() {
   const [editingProduct, setEditingProduct] = useState<VendorProduct | null>(null);
   const [form, setForm] = useState<VendorProductForm>(defaultForm);
 
-  const { data: vendors = [], isLoading: vendorsLoading } = useVendors();
+  // Fetch vendors directly with UUIDs (useVendors returns slugs as IDs which breaks filtering)
+  const { data: vendors = [], isLoading: vendorsLoading } = useQuery({
+    queryKey: ['admin-vendors-with-uuids'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('id, name, slug')
+        .order('name');
+      if (error) throw error;
+      return data || [];
+    },
+  });
   const { data: products = [], isLoading: productsLoading } = useProducts();
 
   // Fetch all vendor products
