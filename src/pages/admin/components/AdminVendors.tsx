@@ -264,6 +264,14 @@ export default function AdminVendors() {
     }
 
     try {
+      // Ensure we have a valid session before calling the edge function
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        toast.error('Session expired. Please log in again.');
+        return;
+      }
+
       toast.info(vendorId ? 'Syncing prices for vendor...' : 'Syncing prices for all vendors...');
       
       const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
@@ -395,26 +403,31 @@ export default function AdminVendors() {
 
         // Auto-sync prices for the newly created vendor if it has a website
         if (newVendor?.id && formData.website.trim()) {
-          toast.info('Syncing prices for new vendor...');
-          try {
-            const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-vendor-prices', {
-              body: { vendorId: newVendor.id }
-            });
+          // Verify session is still valid before auto-sync
+          const { data: sessionData } = await supabase.auth.getSession();
+          
+          if (sessionData.session) {
+            toast.info('Syncing prices for new vendor...');
+            try {
+              const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-vendor-prices', {
+                body: { vendorId: newVendor.id }
+              });
 
-            if (syncError) {
-              console.error('Auto-sync error:', syncError);
-              toast.warning('Vendor created, but price sync failed. You can manually sync later.');
-            } else if (syncData?.success) {
-              const result = syncData.results?.[0];
-              if (result?.productsFound > 0) {
-                toast.success(`Synced ${result.productsUpdated} products from ${result.pagesScraped || 1} pages`);
-              } else {
-                toast.info('No products found on vendor website');
+              if (syncError) {
+                console.error('Auto-sync error:', syncError);
+                toast.warning('Vendor created, but price sync failed. You can manually sync later.');
+              } else if (syncData?.success) {
+                const result = syncData.results?.[0];
+                if (result?.productsFound > 0) {
+                  toast.success(`Synced ${result.productsUpdated} products from ${result.pagesScraped || 1} pages`);
+                } else {
+                  toast.info('No products found on vendor website');
+                }
               }
+            } catch (syncErr) {
+              console.error('Auto-sync error:', syncErr);
+              toast.warning('Vendor created, but price sync failed. You can manually sync later.');
             }
-          } catch (syncErr) {
-            console.error('Auto-sync error:', syncErr);
-            toast.warning('Vendor created, but price sync failed. You can manually sync later.');
           }
         }
       }
