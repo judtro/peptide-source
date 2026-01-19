@@ -22,10 +22,13 @@ const extractPricesTool = {
               name: { type: "string", description: "Product name (peptide name)" },
               price: { type: "number", description: "Price in USD or EUR" },
               sizeMg: { type: "number", description: "Size in milligrams" },
-              inStock: { type: "boolean", description: "Whether the product is in stock" },
+              inStock: { 
+                type: "boolean", 
+                description: "Stock availability. DEFAULT TO TRUE. Only set to false if you see EXPLICIT 'Out of Stock', 'Sold Out', or 'Unavailable' text. If uncertain or no indicator visible, MUST be true."
+              },
               url: { type: "string", description: "Product page URL if available" }
             },
-            required: ["name", "price"]
+            required: ["name", "price", "inStock"]
           }
         }
       },
@@ -33,6 +36,72 @@ const extractPricesTool = {
     }
   }
 };
+
+// Clean markdown content to make stock indicators clearer for AI
+function cleanMarkdownForStockDetection(content: string): string {
+  return content
+    // Replace image markers followed by stock text with clear indicators
+    .replace(/!\[\]\s*In Stock/gi, '[STATUS: IN_STOCK]')
+    .replace(/!\[\]\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
+    .replace(/!\[\]\s*Sold Out/gi, '[STATUS: SOLD_OUT]')
+    .replace(/!\[\]\s*Available/gi, '[STATUS: AVAILABLE]')
+    .replace(/!\[\]\s*Unavailable/gi, '[STATUS: UNAVAILABLE]')
+    // Normalize availability patterns
+    .replace(/Availability:\s*(\d+)\s*in stock/gi, '[STATUS: IN_STOCK - $1 units available]')
+    .replace(/Availability:\s*In Stock/gi, '[STATUS: IN_STOCK]')
+    .replace(/Availability:\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
+    // Handle common button patterns that indicate in-stock
+    .replace(/Add to Cart/gi, '[ACTION: ADD_TO_CART - product is in stock]')
+    .replace(/Buy Now/gi, '[ACTION: BUY_NOW - product is in stock]')
+    .replace(/Select options/gi, '[ACTION: SELECT_OPTIONS - product has variants and is in stock]');
+}
+
+// Validate stock status - override false negatives when no explicit out-of-stock indicator
+function validateStockStatus(product: any, pageContent: string): boolean {
+  // If AI already said in stock, trust it
+  if (product.inStock === true) {
+    return true;
+  }
+  
+  // If AI said out of stock, verify by checking for explicit indicators in the content
+  const lowerContent = pageContent.toLowerCase();
+  const productNameLower = (product.name || '').toLowerCase().split(/\s+/)[0]; // First word of product name
+  
+  // Find content around this product name
+  const productIndex = lowerContent.indexOf(productNameLower);
+  const contextStart = Math.max(0, productIndex - 500);
+  const contextEnd = Math.min(lowerContent.length, productIndex + 1000);
+  const productContext = productIndex >= 0 
+    ? lowerContent.substring(contextStart, contextEnd) 
+    : lowerContent;
+  
+  // Explicit out-of-stock indicators
+  const outOfStockIndicators = [
+    'out of stock',
+    'sold out', 
+    'currently unavailable',
+    'not available',
+    'back order',
+    'pre-order',
+    'coming soon',
+    'temporarily unavailable',
+    'status: out_of_stock',
+    'status: sold_out',
+    'status: unavailable'
+  ];
+  
+  const hasOutOfStock = outOfStockIndicators.some(indicator => 
+    productContext.includes(indicator)
+  );
+  
+  // If no explicit out-of-stock indicator found, override to true
+  if (!hasOutOfStock) {
+    console.log(`Stock override: ${product.name} -> true (no explicit out-of-stock indicator found)`);
+    return true;
+  }
+  
+  return false;
+}
 
 // HIGH PRIORITY: Individual product pages
 const PRODUCT_URL_PRIORITY_PATTERNS = [
@@ -357,20 +426,34 @@ IMPORTANT RULES:
 5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
 6. Include the product URL if visible in the content
 
-STOCK STATUS DETECTION RULES (CRITICAL):
-1. Products are IN STOCK by default - set inStock: true unless you find explicit out-of-stock indicators
-2. OUT OF STOCK indicators to look for:
-   - "Out of Stock", "Sold Out", "Currently Unavailable", "Not Available"
-   - "Back Order", "Pre-Order", "Coming Soon", "Temporarily Unavailable"
-   - Explicitly disabled or greyed out "Add to Cart" buttons
-3. IN STOCK indicators (positive signals):
-   - "In Stock", "Available", "Add to Cart", "Buy Now", "Order Now"
-   - Price displayed with active purchase buttons
-   - Stock quantity shown (e.g., "5 in stock")
-4. CRITICAL: If you cannot determine stock status OR there is no explicit stock indicator, DEFAULT TO inStock: true
-5. Only set inStock: false if you see EXPLICIT out-of-stock text. Do NOT guess.`
+STOCK STATUS DETECTION - CRITICAL RULES (READ VERY CAREFULLY):
+
+⚠️ DEFAULT RULE: Set inStock: true for EVERY product UNLESS you find EXPLICIT out-of-stock text.
+
+ONLY set inStock: false if you see these EXACT phrases near the product:
+- "Out of Stock" / "Out-of-Stock"
+- "Sold Out" / "SoldOut"  
+- "Currently Unavailable"
+- "Not Available" / "Unavailable"
+- "Back Order" / "Backorder"
+- "Pre-Order" / "Preorder"
+- "Coming Soon"
+
+THESE ALL MEAN IN STOCK (set inStock: true):
+- [STATUS: IN_STOCK] markers
+- [ACTION: ADD_TO_CART] markers
+- [ACTION: BUY_NOW] markers
+- [ACTION: SELECT_OPTIONS] markers
+- Any "Add to Cart", "Buy Now", "Order Now" buttons
+- "Select options" (means product has variants - IT IS IN STOCK)
+- Any quantity shown (e.g., "100 in stock", "5 available")
+- Price displayed without strikethrough
+- No stock indicator at all - DEFAULT TO TRUE
+
+⚠️ CRITICAL: When in doubt, set inStock: true. We prefer false positives over false negatives.
+⚠️ NEVER guess out-of-stock. Only mark as false with EXPLICIT evidence.`
               },
-              { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${combinedContent.substring(0, 80000)}` }
+              { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${cleanMarkdownForStockDetection(combinedContent).substring(0, 80000)}` }
             ],
             tools: [extractPricesTool],
             tool_choice: { type: "function", function: { name: "extract_product_prices" } }
@@ -416,7 +499,7 @@ STOCK STATUS DETECTION RULES (CRITICAL):
           }
         }
 
-        // Upsert products
+        // Upsert products with stock validation
         let updatedCount = 0;
         for (const product of products) {
           const pricePerMg = product.sizeMg && product.price 
@@ -433,6 +516,9 @@ STOCK STATUS DETECTION RULES (CRITICAL):
             }
           }
 
+          // Validate stock status - override false negatives
+          const validatedInStock = validateStockStatus(product, combinedContent);
+
           const { error: upsertError } = await supabase
             .from('vendor_products')
             .upsert({
@@ -442,7 +528,7 @@ STOCK STATUS DETECTION RULES (CRITICAL):
               price: product.price,
               price_per_mg: pricePerMg,
               size_mg: product.sizeMg || null,
-              in_stock: product.inStock ?? true,
+              in_stock: validatedInStock,
               source_url: product.url || vendor.website,
               last_synced_at: new Date().toISOString(),
             }, {
