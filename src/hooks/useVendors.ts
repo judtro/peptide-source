@@ -7,7 +7,7 @@ type DbVendor = Tables<'vendors'>;
 
 // Transform database vendor to app Vendor type
 const transformVendor = (dbVendor: DbVendor): Vendor => ({
-  id: dbVendor.slug, // Use slug as the ID for backwards compatibility
+  id: dbVendor.id, // Use actual UUID for database queries
   slug: dbVendor.slug,
   name: dbVendor.name,
   region: dbVendor.region as Region,

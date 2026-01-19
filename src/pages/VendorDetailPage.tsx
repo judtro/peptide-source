@@ -30,7 +30,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 const VendorDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: vendor, isLoading: vendorLoading } = useVendor(slug || '');
-  const { data: vendorProductsList = [], isLoading: vendorProductsLoading } = useVendorProductsForVendor(vendor?.id || '');
+  const { data: vendorProductsList = [], isLoading: vendorProductsLoading, isError: vendorProductsError } = useVendorProductsForVendor(vendor?.id || '');
 
   const isLoading = vendorLoading || vendorProductsLoading;
 
@@ -403,6 +403,14 @@ const VendorDetailPage = () => {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+              ) : vendorProductsError ? (
+                <div className="rounded-lg border border-dashed border-destructive/50 bg-destructive/10 p-8 text-center">
+                  <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-destructive/70" />
+                  <p className="font-medium text-foreground">Failed to load products</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    There was an error loading the product list. Please try again later.
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
