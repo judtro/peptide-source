@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { VendorProductWithVendor, VendorStatus } from '@/types';
+import type { VendorProductWithVendor, VendorStatus, StockStatus } from '@/types';
 
 interface DbVendorProductWithVendor {
   id: string;
@@ -11,6 +11,7 @@ interface DbVendorProductWithVendor {
   price_per_mg: number | null;
   size_mg: number | null;
   in_stock: boolean | null;
+  stock_status: string | null;
   source_url: string | null;
   vendors: {
     id: string;
@@ -32,6 +33,7 @@ const transformVendorProduct = (item: DbVendorProductWithVendor): VendorProductW
   pricePerMg: Number(item.price_per_mg) || 0,
   sizeMg: Number(item.size_mg) || 0,
   inStock: item.in_stock ?? true,
+  stockStatus: (item.stock_status as StockStatus) || 'in_stock',
   sourceUrl: item.source_url || undefined,
   vendorName: item.vendors.name,
   vendorSlug: item.vendors.slug,
@@ -56,6 +58,7 @@ export const useVendorProductsByProduct = (productId: string) => {
           price_per_mg,
           size_mg,
           in_stock,
+          stock_status,
           source_url,
           vendors!inner (
             id,
@@ -94,6 +97,7 @@ export const useVendorProductsByProductName = (productName: string) => {
           price_per_mg,
           size_mg,
           in_stock,
+          stock_status,
           source_url,
           vendors!inner (
             id,

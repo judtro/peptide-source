@@ -22,13 +22,14 @@ const extractPricesTool = {
               name: { type: "string", description: "Product name (peptide name)" },
               price: { type: "number", description: "Price in USD or EUR" },
               sizeMg: { type: "number", description: "Size in milligrams" },
-              inStock: { 
-                type: "boolean", 
-                description: "Stock availability. DEFAULT TO TRUE. Only set to false if you see EXPLICIT 'Out of Stock', 'Sold Out', or 'Unavailable' text. If uncertain or no indicator visible, MUST be true."
+              stockStatus: { 
+                type: "string", 
+                enum: ["in_stock", "out_of_stock", "backorder", "preorder", "coming_soon"],
+                description: "Stock status. Use EXACT vendor terminology: 'in_stock' if available/Add to Cart, 'out_of_stock' for 'Out of Stock'/'Sold Out', 'backorder' for 'Back Order', 'preorder' for 'Pre-Order', 'coming_soon' for 'Coming Soon'. Default to 'in_stock' if unclear."
               },
               url: { type: "string", description: "Product page URL if available" }
             },
-            required: ["name", "price", "inStock"]
+            required: ["name", "price", "stockStatus"]
           }
         }
       },
@@ -37,35 +38,39 @@ const extractPricesTool = {
   }
 };
 
-// Clean markdown content to make stock indicators clearer for AI
-function cleanMarkdownForStockDetection(content: string): string {
-  return content
-    // Replace image markers followed by stock text with clear indicators
-    .replace(/!\[\]\s*In Stock/gi, '[STATUS: IN_STOCK]')
-    .replace(/!\[\]\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
-    .replace(/!\[\]\s*Sold Out/gi, '[STATUS: SOLD_OUT]')
-    .replace(/!\[\]\s*Available/gi, '[STATUS: AVAILABLE]')
-    .replace(/!\[\]\s*Unavailable/gi, '[STATUS: UNAVAILABLE]')
-    // Normalize availability patterns
-    .replace(/Availability:\s*(\d+)\s*in stock/gi, '[STATUS: IN_STOCK - $1 units available]')
-    .replace(/Availability:\s*In Stock/gi, '[STATUS: IN_STOCK]')
-    .replace(/Availability:\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
-    // Handle common button patterns that indicate in-stock
-    .replace(/Add to Cart/gi, '[ACTION: ADD_TO_CART - product is in stock]')
-    .replace(/Buy Now/gi, '[ACTION: BUY_NOW - product is in stock]')
-    .replace(/Select options/gi, '[ACTION: SELECT_OPTIONS - product has variants and is in stock]');
-}
-
-// Validate stock status - override false negatives when no explicit out-of-stock indicator
-function validateStockStatus(product: any, pageContent: string): boolean {
-  // If AI already said in stock, trust it
-  if (product.inStock === true) {
-    return true;
+// Normalize product name to ensure consistent matching
+function normalizeProductName(name: string, sizeMg?: number): string {
+  // Remove any existing size suffix
+  let normalized = name
+    .replace(/\s*\d+\s*(mg|mcg|µg)$/i, '')
+    .trim();
+  
+  // Remove common suffixes that cause duplication
+  normalized = normalized
+    .replace(/\s*-\s*$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  // Append size in consistent format if provided
+  if (sizeMg && sizeMg > 0) {
+    normalized = `${normalized} ${sizeMg}mg`;
   }
   
-  // If AI said out of stock, verify by checking for explicit indicators in the content
+  return normalized;
+}
+
+// Validate stock status - override to in_stock when no explicit indicator found
+function validateStockStatus(product: any, pageContent: string): string {
+  const status = product.stockStatus || 'in_stock';
+  
+  // If already in_stock, trust it
+  if (status === 'in_stock') {
+    return 'in_stock';
+  }
+  
+  // If marked as non-in_stock, verify by checking for explicit indicators
   const lowerContent = pageContent.toLowerCase();
-  const productNameLower = (product.name || '').toLowerCase().split(/\s+/)[0]; // First word of product name
+  const productNameLower = (product.name || '').toLowerCase().split(/\s+/)[0];
   
   // Find content around this product name
   const productIndex = lowerContent.indexOf(productNameLower);
@@ -75,37 +80,48 @@ function validateStockStatus(product: any, pageContent: string): boolean {
     ? lowerContent.substring(contextStart, contextEnd) 
     : lowerContent;
   
-  // Explicit out-of-stock indicators
-  const outOfStockIndicators = [
-    'out of stock',
-    'sold out', 
-    'currently unavailable',
-    'not available',
-    'back order',
-    'pre-order',
-    'coming soon',
-    'temporarily unavailable',
-    'status: out_of_stock',
-    'status: sold_out',
-    'status: unavailable'
-  ];
+  // Explicit status indicators
+  const statusIndicators: Record<string, string[]> = {
+    'out_of_stock': ['out of stock', 'sold out', 'currently unavailable', 'not available', 'status: out_of_stock', 'status: sold_out', 'status: unavailable'],
+    'backorder': ['back order', 'backorder', 'on backorder'],
+    'preorder': ['pre-order', 'preorder', 'pre order'],
+    'coming_soon': ['coming soon', 'coming-soon']
+  };
   
-  const hasOutOfStock = outOfStockIndicators.some(indicator => 
-    productContext.includes(indicator)
-  );
+  // Check if the claimed status has evidence
+  const indicatorsForStatus = statusIndicators[status] || [];
+  const hasEvidence = indicatorsForStatus.some(indicator => productContext.includes(indicator));
   
-  // If no explicit out-of-stock indicator found, override to true
-  if (!hasOutOfStock) {
-    console.log(`Stock override: ${product.name} -> true (no explicit out-of-stock indicator found)`);
-    return true;
+  if (!hasEvidence) {
+    console.log(`Stock override: ${product.name} -> in_stock (no explicit indicator for ${status} found)`);
+    return 'in_stock';
   }
   
-  return false;
+  return status;
+}
+
+// Clean markdown content to make stock indicators clearer for AI
+function cleanMarkdownForStockDetection(content: string): string {
+  return content
+    .replace(/!\[\]\s*In Stock/gi, '[STATUS: IN_STOCK]')
+    .replace(/!\[\]\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
+    .replace(/!\[\]\s*Sold Out/gi, '[STATUS: SOLD_OUT]')
+    .replace(/!\[\]\s*Available/gi, '[STATUS: AVAILABLE]')
+    .replace(/!\[\]\s*Unavailable/gi, '[STATUS: UNAVAILABLE]')
+    .replace(/!\[\]\s*Coming Soon/gi, '[STATUS: COMING_SOON]')
+    .replace(/!\[\]\s*Pre-?Order/gi, '[STATUS: PREORDER]')
+    .replace(/!\[\]\s*Back\s?Order/gi, '[STATUS: BACKORDER]')
+    .replace(/Availability:\s*(\d+)\s*in stock/gi, '[STATUS: IN_STOCK - $1 units available]')
+    .replace(/Availability:\s*In Stock/gi, '[STATUS: IN_STOCK]')
+    .replace(/Availability:\s*Out of Stock/gi, '[STATUS: OUT_OF_STOCK]')
+    .replace(/Add to Cart/gi, '[ACTION: ADD_TO_CART - product is in stock]')
+    .replace(/Buy Now/gi, '[ACTION: BUY_NOW - product is in stock]')
+    .replace(/Select options/gi, '[ACTION: SELECT_OPTIONS - product has variants and is in stock]');
 }
 
 // HIGH PRIORITY: Individual product pages
 const PRODUCT_URL_PRIORITY_PATTERNS = [
-  '/product/',      // Individual product pages (highest priority)
+  '/product/',
   '/products/',
   '/peptide/',
   '/peptides/',
@@ -121,7 +137,7 @@ const PRODUCT_URL_SECONDARY_PATTERNS = [
   '/collection',
 ];
 
-// URL patterns to exclude - be very specific
+// URL patterns to exclude
 const EXCLUDE_URL_PATTERNS = [
   '/cart', '/checkout', '/basket',
   '/account', '/login', '/register', '/signin', '/signup',
@@ -130,7 +146,7 @@ const EXCLUDE_URL_PATTERNS = [
   '/terms', '/privacy', '/policy', '/legal',
   '/shipping', '/returns', '/refund',
   '/track', '/order-status',
-  '/order-steps/', '/order-process/', '/how-to-order',  // Exclude order info pages
+  '/order-steps/', '/order-process/', '/how-to-order',
   '/checkout-', '/payment', '/pay/',
   '/my-account', '/wishlist', '/compare',
   '.pdf', '.jpg', '.png', '.gif', '.svg',
@@ -153,8 +169,8 @@ function isSecondaryProductUrl(url: string): boolean {
   return PRODUCT_URL_SECONDARY_PATTERNS.some(pattern => lowerUrl.includes(pattern));
 }
 
-async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Promise<string[]> {
-  console.log(`Discovering URLs on ${websiteUrl}`);
+async function discoverProductUrls(websiteUrl: string, firecrawlKey: string, syncType: 'fast' | 'full'): Promise<string[]> {
+  console.log(`Discovering URLs on ${websiteUrl} (sync type: ${syncType})`);
   
   try {
     const mapResponse = await fetch('https://api.firecrawl.dev/v1/map', {
@@ -165,7 +181,7 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
       },
       body: JSON.stringify({
         url: websiteUrl,
-        limit: 200,  // Increased limit for better coverage
+        limit: syncType === 'full' ? 500 : 200,
         includeSubdomains: false,
       }),
     });
@@ -180,7 +196,6 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
     
     console.log(`Found ${allUrls.length} total URLs`);
     
-    // Separate URLs by priority - prioritize actual product pages
     const priorityProductUrls = allUrls.filter(isPriorityProductUrl);
     const secondaryProductUrls = allUrls.filter(url => 
       isSecondaryProductUrl(url) && !priorityProductUrls.includes(url)
@@ -189,14 +204,16 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
     console.log(`Found ${priorityProductUrls.length} priority product URLs`);
     console.log(`Found ${secondaryProductUrls.length} secondary/category URLs`);
     
-    // Take up to 5 priority product pages + 2 category pages + homepage (reduced for timeout prevention)
+    // Adjust limits based on sync type
+    const priorityLimit = syncType === 'full' ? 15 : 5;
+    const secondaryLimit = syncType === 'full' ? 5 : 2;
+    
     const selectedUrls = [
       websiteUrl,
-      ...priorityProductUrls.slice(0, 5),
-      ...secondaryProductUrls.slice(0, 2)
+      ...priorityProductUrls.slice(0, priorityLimit),
+      ...secondaryProductUrls.slice(0, secondaryLimit)
     ];
     
-    // Deduplicate
     const uniqueUrls = [...new Set(selectedUrls)];
     console.log(`Selected ${uniqueUrls.length} URLs to scrape`);
     
@@ -221,7 +238,7 @@ async function scrapeSinglePage(url: string, firecrawlKey: string): Promise<stri
         url,
         formats: ['markdown'],
         onlyMainContent: false,
-        waitFor: 1500, // Reduced from 3000 for faster scraping
+        waitFor: 1500,
       }),
     });
 
@@ -245,7 +262,7 @@ async function scrapeSinglePage(url: string, firecrawlKey: string): Promise<stri
 
 async function scrapeMultiplePages(urls: string[], firecrawlKey: string): Promise<string> {
   const contents: string[] = [];
-  const batchSize = 3; // Scrape 3 pages in parallel
+  const batchSize = 3;
   
   for (let i = 0; i < urls.length; i += batchSize) {
     const batch = urls.slice(i, i + batchSize);
@@ -264,7 +281,6 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       console.log('Missing or invalid Authorization header');
@@ -280,12 +296,10 @@ serve(async (req) => {
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
     const lovableKey = Deno.env.get('LOVABLE_API_KEY');
 
-    // Create client with user's auth for verification
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Verify JWT and get user claims
     const token = authHeader.replace('Bearer ', '');
     const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
 
@@ -306,7 +320,6 @@ serve(async (req) => {
       );
     }
 
-    // Check if user has admin role
     const { data: roleData, error: roleError } = await supabaseAuth
       .from('user_roles')
       .select('role')
@@ -332,8 +345,7 @@ serve(async (req) => {
 
     console.log('Admin access verified for user:', userId);
 
-    // Now proceed with the sync operation using service role
-    const { vendorId, syncAll } = await req.json();
+    const { vendorId, syncAll, syncType = 'fast' } = await req.json();
 
     if (!firecrawlKey) {
       return new Response(
@@ -349,10 +361,8 @@ serve(async (req) => {
       );
     }
 
-    // Use service role for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get vendors to sync
     let vendorsQuery = supabase.from('vendors').select('id, name, website, slug');
     if (!syncAll && vendorId) {
       vendorsQuery = vendorsQuery.eq('id', vendorId);
@@ -374,7 +384,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Syncing prices for ${vendors.length} vendor(s)`);
+    console.log(`Syncing prices for ${vendors.length} vendor(s) (sync type: ${syncType})`);
 
     const results = [];
 
@@ -389,8 +399,11 @@ serve(async (req) => {
         console.log(`\n========== Processing ${vendor.name} ==========`);
         console.log(`Website: ${vendor.website}`);
 
-        // Step 1: Discover product URLs using Firecrawl Map
-        const urlsToScrape = await discoverProductUrls(vendor.website, firecrawlKey);
+        // Record sync start time for stale cleanup
+        const syncStartTime = new Date().toISOString();
+
+        // Step 1: Discover product URLs
+        const urlsToScrape = await discoverProductUrls(vendor.website, firecrawlKey, syncType as 'fast' | 'full');
         console.log(`Will scrape ${urlsToScrape.length} pages for ${vendor.name}`);
 
         // Step 2: Scrape all discovered pages
@@ -426,32 +439,18 @@ IMPORTANT RULES:
 5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
 6. Include the product URL if visible in the content
 
-STOCK STATUS DETECTION - CRITICAL RULES (READ VERY CAREFULLY):
+STOCK STATUS DETECTION - USE VENDOR'S EXACT TERMINOLOGY:
 
-⚠️ DEFAULT RULE: Set inStock: true for EVERY product UNLESS you find EXPLICIT out-of-stock text.
+Set stockStatus based on what you see on the website:
+- "in_stock": Default. Use for "In Stock", "Available", "Add to Cart", "Buy Now", "Select options", or when no indicator is present
+- "out_of_stock": ONLY for explicit "Out of Stock", "Sold Out", "Unavailable"
+- "backorder": ONLY for explicit "Back Order", "Backorder", "On Backorder"
+- "preorder": ONLY for explicit "Pre-Order", "Preorder", "Pre Order"
+- "coming_soon": ONLY for explicit "Coming Soon"
 
-ONLY set inStock: false if you see these EXACT phrases near the product:
-- "Out of Stock" / "Out-of-Stock"
-- "Sold Out" / "SoldOut"  
-- "Currently Unavailable"
-- "Not Available" / "Unavailable"
-- "Back Order" / "Backorder"
-- "Pre-Order" / "Preorder"
-- "Coming Soon"
-
-THESE ALL MEAN IN STOCK (set inStock: true):
-- [STATUS: IN_STOCK] markers
-- [ACTION: ADD_TO_CART] markers
-- [ACTION: BUY_NOW] markers
-- [ACTION: SELECT_OPTIONS] markers
-- Any "Add to Cart", "Buy Now", "Order Now" buttons
-- "Select options" (means product has variants - IT IS IN STOCK)
-- Any quantity shown (e.g., "100 in stock", "5 available")
-- Price displayed without strikethrough
-- No stock indicator at all - DEFAULT TO TRUE
-
-⚠️ CRITICAL: When in doubt, set inStock: true. We prefer false positives over false negatives.
-⚠️ NEVER guess out-of-stock. Only mark as false with EXPLICIT evidence.`
+⚠️ CRITICAL: Default to "in_stock" unless you see one of the EXPLICIT phrases above.
+⚠️ If a product shows "Add to Cart", "Buy Now", "Select options" - it is IN STOCK.
+⚠️ If no stock indicator is visible - default to "in_stock".`
               },
               { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${cleanMarkdownForStockDetection(combinedContent).substring(0, 80000)}` }
             ],
@@ -499,36 +498,51 @@ THESE ALL MEAN IN STOCK (set inStock: true):
           }
         }
 
-        // Upsert products with stock validation
+        // Upsert products with normalized names and stock validation
         let updatedCount = 0;
+        const processedProducts = new Set<string>();
+
         for (const product of products) {
+          // Normalize the product name for consistent matching
+          const normalizedName = normalizeProductName(product.name, product.sizeMg);
+          
+          // Skip duplicates within this sync
+          const uniqueKey = `${normalizedName}-${product.sizeMg || 0}`;
+          if (processedProducts.has(uniqueKey)) {
+            console.log(`Skipping duplicate: ${uniqueKey}`);
+            continue;
+          }
+          processedProducts.add(uniqueKey);
+
           const pricePerMg = product.sizeMg && product.price 
             ? product.price / product.sizeMg 
             : null;
 
           // Try to find a matching product_id by name
           let matchedProductId: string | null = null;
-          const productNameLower = product.name.toLowerCase();
+          const productNameLower = normalizedName.toLowerCase();
           for (const [dbName, dbId] of productsMap.entries()) {
-            if (productNameLower.includes(dbName) || dbName.includes(productNameLower)) {
+            if (productNameLower.includes(dbName) || dbName.includes(productNameLower.replace(/\s*\d+mg$/, '').trim())) {
               matchedProductId = dbId;
               break;
             }
           }
 
-          // Validate stock status - override false negatives
-          const validatedInStock = validateStockStatus(product, combinedContent);
+          // Validate stock status
+          const validatedStockStatus = validateStockStatus(product, combinedContent);
+          const inStock = validatedStockStatus === 'in_stock';
 
           const { error: upsertError } = await supabase
             .from('vendor_products')
             .upsert({
               vendor_id: vendor.id,
               product_id: matchedProductId,
-              product_name: product.name,
+              product_name: normalizedName,
               price: product.price,
               price_per_mg: pricePerMg,
               size_mg: product.sizeMg || null,
-              in_stock: validatedInStock,
+              in_stock: inStock,
+              stock_status: validatedStockStatus,
               source_url: product.url || vendor.website,
               last_synced_at: new Date().toISOString(),
             }, {
@@ -536,17 +550,34 @@ THESE ALL MEAN IN STOCK (set inStock: true):
             });
 
           if (upsertError) {
-            console.error(`Failed to upsert product ${product.name}:`, upsertError);
+            console.error(`Failed to upsert product ${normalizedName}:`, upsertError);
           } else {
             updatedCount++;
           }
+        }
+
+        // Clean up stale products that weren't updated in this sync
+        const { data: staleProducts, error: deleteError } = await supabase
+          .from('vendor_products')
+          .delete()
+          .eq('vendor_id', vendor.id)
+          .lt('last_synced_at', syncStartTime)
+          .select('id');
+
+        const deletedCount = staleProducts?.length || 0;
+
+        if (deleteError) {
+          console.error(`Error cleaning stale products for ${vendor.name}:`, deleteError);
+        } else if (deletedCount > 0) {
+          console.log(`Deleted ${deletedCount} stale products for ${vendor.name}`);
         }
 
         results.push({
           vendorName: vendor.name,
           productsUpdated: updatedCount,
           productsFound: products.length,
-          pagesScraped: urlsToScrape.length
+          pagesScraped: urlsToScrape.length,
+          staleRemoved: deletedCount || 0
         });
 
         console.log(`✓ ${vendor.name}: ${updatedCount}/${products.length} products saved`);

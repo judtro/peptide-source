@@ -5,8 +5,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, DollarSign, Award, Tag, Package } from 'lucide-react';
-import type { VendorProductWithVendor } from '@/types';
+import { ExternalLink, DollarSign, Award, Tag, Package, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import type { VendorProductWithVendor, StockStatus } from '@/types';
+
+const stockStatusConfig: Record<StockStatus, { label: string; variant: 'default' | 'destructive' | 'secondary' | 'outline'; icon: typeof CheckCircle }> = {
+  in_stock: { label: 'In Stock', variant: 'default', icon: CheckCircle },
+  out_of_stock: { label: 'Out of Stock', variant: 'destructive', icon: XCircle },
+  backorder: { label: 'Backorder', variant: 'secondary', icon: Clock },
+  preorder: { label: 'Pre-Order', variant: 'secondary', icon: Clock },
+  coming_soon: { label: 'Coming Soon', variant: 'outline', icon: AlertTriangle },
+};
 
 interface ProductPriceTableProps {
   productId?: string;
@@ -101,6 +109,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
               <TableRow>
                 <TableHead>Vendor</TableHead>
                 <TableHead className="text-center">Size</TableHead>
+                <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Price</TableHead>
                 <TableHead className="text-right">Price/mg</TableHead>
                 <TableHead className="text-right">With Discount</TableHead>
@@ -112,6 +121,8 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                 const discountedPrice = calculateDiscountedPrice(item.pricePerMg, item.discountPercentage);
                 const hasDiscount = item.discountPercentage && item.discountPercentage > 0;
                 const isBestDeal = item.id === bestDealId;
+                const stockConfig = stockStatusConfig[item.stockStatus] || stockStatusConfig.in_stock;
+                const StockIcon = stockConfig.icon;
 
                 return (
                   <TableRow 
@@ -139,8 +150,33 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                         {item.sizeMg}mg
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={stockConfig.variant} className="gap-1 text-xs">
+                        <StockIcon className="h-3 w-3" />
+                        {stockConfig.label}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right font-mono">
                       {formatPrice(item.price)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-muted-foreground">
+                      {formatPricePerMg(item.pricePerMg)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {hasDiscount ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="font-mono font-semibold text-primary">
+                            {formatPricePerMg(discountedPrice)}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Tag className="h-3 w-3" />
+                            <code className="text-primary">{item.discountCode}</code>
+                            <span>(-{item.discountPercentage}%)</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="font-mono text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-mono text-muted-foreground">
                       {formatPricePerMg(item.pricePerMg)}
