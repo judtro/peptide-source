@@ -110,7 +110,33 @@ export const useVendorProductsByProductName = (productName: string) => {
         .order('price_per_mg', { ascending: true });
 
       if (error) throw error;
-      return (data || []).map((item) => transformVendorProduct(item as unknown as DbVendorProductWithVendor));
+      
+      const transformed = (data || []).map((item) => transformVendorProduct(item as unknown as DbVendorProductWithVendor));
+      
+      // Filter to exclude combo products - only match exact product or same product with size indicator
+      const searchLower = productName.toLowerCase().trim();
+      
+      return transformed.filter((item) => {
+        const nameLower = item.productName.toLowerCase().trim();
+        
+        // Exact match
+        if (nameLower === searchLower) return true;
+        
+        // Check if product name starts with search term followed by size (e.g., "BPC-157 5mg")
+        if (nameLower.startsWith(searchLower)) {
+          const remainder = nameLower.slice(searchLower.length).trim();
+          // Allow if remainder is just a size like "5mg", "10mg", etc.
+          if (/^\d+\s*(mg|mcg)?$/i.test(remainder)) return true;
+        }
+        
+        // Reject combo products (contains &, /, "and", "mix", "blend", or parentheses with other compounds)
+        if (/[&\/]/.test(nameLower) || /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower)) {
+          return false;
+        }
+        
+        // If it's just the product name with no modifiers, allow it
+        return nameLower === searchLower;
+      });
     },
     enabled: !!productName,
     staleTime: 5 * 60 * 1000,

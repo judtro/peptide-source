@@ -28,10 +28,23 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-48" />
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <DollarSign className="h-5 w-5 text-primary" />
+            Price Comparison
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-48 w-full" />
+          <div className="flex flex-col items-center justify-center py-6 text-center mb-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span>Loading vendor prices...</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
         </CardContent>
       </Card>
     );
