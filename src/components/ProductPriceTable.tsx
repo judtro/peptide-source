@@ -23,12 +23,13 @@ interface ProductPriceTableProps {
 
 export const ProductPriceTable = ({ productId, productName }: ProductPriceTableProps) => {
   // Always fetch by both ID and name - use ID results if available, fallback to name matching
-  const { data: productsByIdData, isLoading: isLoadingById } = useVendorProductsByProduct(productId || '');
+  // Also pass productName into the ID-based hook to hard-filter mis-associated rows (e.g. combo URLs tagged to a single product_id).
+  const { data: productsByIdData, isLoading: isLoadingById } = useVendorProductsByProduct(productId || '', productName || '');
   const { data: productsByNameData, isLoading: isLoadingByName } = useVendorProductsByProductName(productName || '');
 
   // Prioritize ID-based results, but fallback to name-based matching if empty
-  const vendorProducts = (productsByIdData && productsByIdData.length > 0) 
-    ? productsByIdData 
+  const vendorProducts = (productsByIdData && productsByIdData.length > 0)
+    ? productsByIdData
     : productsByNameData;
   const isLoading = isLoadingById || isLoadingByName;
 
