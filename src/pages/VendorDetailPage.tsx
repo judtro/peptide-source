@@ -2,9 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { useVendor } from '@/hooks/useVendors';
-import { useProducts } from '@/hooks/useProducts';
-import type { Product, Vendor } from '@/types';
-import { ProductCard } from '@/components/ProductCard';
+import { useVendorProductsForVendor } from '@/hooks/useVendorProducts';
+import type { Vendor } from '@/types';
 import { DiscountBadge } from '@/components/DiscountBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,9 +30,9 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 const VendorDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: vendor, isLoading: vendorLoading } = useVendor(slug || '');
-  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: vendorProductsList = [], isLoading: vendorProductsLoading } = useVendorProductsForVendor(vendor?.id || '');
 
-  const isLoading = vendorLoading || productsLoading;
+  const isLoading = vendorLoading || vendorProductsLoading;
 
   // Generate JSON-LD schemas for SEO
   const jsonLdSchemas = useMemo(() => {
@@ -106,11 +105,6 @@ const VendorDetailPage = () => {
       </Layout>
     );
   }
-
-  // Get products available from this vendor
-  const vendorProducts: Product[] = products.filter((p) =>
-    vendor.peptides.includes(p.id)
-  );
 
   const getRegionFlag = (region: string) => {
     switch (region) {
@@ -346,7 +340,7 @@ const VendorDetailPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-lg font-semibold">{vendorProducts.length} compounds</p>
+                    <p className="text-lg font-semibold">{vendorProductsList.length} products</p>
                   </CardContent>
                 </Card>
               </div>
@@ -364,10 +358,50 @@ const VendorDetailPage = () => {
                 Molecules currently available from this verified source.
               </p>
 
-              {vendorProducts.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {vendorProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+              {vendorProductsList.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {vendorProductsList.map((vp) => (
+                    <Card key={vp.id} className="hover:border-primary/50 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold text-sm truncate">{vp.productName}</h3>
+                            {vp.sizeMg > 0 && (
+                              <p className="text-xs text-muted-foreground">{vp.sizeMg}mg</p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            {vp.price > 0 && (
+                              <p className="font-mono font-bold text-sm">${vp.price.toFixed(2)}</p>
+                            )}
+                            {vp.pricePerMg > 0 && (
+                              <p className="text-xs text-muted-foreground">${vp.pricePerMg.toFixed(2)}/mg</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between">
+                          <Badge 
+                            variant={vp.inStock ? 'default' : 'secondary'} 
+                            className="text-xs"
+                          >
+                            {vp.stockStatus === 'in_stock' ? 'In Stock' : 
+                             vp.stockStatus === 'backorder' ? 'Backorder' :
+                             vp.stockStatus === 'preorder' ? 'Pre-order' : 
+                             vp.stockStatus === 'out_of_stock' ? 'Out of Stock' : 'Available'}
+                          </Badge>
+                          {vp.sourceUrl && (
+                            <a 
+                              href={vp.sourceUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              View →
+                            </a>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               ) : (

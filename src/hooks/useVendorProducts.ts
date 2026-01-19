@@ -369,6 +369,48 @@ export const useVendorProductsByProductName = (productName: string) => {
   });
 };
 
+// Fetch all vendor products for a specific vendor
+export const useVendorProductsForVendor = (vendorId: string) => {
+  return useQuery({
+    queryKey: ['vendor-products', 'vendor', vendorId],
+    queryFn: async (): Promise<VendorProductWithVendor[]> => {
+      const { data, error } = await supabase
+        .from('vendor_products')
+        .select(`
+          id,
+          vendor_id,
+          product_id,
+          product_name,
+          price,
+          price_per_mg,
+          size_mg,
+          in_stock,
+          stock_status,
+          source_url,
+          vendors!inner (
+            id,
+            name,
+            slug,
+            discount_code,
+            discount_percentage,
+            website,
+            status
+          )
+        `)
+        .eq('vendor_id', vendorId)
+        .order('product_name', { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map((item) =>
+        transformVendorProduct(item as unknown as DbVendorProductWithVendor)
+      );
+    },
+    enabled: !!vendorId,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 // Calculate the discounted price per mg
 export const calculateDiscountedPrice = (pricePerMg: number, discountPercentage?: number): number => {
   if (!discountPercentage || discountPercentage <= 0) return pricePerMg;
