@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FlaskConical } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export const Footer = () => {
   const { t } = useTranslation();
@@ -11,10 +11,8 @@ export const Footer = () => {
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <FlaskConical className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
-              </div>
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logo} alt="ChemVerify" className="h-10 w-auto" />
               <span className="font-mono text-lg font-bold text-foreground">ChemVerify</span>
             </Link>
             <p className="mt-4 max-w-md text-sm text-muted-foreground">
