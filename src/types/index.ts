@@ -49,6 +49,32 @@ export interface Vendor {
   shippingMethods: string[];
   paymentMethods: string[];
   logoUrl?: string;
+  discountPercentage?: number;
+}
+
+// ============================================
+// VENDOR PRODUCT TYPES
+// ============================================
+
+export interface VendorProduct {
+  id: string;
+  vendorId: string;
+  productId: string;
+  productName: string;
+  price: number;
+  pricePerMg: number;
+  sizeMg: number;
+  inStock: boolean;
+  sourceUrl?: string;
+}
+
+export interface VendorProductWithVendor extends VendorProduct {
+  vendorName: string;
+  vendorSlug: string;
+  discountCode?: string;
+  discountPercentage?: number;
+  website?: string;
+  status: VendorStatus;
 }
 
 // ============================================

@@ -53,6 +53,7 @@ interface DbVendor {
   status: string;
   website: string | null;
   discount_code: string | null;
+  discount_percentage: number | null;
   description: string | null;
 }
 
@@ -87,6 +88,10 @@ const vendorSchema = z.object({
     .regex(/^[a-zA-Z0-9\-_]*$/, 'Discount code can only contain letters, numbers, hyphens, and underscores')
     .optional()
     .or(z.literal('')),
+  discountPercentage: z.number()
+    .min(0, 'Discount percentage must be at least 0')
+    .max(100, 'Discount percentage cannot exceed 100')
+    .optional(),
   description: z.string()
     .max(1000, 'Description must be less than 1000 characters')
     .optional()
@@ -100,6 +105,7 @@ interface VendorFormData {
   website: string;
   status: VendorStatus;
   discountCode: string;
+  discountPercentage: number;
   description: string;
 }
 
@@ -110,6 +116,7 @@ const emptyFormData: VendorFormData = {
   website: '',
   status: 'pending',
   discountCode: '',
+  discountPercentage: 0,
   description: '',
 };
 
@@ -138,7 +145,7 @@ export default function AdminVendors() {
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, slug, region, shipping_regions, status, website, discount_code, description')
+        .select('id, name, slug, region, shipping_regions, status, website, discount_code, discount_percentage, description')
         .order('name');
 
       if (error) throw error;
@@ -162,6 +169,7 @@ export default function AdminVendors() {
         website: vendor.website || '',
         status: vendor.status as VendorStatus,
         discountCode: vendor.discount_code || '',
+        discountPercentage: Number(vendor.discount_percentage) || 0,
         description: vendor.description || '',
       });
     } else {
@@ -226,6 +234,7 @@ export default function AdminVendors() {
         website: extracted.sourceUrl || vendorUrl.trim(),
         status: 'pending',
         discountCode: '',
+        discountPercentage: 0,
         description: extracted.description || '',
       });
 
@@ -357,6 +366,7 @@ export default function AdminVendors() {
             website: formData.website.trim() || null,
             status: formData.status,
             discount_code: formData.discountCode.trim() || null,
+            discount_percentage: formData.discountPercentage || 0,
             description: formData.description.trim() || null,
           })
           .eq('id', editingVendor.id);
@@ -374,6 +384,7 @@ export default function AdminVendors() {
             website: formData.website.trim() || null,
             status: formData.status,
             discount_code: formData.discountCode.trim() || null,
+            discount_percentage: formData.discountPercentage || 0,
             description: formData.description.trim() || null,
           });
 
@@ -721,18 +732,39 @@ export default function AdminVendors() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label>Discount Code (optional)</Label>
-              <Input
-                value={formData.discountCode}
-                onChange={(e) => setFormData(prev => ({ ...prev, discountCode: e.target.value }))}
-                placeholder="e.g., CHEMVERIFY10"
-                className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
-                maxLength={50}
-              />
-              {formErrors.discountCode && (
-                <p className="text-xs text-destructive">{formErrors.discountCode}</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Discount Code (optional)</Label>
+                <Input
+                  value={formData.discountCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, discountCode: e.target.value }))}
+                  placeholder="e.g., CHEMVERIFY10"
+                  className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                  maxLength={50}
+                />
+                {formErrors.discountCode && (
+                  <p className="text-xs text-destructive">{formErrors.discountCode}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Discount % (optional)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={formData.discountPercentage || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    discountPercentage: e.target.value ? Number(e.target.value) : 0 
+                  }))}
+                  placeholder="e.g., 10"
+                  className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]"
+                />
+                {formErrors.discountPercentage && (
+                  <p className="text-xs text-destructive">{formErrors.discountPercentage}</p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
