@@ -30,6 +30,7 @@ import { DiscountBadge } from './DiscountBadge';
 import { CommandSearch } from './CommandSearch';
 import { products } from '@/data/products';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const Header = () => {
   const { t, i18n } = useTranslation();
@@ -61,6 +62,16 @@ export const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const isProductsActive = location.pathname.startsWith('/product');
+
+  // Get featured products (popular ones, limit to 5)
+  const featuredProducts = products
+    .filter(p => p.isPopular)
+    .slice(0, 5);
+
+  // Get all products sorted alphabetically
+  const allProductsAlphabetical = [...products].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
 
   return (
     <>
@@ -183,33 +194,57 @@ export const Header = () => {
                     {t('nav.products')}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid w-[420px] gap-1 p-3 md:w-[520px] md:grid-cols-2">
-                      {products.map((product) => (
-                        <NavigationMenuLink key={product.id} asChild>
-                          <Link
-                            to={`/product/${product.id}`}
-                            className="flex items-start gap-3 rounded-md p-3 transition-colors hover:bg-accent"
-                          >
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                              <Dna className="h-4 w-4 text-primary" aria-hidden="true" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-foreground">
-                                {product.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {product.category}
-                              </p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      ))}
+                    <div className="w-[260px] p-3">
+                      {/* Featured Section */}
+                      {featuredProducts.length > 0 && (
+                        <div className="mb-2">
+                          <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Featured
+                          </p>
+                          <div className="flex flex-col">
+                            {featuredProducts.map((product) => (
+                              <NavigationMenuLink key={product.id} asChild>
+                                <Link
+                                  to={`/product/${product.id}`}
+                                  className="rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+                                >
+                                  {product.name}
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Divider */}
+                      <div className="my-2 h-px bg-border" />
+                      
+                      {/* All Peptides Section */}
+                      <div className="mb-2">
+                        <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          All Peptides
+                        </p>
+                        <ScrollArea className="max-h-[280px]">
+                          <div className="flex flex-col">
+                            {allProductsAlphabetical.map((product) => (
+                              <NavigationMenuLink key={product.id} asChild>
+                                <Link
+                                  to={`/product/${product.id}`}
+                                  className="rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                                >
+                                  {product.name}
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
                       
                       {/* View All Link */}
                       <NavigationMenuLink asChild>
                         <Link
                           to="/products"
-                          className="col-span-full flex items-center justify-center gap-2 rounded-md border border-dashed border-border p-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                          className="flex items-center justify-center rounded-md border border-dashed border-border p-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                         >
                           {t('common.view_all_products')}
                         </Link>
@@ -350,20 +385,41 @@ export const Header = () => {
                           </AccordionTrigger>
                           <AccordionContent className="pb-0 pt-1">
                             <div className="flex flex-col gap-1 pl-2 sm:pl-4">
-                              {products.map((product) => (
+                              {/* Featured Section */}
+                              {featuredProducts.length > 0 && (
+                                <>
+                                  <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Featured
+                                  </p>
+                                  {featuredProducts.map((product) => (
+                                    <Link
+                                      key={product.id}
+                                      to={`/product/${product.id}`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="min-h-[40px] rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                                    >
+                                      {product.name}
+                                    </Link>
+                                  ))}
+                                  <div className="my-1 h-px bg-border" />
+                                </>
+                              )}
+                              
+                              {/* All Peptides Section */}
+                              <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                All Peptides
+                              </p>
+                              {allProductsAlphabetical.map((product) => (
                                 <Link
                                   key={product.id}
                                   to={`/product/${product.id}`}
                                   onClick={() => setMobileMenuOpen(false)}
-                                  className="flex min-h-[44px] items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  className="min-h-[40px] rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
                                 >
-                                  <Dna className="h-4 w-4 text-primary" aria-hidden="true" />
-                                  <span className="flex-1">{product.name}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {product.category}
-                                  </span>
+                                  {product.name}
                                 </Link>
                               ))}
+                              
                               <Link
                                 to="/products"
                                 onClick={() => setMobileMenuOpen(false)}
