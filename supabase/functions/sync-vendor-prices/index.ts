@@ -38,18 +38,148 @@ const extractPricesTool = {
   }
 };
 
+// Common product name aliases for matching
+const PRODUCT_ALIASES: Record<string, string[]> = {
+  'bpc-157': ['bpc 157', 'bpc157', 'body protection compound'],
+  'tb-500': ['tb500', 'tb 500', 'thymosin beta-4', 'thymosin beta 4'],
+  'melanotan 2': ['melanotan ii', 'melanotan-2', 'mt-2', 'mt2', 'mt 2', 'mt-ii'],
+  'pt-141': ['pt141', 'pt 141', 'bremelanotide'],
+  'ghk-cu': ['ghk cu', 'ghkcu', 'copper peptide', 'ghk copper'],
+  'cjc-1295': ['cjc1295', 'cjc 1295'],
+  'cjc-1295 no dac': ['cjc-1295 (no dac)', 'cjc-1295 without dac', 'cjc no dac', 'mod grf 1-29', 'mod grf'],
+  'ipamorelin': ['ipam', 'ipa'],
+  'ghrp-6': ['ghrp6', 'ghrp 6'],
+  'ghrp-2': ['ghrp2', 'ghrp 2'],
+  'aod-9604': ['aod9604', 'aod 9604'],
+  'igf-1 lr3': ['igf1 lr3', 'igf-1lr3', 'igf1lr3'],
+  'thymosin alpha-1': ['ta1', 'thymosin alpha 1', 'ta-1'],
+  'semaglutide': ['sema', 'glp-1', 'ozempic', 'wegovy'],
+  'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1'],
+  'retatrutide': ['reta', 'triple g'],
+  'tesamorelin': ['th9507', 'egrifta'],
+  'epithalon': ['epitalon', 'epitalone'],
+  'mots-c': ['motsc', 'mots c'],
+  'll-37': ['ll37', 'll 37'],
+  'selank': [],
+  'semax': [],
+  'dsip': ['delta sleep inducing peptide'],
+  'nad+': ['nad plus', 'nicotinamide adenine dinucleotide'],
+  'follistatin': ['fst', 'follistatin 344', 'follistatin-344'],
+  'humanin': [],
+  'oxytocin': [],
+  'fragment 176-191': ['frag 176-191', 'hgh fragment', 'hgh frag'],
+  'mgf': ['mechano growth factor'],
+  'kpv': [],
+};
+
+// Normalize product name for matching (without size suffix)
+function normalizeForMatching(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s*\d+\s*(mg|mcg|µg|iu)$/i, '') // Remove size suffix
+    .replace(/[-_]/g, ' ')                     // Normalize separators
+    .replace(/\s+/g, ' ')                      // Single spaces
+    .replace(/[()]/g, '')                      // Remove parentheses
+    .trim();
+}
+
+// Find canonical name from aliases
+function getCanonicalName(name: string): string {
+  const normalized = normalizeForMatching(name);
+  
+  // Check if it matches any alias
+  for (const [canonical, aliases] of Object.entries(PRODUCT_ALIASES)) {
+    if (canonical === normalized || aliases.includes(normalized)) {
+      return canonical;
+    }
+    // Also check partial matches
+    if (normalized.includes(canonical) || canonical.includes(normalized)) {
+      return canonical;
+    }
+    for (const alias of aliases) {
+      if (normalized.includes(alias) || alias.includes(normalized)) {
+        return canonical;
+      }
+    }
+  }
+  
+  return normalized;
+}
+
+// Enhanced product matching against database products
+function findMatchingProduct(
+  scrapedName: string, 
+  productsMap: Map<string, { id: string; name: string; normalizedName: string }>
+): { id: string; name: string } | null {
+  const normalizedScraped = normalizeForMatching(scrapedName);
+  const canonicalScraped = getCanonicalName(scrapedName);
+  
+  // 1. Exact match on normalized name
+  for (const [_, product] of productsMap) {
+    if (product.normalizedName === normalizedScraped) {
+      return { id: product.id, name: product.name };
+    }
+  }
+  
+  // 2. Canonical name match
+  for (const [_, product] of productsMap) {
+    const canonicalDb = getCanonicalName(product.name);
+    if (canonicalDb === canonicalScraped) {
+      return { id: product.id, name: product.name };
+    }
+  }
+  
+  // 3. Partial match (scraped contains db name or vice versa)
+  for (const [_, product] of productsMap) {
+    if (normalizedScraped.includes(product.normalizedName) || 
+        product.normalizedName.includes(normalizedScraped)) {
+      return { id: product.id, name: product.name };
+    }
+  }
+  
+  return null;
+}
+
+// Build products map with normalized names
+function buildProductsMap(dbProducts: { id: string; name: string }[]): Map<string, { id: string; name: string; normalizedName: string }> {
+  const map = new Map();
+  for (const p of dbProducts) {
+    map.set(p.id, {
+      id: p.id,
+      name: p.name,
+      normalizedName: normalizeForMatching(p.name)
+    });
+  }
+  return map;
+}
+
 // Normalize product name to ensure consistent matching
 function normalizeProductName(name: string, sizeMg?: number): string {
-  // Remove any existing size suffix
-  let normalized = name
-    .replace(/\s*\d+\s*(mg|mcg|µg)$/i, '')
+  // Get canonical name
+  let normalized = getCanonicalName(name);
+  
+  // Title case the canonical name
+  normalized = normalized
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .replace(/\s*-\s*$/, '')
     .trim();
   
-  // Remove common suffixes that cause duplication
+  // Handle special casing for known patterns
   normalized = normalized
-    .replace(/\s*-\s*$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/bpc 157/i, 'BPC-157')
+    .replace(/tb 500/i, 'TB-500')
+    .replace(/ghk cu/i, 'GHK-Cu')
+    .replace(/cjc 1295/i, 'CJC-1295')
+    .replace(/ghrp 6/i, 'GHRP-6')
+    .replace(/ghrp 2/i, 'GHRP-2')
+    .replace(/aod 9604/i, 'AOD-9604')
+    .replace(/igf 1 lr3/i, 'IGF-1 LR3')
+    .replace(/pt 141/i, 'PT-141')
+    .replace(/ll 37/i, 'LL-37')
+    .replace(/mots c/i, 'MOTS-c')
+    .replace(/nad\+/i, 'NAD+');
   
   // Append size in consistent format if provided
   if (sizeMg && sizeMg > 0) {
@@ -57,6 +187,50 @@ function normalizeProductName(name: string, sizeMg?: number): string {
   }
   
   return normalized;
+}
+
+// Generate enhanced AI prompt with known products
+function generateExtractionPrompt(knownProductNames: string[]): string {
+  const productsList = knownProductNames.length > 0 
+    ? knownProductNames.join(', ')
+    : 'BPC-157, TB-500, Semaglutide, Tirzepatide, Retatrutide, GHK-Cu, Ipamorelin, CJC-1295';
+    
+  return `You are a peptide product data extractor. Extract ALL peptide product prices from the website content provided.
+
+## PRIORITY PRODUCTS TO FIND (extract ALL size variants of these):
+${productsList}
+
+## COMMON NAME VARIATIONS TO RECOGNIZE:
+- Melanotan 2 = Melanotan II = MT-2 = MT2 = MT II
+- BPC-157 = BPC 157 = Body Protection Compound
+- TB-500 = TB500 = Thymosin Beta-4
+- Semaglutide = Sema = GLP-1 agonist
+- Tirzepatide = Tirz = GIP/GLP-1 = Mounjaro
+- CJC-1295 (No DAC) = CJC-1295 without DAC = CJC No DAC = MOD GRF 1-29
+- Ipamorelin = Ipam = IPAM
+- GHK-Cu = GHK Copper = Copper Peptide
+- PT-141 = Bremelanotide
+- Tesamorelin = TH9507 = Egrifta
+- Epithalon = Epitalon
+- AOD-9604 = AOD9604
+- IGF-1 LR3 = IGF-1LR3
+
+## EXTRACTION RULES:
+1. Extract EVERY peptide product found, including ALL size variants
+2. For products with multiple sizes, create SEPARATE entries (BPC-157 5mg, BPC-157 10mg = 2 entries)
+3. Prices may be in USD ($), EUR (€), GBP (£) - keep the value as shown
+4. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
+5. Include the product URL if visible in the content
+6. For PRIORITY PRODUCTS above, use the standard name format shown
+
+## STOCK STATUS (default to "in_stock" if unclear):
+- "in_stock": Default. Use for "In Stock", "Available", "Add to Cart", "Buy Now", "Select options", or when no indicator
+- "out_of_stock": ONLY for explicit "Out of Stock", "Sold Out", "Unavailable"
+- "backorder": ONLY for explicit "Back Order", "Backorder", "On Backorder"
+- "preorder": ONLY for explicit "Pre-Order", "Preorder"
+- "coming_soon": ONLY for explicit "Coming Soon"
+
+⚠️ CRITICAL: Default to "in_stock" unless you see an EXPLICIT out-of-stock phrase.`;
 }
 
 // Validate stock status - override to in_stock when no explicit indicator found
@@ -328,11 +502,14 @@ async function scrapeMultiplePages(urls: string[], firecrawlKey: string): Promis
 // Extract products from a single page or small batch
 async function extractProductsFromContent(
   content: string, 
-  lovableKey: string
+  lovableKey: string,
+  knownProductNames: string[] = []
 ): Promise<any[]> {
   if (!content || content.length < 50) {
     return [];
   }
+
+  const systemPrompt = generateExtractionPrompt(knownProductNames);
 
   const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
@@ -343,31 +520,7 @@ async function extractProductsFromContent(
     body: JSON.stringify({
       model: 'google/gemini-3-flash-preview',
       messages: [
-        { 
-          role: 'system', 
-          content: `You are a peptide product data extractor. Extract ALL peptide product prices from the website content provided.
-
-IMPORTANT RULES:
-1. Extract EVERY peptide product you can find, even if you're not 100% sure it's a peptide
-2. Include ALL size variants as separate entries (e.g., BPC-157 5mg, BPC-157 10mg should be 2 entries)
-3. Prices may be in USD ($), EUR (€), GBP (£) - convert approximate value to USD if needed
-4. Common peptides to look for: BPC-157, TB-500, Semaglutide, Tirzepatide, Retatrutide, GHK-Cu, Ipamorelin, CJC-1295, GHRP-6, GHRP-2, Melanotan II, PT-141, Oxytocin, Selank, Semax, Epithalon, DSIP, AOD-9604, Fragment 176-191, MGF, IGF-1 LR3, Thymosin Alpha-1, LL-37, KPV, GLP-1, Tesamorelin, NAD+, Follistatin, MOTS-c, Humanin
-5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
-6. Include the product URL if visible in the content
-
-STOCK STATUS DETECTION - USE VENDOR'S EXACT TERMINOLOGY:
-
-Set stockStatus based on what you see on the website:
-- "in_stock": Default. Use for "In Stock", "Available", "Add to Cart", "Buy Now", "Select options", or when no indicator is present
-- "out_of_stock": ONLY for explicit "Out of Stock", "Sold Out", "Unavailable"
-- "backorder": ONLY for explicit "Back Order", "Backorder", "On Backorder"
-- "preorder": ONLY for explicit "Pre-Order", "Preorder", "Pre Order"
-- "coming_soon": ONLY for explicit "Coming Soon"
-
-⚠️ CRITICAL: Default to "in_stock" unless you see one of the EXPLICIT phrases above.
-⚠️ If a product shows "Add to Cart", "Buy Now", "Select options" - it is IN STOCK.
-⚠️ If no stock indicator is visible - default to "in_stock".`
-        },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: `Extract ALL product prices from this page content:\n\n${cleanMarkdownForStockDetection(content).substring(0, 30000)}` }
       ],
       tools: [extractPricesTool],
@@ -577,23 +730,22 @@ serve(async (req) => {
       if (urls && Array.isArray(urls) && urls.length > 0) {
         console.log(`[COMPLETE] Processing batch of ${urls.length} URLs for ${vendor.name}`);
         
-        // Fetch products map for linking
+        // Fetch products from database for enhanced matching
         const { data: dbProducts } = await supabase
           .from('products')
           .select('id, name');
         
-        const productsMap = new Map<string, string>();
-        if (dbProducts) {
-          for (const p of dbProducts) {
-            productsMap.set(p.name.toLowerCase(), p.id);
-          }
-        }
+        const productsMap = buildProductsMap(dbProducts || []);
+        const knownProductNames = dbProducts?.map(p => p.name) || [];
+        console.log(`[COMPLETE] Loaded ${knownProductNames.length} known products for matching`);
 
         let totalProcessed = 0;
         let totalExtracted = 0;
         let totalUpserted = 0;
+        let totalMatched = 0;
         const failedUrls: string[] = [];
         const processedProducts = new Set<string>();
+        const unmatchedProducts: string[] = [];
 
         // Process URLs in small batches to avoid timeout
         const processBatchSize = Math.min(batchSize, 5);
@@ -618,8 +770,8 @@ serve(async (req) => {
               continue;
             }
 
-            // Extract products from this single page
-            const products = await extractProductsFromContent(content, lovableKey);
+            // Extract products with known products list for AI guidance
+            const products = await extractProductsFromContent(content, lovableKey, knownProductNames);
             totalExtracted += products.length;
 
             // Upsert each product
@@ -637,14 +789,15 @@ serve(async (req) => {
                 ? product.price / product.sizeMg 
                 : null;
 
-              // Try to find a matching product_id
-              let matchedProductId: string | null = null;
-              const productNameLower = normalizedName.toLowerCase();
-              for (const [dbName, dbId] of productsMap.entries()) {
-                if (productNameLower.includes(dbName) || dbName.includes(productNameLower.replace(/\s*\d+mg$/, '').trim())) {
-                  matchedProductId = dbId;
-                  break;
-                }
+              // Use enhanced matching to find product_id
+              const matchedProduct = findMatchingProduct(product.name, productsMap);
+              const matchedProductId = matchedProduct?.id || null;
+              
+              if (matchedProductId) {
+                totalMatched++;
+                console.log(`[MATCH] "${product.name}" -> "${matchedProduct?.name}" (ID: ${matchedProductId})`);
+              } else {
+                unmatchedProducts.push(product.name);
               }
 
               // Validate stock status using page content
@@ -675,7 +828,10 @@ serve(async (req) => {
           }
         }
 
-        console.log(`[COMPLETE] Batch done: ${totalProcessed} pages, ${totalExtracted} extracted, ${totalUpserted} upserted`);
+        console.log(`[COMPLETE] Batch done: ${totalProcessed} pages, ${totalExtracted} extracted, ${totalUpserted} upserted, ${totalMatched} matched`);
+        if (unmatchedProducts.length > 0) {
+          console.log(`[COMPLETE] Unmatched products: ${unmatchedProducts.slice(0, 10).join(', ')}`);
+        }
 
         return new Response(
           JSON.stringify({
@@ -685,7 +841,9 @@ serve(async (req) => {
             urlsProcessed: totalProcessed,
             productsExtracted: totalExtracted,
             productsUpserted: totalUpserted,
-            failedUrls: failedUrls.slice(0, 10) // Limit failed URLs in response
+            productsMatched: totalMatched,
+            failedUrls: failedUrls.slice(0, 10),
+            unmatchedProducts: unmatchedProducts.slice(0, 20)
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -722,6 +880,15 @@ serve(async (req) => {
 
     console.log(`Syncing prices for ${vendors.length} vendor(s) (sync type: ${syncType})`);
 
+    // Fetch all products from the products table ONCE before the vendor loop
+    const { data: allDbProducts } = await supabase
+      .from('products')
+      .select('id, name');
+    
+    const productsMap = buildProductsMap(allDbProducts || []);
+    const knownProductNames = allDbProducts?.map(p => p.name) || [];
+    console.log(`Loaded ${knownProductNames.length} known products for matching`);
+
     const results = [];
 
     for (const vendor of vendors) {
@@ -753,7 +920,9 @@ serve(async (req) => {
 
         console.log(`Total content length for ${vendor.name}: ${combinedContent.length} chars`);
 
-        // Step 3: Extract prices using AI
+        // Step 3: Extract prices using AI with known products prompt
+        const systemPrompt = generateExtractionPrompt(knownProductNames);
+        
         const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -763,31 +932,7 @@ serve(async (req) => {
           body: JSON.stringify({
             model: 'google/gemini-3-flash-preview',
             messages: [
-              { 
-                role: 'system', 
-                content: `You are a peptide product data extractor. Extract ALL peptide product prices from the website content provided.
-
-IMPORTANT RULES:
-1. Extract EVERY peptide product you can find, even if you're not 100% sure it's a peptide
-2. Include ALL size variants as separate entries (e.g., BPC-157 5mg, BPC-157 10mg should be 2 entries)
-3. Prices may be in USD ($), EUR (€), GBP (£) - convert approximate value to USD if needed
-4. Common peptides to look for: BPC-157, TB-500, Semaglutide, Tirzepatide, Retatrutide, GHK-Cu, Ipamorelin, CJC-1295, GHRP-6, GHRP-2, Melanotan II, PT-141, Oxytocin, Selank, Semax, Epithalon, DSIP, AOD-9604, Fragment 176-191, MGF, IGF-1 LR3, Thymosin Alpha-1, LL-37, KPV, GLP-1, Tesamorelin, NAD+, Follistatin, MOTS-c, Humanin
-5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
-6. Include the product URL if visible in the content
-
-STOCK STATUS DETECTION - USE VENDOR'S EXACT TERMINOLOGY:
-
-Set stockStatus based on what you see on the website:
-- "in_stock": Default. Use for "In Stock", "Available", "Add to Cart", "Buy Now", "Select options", or when no indicator is present
-- "out_of_stock": ONLY for explicit "Out of Stock", "Sold Out", "Unavailable"
-- "backorder": ONLY for explicit "Back Order", "Backorder", "On Backorder"
-- "preorder": ONLY for explicit "Pre-Order", "Preorder", "Pre Order"
-- "coming_soon": ONLY for explicit "Coming Soon"
-
-⚠️ CRITICAL: Default to "in_stock" unless you see one of the EXPLICIT phrases above.
-⚠️ If a product shows "Add to Cart", "Buy Now", "Select options" - it is IN STOCK.
-⚠️ If no stock indicator is visible - default to "in_stock".`
-              },
+              { role: 'system', content: systemPrompt },
               { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${cleanMarkdownForStockDetection(combinedContent).substring(0, 80000)}` }
             ],
             tools: [extractPricesTool],
@@ -822,21 +967,11 @@ Set stockStatus based on what you see on the website:
         const products = extractedProducts.products || [];
         console.log(`Found ${products.length} products for ${vendor.name}`);
 
-        // Fetch all products from the products table to link vendor_products
-        const { data: dbProducts } = await supabase
-          .from('products')
-          .select('id, name');
-        
-        const productsMap = new Map<string, string>();
-        if (dbProducts) {
-          for (const p of dbProducts) {
-            productsMap.set(p.name.toLowerCase(), p.id);
-          }
-        }
-
-        // Upsert products with normalized names and stock validation
+        // Upsert products with normalized names, enhanced matching, and stock validation
         let updatedCount = 0;
+        let matchedCount = 0;
         const processedProducts = new Set<string>();
+        const unmatchedProducts: string[] = [];
 
         for (const product of products) {
           // Normalize the product name for consistent matching
@@ -854,14 +989,15 @@ Set stockStatus based on what you see on the website:
             ? product.price / product.sizeMg 
             : null;
 
-          // Try to find a matching product_id by name
-          let matchedProductId: string | null = null;
-          const productNameLower = normalizedName.toLowerCase();
-          for (const [dbName, dbId] of productsMap.entries()) {
-            if (productNameLower.includes(dbName) || dbName.includes(productNameLower.replace(/\s*\d+mg$/, '').trim())) {
-              matchedProductId = dbId;
-              break;
-            }
+          // Use enhanced matching to find product_id
+          const matchedProduct = findMatchingProduct(product.name, productsMap);
+          const matchedProductId = matchedProduct?.id || null;
+          
+          if (matchedProductId) {
+            matchedCount++;
+            console.log(`[MATCH] "${product.name}" -> "${matchedProduct?.name}"`);
+          } else {
+            unmatchedProducts.push(product.name);
           }
 
           // Validate stock status
@@ -912,11 +1048,16 @@ Set stockStatus based on what you see on the website:
           vendorName: vendor.name,
           productsUpdated: updatedCount,
           productsFound: products.length,
+          productsMatched: matchedCount,
           pagesScraped: urlsToScrape.length,
-          staleRemoved: deletedCount || 0
+          staleRemoved: deletedCount || 0,
+          unmatchedProducts: unmatchedProducts.slice(0, 10)
         });
 
-        console.log(`✓ ${vendor.name}: ${updatedCount}/${products.length} products saved`);
+        console.log(`✓ ${vendor.name}: ${updatedCount}/${products.length} products saved, ${matchedCount} matched to database`);
+        if (unmatchedProducts.length > 0) {
+          console.log(`  Unmatched: ${unmatchedProducts.slice(0, 5).join(', ')}${unmatchedProducts.length > 5 ? '...' : ''}`);
+        }
 
       } catch (vendorError) {
         console.error(`Error processing ${vendor.name}:`, vendorError);
