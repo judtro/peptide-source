@@ -33,7 +33,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, DollarSign, Package, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, DollarSign, Package, ExternalLink, Search, AlertCircle } from 'lucide-react';
 
 interface VendorProduct {
   id: string;
@@ -72,6 +72,8 @@ export default function AdminPrices() {
   const queryClient = useQueryClient();
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [productFilter, setProductFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showMissingPrices, setShowMissingPrices] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<VendorProduct | null>(null);
   const [form, setForm] = useState<VendorProductForm>(defaultForm);
@@ -250,15 +252,29 @@ export default function AdminPrices() {
     }
   };
 
+  // Get unique products that have prices
+  const productsWithPrices = [...new Set(vendorProducts.map((vp) => vp.productId).filter(Boolean))];
+
+  // Calculate products without prices
+  const productsWithoutPrices = products.filter(
+    (product) => !vendorProducts.some((vp) => vp.productId === product.id)
+  );
+
   // Filter products
   const filteredProducts = vendorProducts.filter((vp) => {
     if (vendorFilter !== 'all' && vp.vendorId !== vendorFilter) return false;
     if (productFilter !== 'all' && vp.productId !== productFilter) return false;
+    
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesProduct = vp.productName.toLowerCase().includes(query);
+      const matchesVendor = vp.vendorName.toLowerCase().includes(query);
+      if (!matchesProduct && !matchesVendor) return false;
+    }
+    
     return true;
   });
-
-  // Get unique products that have prices
-  const productsWithPrices = [...new Set(vendorProducts.map((vp) => vp.productId).filter(Boolean))];
 
   const isLoading = vendorsLoading || productsLoading || productsListLoading;
 
@@ -455,7 +471,22 @@ export default function AdminPrices() {
         <CardHeader>
           <CardTitle className="text-lg">Filters</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {/* Search */}
+          <div className="space-y-2">
+            <Label>Search</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by product or vendor name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          {/* Dropdowns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Filter by Vendor</Label>
@@ -490,8 +521,61 @@ export default function AdminPrices() {
               </Select>
             </div>
           </div>
+
+          {/* Show products without prices toggle */}
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="missingPrices"
+                checked={showMissingPrices}
+                onCheckedChange={(checked) => setShowMissingPrices(!!checked)}
+              />
+              <Label htmlFor="missingPrices" className="cursor-pointer">
+                Show products without prices
+              </Label>
+            </div>
+            <Badge variant="secondary" className="ml-2">
+              {productsWithoutPrices.length} missing
+            </Badge>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Products Without Prices Section */}
+      {showMissingPrices && productsWithoutPrices.length > 0 && (
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-amber-400">
+              <AlertCircle className="h-5 w-5" />
+              Products Without Prices ({productsWithoutPrices.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {productsWithoutPrices.map((product) => (
+                <Button
+                  key={product.id}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setForm({
+                      ...defaultForm,
+                      productId: product.id,
+                      productName: product.name,
+                    });
+                    setDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  {product.name}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Products Table */}
       <Card>

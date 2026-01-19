@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +12,8 @@ import {
   X,
   DollarSign,
   FlaskConical,
+  Home,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AdminOverview from './components/AdminOverview';
@@ -72,24 +74,48 @@ export default function AdminDashboard() {
           sidebarOpen ? 'w-64' : 'w-16'
         )}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700">
-          {sidebarOpen ? (
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
-              <span className="font-semibold text-slate-100">Admin</span>
-            </div>
-          ) : (
-            <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-slate-100 hover:bg-slate-800"
-          >
-            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+        {/* Header Section */}
+        <div className="border-b border-slate-700">
+          {/* Logo Row */}
+          <div className="h-14 flex items-center justify-between px-4">
+            {sidebarOpen ? (
+              <div className="flex items-center gap-3">
+                <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-slate-100 text-sm leading-tight">ChemVerify</span>
+                  <span className="text-xs text-slate-400 leading-tight">Admin Panel</span>
+                </div>
+              </div>
+            ) : (
+              <img src={logo} alt="ChemVerify" className="h-8 w-auto mx-auto" />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-slate-400 hover:text-slate-100 hover:bg-slate-800 shrink-0"
+            >
+              {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
+
+          {/* Back to Homepage Button */}
+          <div className="px-3 pb-3">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className={cn(
+                "w-full border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100",
+                !sidebarOpen && "px-0 justify-center"
+              )}
+            >
+              <Link to="/">
+                <Home className="h-4 w-4 shrink-0" />
+                {sidebarOpen && <span className="ml-2">Back to Homepage</span>}
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Navigation */}
