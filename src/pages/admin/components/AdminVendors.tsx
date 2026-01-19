@@ -257,43 +257,74 @@ export default function AdminVendors() {
   };
 
   const handleSyncPrices = async (vendorId?: string) => {
-    if (vendorId) {
-      setSyncingVendorId(vendorId);
-    } else {
-      setIsSyncingPrices(true);
+    // Ensure we have a valid session before calling the edge function
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !sessionData.session) {
+      toast.error('Session expired. Please log in again.');
+      return;
     }
 
-    try {
-      // Ensure we have a valid session before calling the edge function
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (vendorId) {
+      // Sync single vendor
+      setSyncingVendorId(vendorId);
+      try {
+        toast.info('Syncing prices for vendor...');
+        
+        const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
+          body: { vendorId }
+        });
+
+        if (error) throw error;
+        if (!data?.success) {
+          throw new Error(data?.error || 'Sync failed');
+        }
+
+        const result = data.results?.[0];
+        if (result?.productsUpdated > 0) {
+          toast.success(`Synced ${result.productsUpdated} products`);
+        } else {
+          toast.info('No products found');
+        }
+      } catch (err: any) {
+        console.error('Error syncing prices:', err);
+        toast.error(err.message || 'Failed to sync prices');
+      } finally {
+        setSyncingVendorId(null);
+      }
+    } else {
+      // Sync all vendors one-by-one to prevent timeout
+      setIsSyncingPrices(true);
+      let totalSuccess = 0;
+      let totalProducts = 0;
+
+      const vendorsWithWebsite = vendorList.filter(v => v.website);
       
-      if (sessionError || !sessionData.session) {
-        toast.error('Session expired. Please log in again.');
-        return;
+      for (let i = 0; i < vendorsWithWebsite.length; i++) {
+        const vendor = vendorsWithWebsite[i];
+        toast.info(`Syncing ${vendor.name} (${i + 1}/${vendorsWithWebsite.length})...`);
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
+            body: { vendorId: vendor.id }
+          });
+
+          if (error) {
+            console.error(`Error syncing ${vendor.name}:`, error);
+            continue;
+          }
+
+          if (data?.success) {
+            totalSuccess++;
+            const result = data.results?.[0];
+            totalProducts += result?.productsUpdated || 0;
+          }
+        } catch (err) {
+          console.error(`Error syncing ${vendor.name}:`, err);
+        }
       }
 
-      toast.info(vendorId ? 'Syncing prices for vendor...' : 'Syncing prices for all vendors...');
-      
-      const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
-        body: vendorId ? { vendorId } : { syncAll: true }
-      });
-
-      if (error) throw error;
-      if (!data?.success) {
-        throw new Error(data?.error || 'Sync failed');
-      }
-
-      const results = data.results || [];
-      const successCount = results.filter((r: any) => !r.error).length;
-      const totalProducts = results.reduce((sum: number, r: any) => sum + (r.productsUpdated || 0), 0);
-
-      toast.success(`Synced ${successCount} vendor(s), updated ${totalProducts} product prices`);
-
-    } catch (err: any) {
-      console.error('Error syncing prices:', err);
-      toast.error(err.message || 'Failed to sync prices');
-    } finally {
-      setSyncingVendorId(null);
+      toast.success(`Synced ${totalSuccess} vendor(s), updated ${totalProducts} product prices`);
       setIsSyncingPrices(false);
     }
   };
