@@ -169,6 +169,56 @@ function isSecondaryProductUrl(url: string): boolean {
   return PRODUCT_URL_SECONDARY_PATTERNS.some(pattern => lowerUrl.includes(pattern));
 }
 
+// Discover ALL product URLs for complete sync
+async function discoverAllProductUrls(websiteUrl: string, firecrawlKey: string): Promise<string[]> {
+  console.log(`[COMPLETE] Discovering ALL URLs on ${websiteUrl}`);
+  
+  try {
+    const mapResponse = await fetch('https://api.firecrawl.dev/v1/map', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${firecrawlKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: websiteUrl,
+        limit: 5000, // Maximum for complete sync
+        includeSubdomains: false,
+      }),
+    });
+
+    if (!mapResponse.ok) {
+      console.log(`Map API failed for ${websiteUrl}`);
+      return [];
+    }
+
+    const mapData = await mapResponse.json();
+    const allUrls: string[] = mapData.links || mapData.data?.links || [];
+    
+    console.log(`[COMPLETE] Found ${allUrls.length} total URLs`);
+    
+    // Get ALL priority product URLs (no limit)
+    const priorityProductUrls = allUrls.filter(isPriorityProductUrl);
+    const secondaryProductUrls = allUrls.filter(url => 
+      isSecondaryProductUrl(url) && !priorityProductUrls.includes(url)
+    );
+    
+    console.log(`[COMPLETE] Found ${priorityProductUrls.length} priority product URLs`);
+    console.log(`[COMPLETE] Found ${secondaryProductUrls.length} secondary/category URLs`);
+    
+    // Return ALL product URLs for complete sync
+    const selectedUrls = [...priorityProductUrls, ...secondaryProductUrls];
+    const uniqueUrls = [...new Set(selectedUrls)];
+    
+    console.log(`[COMPLETE] Selected ${uniqueUrls.length} total URLs to process`);
+    
+    return uniqueUrls;
+  } catch (error) {
+    console.error('[COMPLETE] Error discovering URLs:', error);
+    return [];
+  }
+}
+
 async function discoverProductUrls(websiteUrl: string, firecrawlKey: string, syncType: 'fast' | 'full'): Promise<string[]> {
   console.log(`Discovering URLs on ${websiteUrl} (sync type: ${syncType})`);
   
@@ -275,6 +325,77 @@ async function scrapeMultiplePages(urls: string[], firecrawlKey: string): Promis
   return contents.join('\n\n');
 }
 
+// Extract products from a single page or small batch
+async function extractProductsFromContent(
+  content: string, 
+  lovableKey: string
+): Promise<any[]> {
+  if (!content || content.length < 50) {
+    return [];
+  }
+
+  const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-3-flash-preview',
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are a peptide product data extractor. Extract ALL peptide product prices from the website content provided.
+
+IMPORTANT RULES:
+1. Extract EVERY peptide product you can find, even if you're not 100% sure it's a peptide
+2. Include ALL size variants as separate entries (e.g., BPC-157 5mg, BPC-157 10mg should be 2 entries)
+3. Prices may be in USD ($), EUR (€), GBP (£) - convert approximate value to USD if needed
+4. Common peptides to look for: BPC-157, TB-500, Semaglutide, Tirzepatide, Retatrutide, GHK-Cu, Ipamorelin, CJC-1295, GHRP-6, GHRP-2, Melanotan II, PT-141, Oxytocin, Selank, Semax, Epithalon, DSIP, AOD-9604, Fragment 176-191, MGF, IGF-1 LR3, Thymosin Alpha-1, LL-37, KPV, GLP-1, Tesamorelin, NAD+, Follistatin, MOTS-c, Humanin
+5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
+6. Include the product URL if visible in the content
+
+STOCK STATUS DETECTION - USE VENDOR'S EXACT TERMINOLOGY:
+
+Set stockStatus based on what you see on the website:
+- "in_stock": Default. Use for "In Stock", "Available", "Add to Cart", "Buy Now", "Select options", or when no indicator is present
+- "out_of_stock": ONLY for explicit "Out of Stock", "Sold Out", "Unavailable"
+- "backorder": ONLY for explicit "Back Order", "Backorder", "On Backorder"
+- "preorder": ONLY for explicit "Pre-Order", "Preorder", "Pre Order"
+- "coming_soon": ONLY for explicit "Coming Soon"
+
+⚠️ CRITICAL: Default to "in_stock" unless you see one of the EXPLICIT phrases above.
+⚠️ If a product shows "Add to Cart", "Buy Now", "Select options" - it is IN STOCK.
+⚠️ If no stock indicator is visible - default to "in_stock".`
+        },
+        { role: 'user', content: `Extract ALL product prices from this page content:\n\n${cleanMarkdownForStockDetection(content).substring(0, 30000)}` }
+      ],
+      tools: [extractPricesTool],
+      tool_choice: { type: "function", function: { name: "extract_product_prices" } }
+    }),
+  });
+
+  if (!aiResponse.ok) {
+    console.error('AI extraction failed');
+    return [];
+  }
+
+  const aiData = await aiResponse.json();
+  const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+  
+  if (!toolCall) {
+    return [];
+  }
+
+  try {
+    const extractedProducts = JSON.parse(toolCall.function.arguments);
+    return extractedProducts.products || [];
+  } catch {
+    console.error('Failed to parse AI response');
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -345,7 +466,17 @@ serve(async (req) => {
 
     console.log('Admin access verified for user:', userId);
 
-    const { vendorId, syncAll, syncType = 'fast' } = await req.json();
+    const { 
+      vendorId, 
+      syncAll, 
+      syncType = 'fast',
+      // Complete sync parameters
+      discoverOnly = false,
+      urls = null,
+      syncStartedAt = null,
+      finalize = false,
+      batchSize = 5
+    } = await req.json();
 
     if (!firecrawlKey) {
       return new Response(
@@ -363,6 +494,211 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Handle COMPLETE sync mode
+    if (syncType === 'complete') {
+      if (!vendorId) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'vendorId required for complete sync' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Fetch the vendor
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id, name, website')
+        .eq('id', vendorId)
+        .single();
+
+      if (vendorError || !vendor) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Vendor not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!vendor.website) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Vendor has no website configured' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // DISCOVERY PHASE: Return all product URLs
+      if (discoverOnly) {
+        console.log(`[COMPLETE] Discovery phase for ${vendor.name}`);
+        const productUrls = await discoverAllProductUrls(vendor.website, firecrawlKey);
+        const startedAt = new Date().toISOString();
+        
+        return new Response(
+          JSON.stringify({
+            success: true,
+            phase: 'discovery',
+            vendorName: vendor.name,
+            productUrls,
+            totalUrls: productUrls.length,
+            syncStartedAt: startedAt
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // FINALIZE PHASE: Clean up stale products
+      if (finalize && syncStartedAt) {
+        console.log(`[COMPLETE] Finalize phase for ${vendor.name}`);
+        
+        const { data: staleProducts, error: deleteError } = await supabase
+          .from('vendor_products')
+          .delete()
+          .eq('vendor_id', vendor.id)
+          .lt('last_synced_at', syncStartedAt)
+          .select('id');
+
+        const deletedCount = staleProducts?.length || 0;
+
+        if (deleteError) {
+          console.error(`Error cleaning stale products for ${vendor.name}:`, deleteError);
+        } else {
+          console.log(`[COMPLETE] Deleted ${deletedCount} stale products for ${vendor.name}`);
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            phase: 'finalize',
+            vendorName: vendor.name,
+            staleRemoved: deletedCount
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // BATCH PROCESSING PHASE: Scrape and extract from provided URLs
+      if (urls && Array.isArray(urls) && urls.length > 0) {
+        console.log(`[COMPLETE] Processing batch of ${urls.length} URLs for ${vendor.name}`);
+        
+        // Fetch products map for linking
+        const { data: dbProducts } = await supabase
+          .from('products')
+          .select('id, name');
+        
+        const productsMap = new Map<string, string>();
+        if (dbProducts) {
+          for (const p of dbProducts) {
+            productsMap.set(p.name.toLowerCase(), p.id);
+          }
+        }
+
+        let totalProcessed = 0;
+        let totalExtracted = 0;
+        let totalUpserted = 0;
+        const failedUrls: string[] = [];
+        const processedProducts = new Set<string>();
+
+        // Process URLs in small batches to avoid timeout
+        const processBatchSize = Math.min(batchSize, 5);
+        
+        for (let i = 0; i < urls.length; i += processBatchSize) {
+          const urlBatch = urls.slice(i, i + processBatchSize);
+          
+          // Scrape all pages in this batch concurrently
+          const scrapeResults = await Promise.all(
+            urlBatch.map(async (url: string) => {
+              const content = await scrapeSinglePage(url, firecrawlKey);
+              return { url, content };
+            })
+          );
+
+          // Process each scraped page
+          for (const { url, content } of scrapeResults) {
+            totalProcessed++;
+            
+            if (!content) {
+              failedUrls.push(url);
+              continue;
+            }
+
+            // Extract products from this single page
+            const products = await extractProductsFromContent(content, lovableKey);
+            totalExtracted += products.length;
+
+            // Upsert each product
+            for (const product of products) {
+              const normalizedName = normalizeProductName(product.name, product.sizeMg);
+              
+              // Skip duplicates
+              const uniqueKey = `${normalizedName}-${product.sizeMg || 0}`;
+              if (processedProducts.has(uniqueKey)) {
+                continue;
+              }
+              processedProducts.add(uniqueKey);
+
+              const pricePerMg = product.sizeMg && product.price 
+                ? product.price / product.sizeMg 
+                : null;
+
+              // Try to find a matching product_id
+              let matchedProductId: string | null = null;
+              const productNameLower = normalizedName.toLowerCase();
+              for (const [dbName, dbId] of productsMap.entries()) {
+                if (productNameLower.includes(dbName) || dbName.includes(productNameLower.replace(/\s*\d+mg$/, '').trim())) {
+                  matchedProductId = dbId;
+                  break;
+                }
+              }
+
+              // Validate stock status using page content
+              const validatedStockStatus = validateStockStatus(product, content);
+              const inStock = validatedStockStatus === 'in_stock';
+
+              const { error: upsertError } = await supabase
+                .from('vendor_products')
+                .upsert({
+                  vendor_id: vendor.id,
+                  product_id: matchedProductId,
+                  product_name: normalizedName,
+                  price: product.price,
+                  price_per_mg: pricePerMg,
+                  size_mg: product.sizeMg || null,
+                  in_stock: inStock,
+                  stock_status: validatedStockStatus,
+                  source_url: product.url || url,
+                  last_synced_at: syncStartedAt || new Date().toISOString(),
+                }, {
+                  onConflict: 'vendor_id,product_name,size_mg'
+                });
+
+              if (!upsertError) {
+                totalUpserted++;
+              }
+            }
+          }
+        }
+
+        console.log(`[COMPLETE] Batch done: ${totalProcessed} pages, ${totalExtracted} extracted, ${totalUpserted} upserted`);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            phase: 'batch',
+            vendorName: vendor.name,
+            urlsProcessed: totalProcessed,
+            productsExtracted: totalExtracted,
+            productsUpserted: totalUpserted,
+            failedUrls: failedUrls.slice(0, 10) // Limit failed URLs in response
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // If no specific phase, return error
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid complete sync request - specify discoverOnly, urls, or finalize' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle FAST/FULL sync mode (original behavior)
     let vendorsQuery = supabase.from('vendors').select('id, name, website, slug');
     if (!syncAll && vendorId) {
       vendorsQuery = vendorsQuery.eq('id', vendorId);
