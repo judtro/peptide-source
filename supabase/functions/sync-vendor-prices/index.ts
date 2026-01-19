@@ -604,25 +604,18 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    // Verify user session
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
 
-    if (claimsError || !claimsData?.claims) {
-      console.log('Invalid token:', claimsError?.message);
+    if (userError || !user) {
+      console.log('Invalid token or no user:', userError?.message);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub;
-    if (!userId) {
-      console.log('No user ID in token');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const userId = user.id;
 
     const { data: roleData, error: roleError } = await supabaseAuth
       .from('user_roles')
