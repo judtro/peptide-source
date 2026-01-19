@@ -9,6 +9,7 @@ import { useProduct } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -147,64 +148,93 @@ const ProductDetailPage = () => {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-8 lg:col-span-2">
+            {/* Description */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FlaskConical className="h-5 w-5 text-primary" />
-                  Molecular Information
+                  <Dna className="h-5 w-5 text-primary" />
+                  Description
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Molecular Weight
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{product.molecularWeight}</p>
-                  </div>
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Purity Standard
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{product.purityStandard}</p>
-                  </div>
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Half-Life</p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{product.halfLife}</p>
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div>
-                  <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-                    Amino Acid Sequence
-                  </p>
-                  <div className="overflow-x-auto rounded-lg bg-secondary/10 p-3">
-                    <code className="whitespace-nowrap font-mono text-xs text-foreground">
-                      {product.sequence}
-                    </code>
-                  </div>
-                </div>
-
-                {product.synonyms.length > 0 && (
-                  <>
-                    <Separator className="my-6" />
-                    <div>
-                      <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-                        Also Known As
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {product.synonyms.map((syn, i) => (
-                          <Badge key={i} variant="secondary">{syn}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+                <p className="leading-relaxed text-foreground">{product.description}</p>
               </CardContent>
             </Card>
 
+            {/* Molecular Information - Collapsed by default */}
+            <Collapsible defaultOpen={false}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <FlaskConical className="h-5 w-5 text-primary" />
+                        Molecular Information
+                      </span>
+                      <span className="text-xs text-muted-foreground font-normal">Click to expand</span>
+                    </CardTitle>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="rounded-lg bg-muted/50 p-4">
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          Molecular Weight
+                        </p>
+                        <p className="mt-1 font-mono text-lg font-semibold">{product.molecularWeight}</p>
+                      </div>
+                      <div className="rounded-lg bg-muted/50 p-4">
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          Purity Standard
+                        </p>
+                        <p className="mt-1 font-mono text-lg font-semibold">{product.purityStandard}</p>
+                      </div>
+                      <div className="rounded-lg bg-muted/50 p-4">
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Half-Life</p>
+                        <p className="mt-1 font-mono text-lg font-semibold">{product.halfLife}</p>
+                      </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    <div>
+                      <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                        Amino Acid Sequence
+                      </p>
+                      <div className="overflow-x-auto rounded-lg bg-secondary/10 p-3">
+                        <code className="whitespace-nowrap font-mono text-xs text-foreground">
+                          {product.sequence}
+                        </code>
+                      </div>
+                    </div>
+
+                    {product.synonyms.length > 0 && (
+                      <>
+                        <Separator className="my-6" />
+                        <div>
+                          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                            Also Known As
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {product.synonyms.map((syn, i) => (
+                              <Badge key={i} variant="secondary">{syn}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Price Comparison */}
+            <section id="price-table" className="scroll-mt-32">
+              <ProductPriceTable productId={product.id} productName={product.name} />
+            </section>
+
+            {/* Educational Video */}
             {product.videoUrl && (
               <Card className="overflow-hidden">
                 <CardHeader>
@@ -232,24 +262,10 @@ const ProductDetailPage = () => {
               </Card>
             )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Dna className="h-5 w-5 text-primary" />
-                  Description
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="leading-relaxed text-foreground">{product.description}</p>
-              </CardContent>
-            </Card>
-
-            <section id="price-table" className="scroll-mt-32">
-              <ProductPriceTable productId={product.id} productName={product.name} />
-            </section>
-
+            {/* Reconstitution Calculator */}
             <ReconstitutionCalculator />
 
+            {/* Verified Sources */}
             <section id="vendor-table" className="scroll-mt-32">
               <div className="mb-4 flex items-center gap-3">
                 <ShieldCheck className="h-6 w-6 text-primary" />
