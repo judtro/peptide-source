@@ -65,6 +65,9 @@ export interface VendorProduct {
   productName: string;
   price: number;
   pricePerMg: number;
+  priceUsd: number;
+  pricePerMgUsd: number;
+  currency: string;
   sizeMg: number;
   inStock: boolean;
   stockStatus: StockStatus;

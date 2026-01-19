@@ -230,11 +230,14 @@ export type Database = {
       vendor_products: {
         Row: {
           created_at: string | null
+          currency: string | null
           id: string
           in_stock: boolean | null
           last_synced_at: string | null
           price: number | null
           price_per_mg: number | null
+          price_per_mg_usd: number | null
+          price_usd: number | null
           product_id: string | null
           product_name: string
           size_mg: number | null
@@ -245,11 +248,14 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          currency?: string | null
           id?: string
           in_stock?: boolean | null
           last_synced_at?: string | null
           price?: number | null
           price_per_mg?: number | null
+          price_per_mg_usd?: number | null
+          price_usd?: number | null
           product_id?: string | null
           product_name: string
           size_mg?: number | null
@@ -260,11 +266,14 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          currency?: string | null
           id?: string
           in_stock?: boolean | null
           last_synced_at?: string | null
           price?: number | null
           price_per_mg?: number | null
+          price_per_mg_usd?: number | null
+          price_usd?: number | null
           product_id?: string | null
           product_name?: string
           size_mg?: number | null
@@ -294,6 +303,7 @@ export type Database = {
         Row: {
           coa_verified: boolean | null
           created_at: string
+          default_currency: string | null
           description: string | null
           discount_code: string | null
           discount_percentage: number | null
@@ -318,6 +328,7 @@ export type Database = {
         Insert: {
           coa_verified?: boolean | null
           created_at?: string
+          default_currency?: string | null
           description?: string | null
           discount_code?: string | null
           discount_percentage?: number | null
@@ -342,6 +353,7 @@ export type Database = {
         Update: {
           coa_verified?: boolean | null
           created_at?: string
+          default_currency?: string | null
           description?: string | null
           discount_code?: string | null
           discount_percentage?: number | null
