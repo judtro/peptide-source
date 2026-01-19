@@ -266,10 +266,32 @@ export const useVendorProductsByProductName = (productName: string) => {
         
         if (!matchesTerm) return false;
         
-        // Reject combo products
+        // Determine if search is for a combo product
+        const searchLower = productName.toLowerCase();
+        const searchIsCombo = /[&\/\+]/.test(searchLower) || 
+          /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(searchLower);
+        
+        // Determine if this item is a combo product
         const nameLower = item.productName.toLowerCase();
-        if (/[&\/]/.test(nameLower) || /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower)) {
+        const itemIsCombo = /[&\/\+]/.test(nameLower) || 
+          /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower);
+        
+        // Strictly reject combos when searching for single products
+        if (!searchIsCombo && itemIsCombo) {
           return false;
+        }
+        
+        // For combo searches, require all components to be present
+        if (searchIsCombo && itemIsCombo) {
+          const searchComponents = searchLower
+            .split(/[&\/\+]/)
+            .map(s => s.replace(/\b(mix|blend|combo)\b/gi, '').trim())
+            .filter(s => s.length > 2);
+          
+          const allComponentsMatch = searchComponents.every(comp => 
+            normalizedItemName.includes(normalizeProductName(comp))
+          );
+          if (!allComponentsMatch) return false;
         }
         
         return true;

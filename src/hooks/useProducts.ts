@@ -7,7 +7,7 @@ type DbProduct = Tables<'products'>;
 
 // Transform database product to app Product type
 const transformProduct = (dbProduct: DbProduct): Product => ({
-  id: dbProduct.slug, // Use slug as the ID for backwards compatibility
+  id: dbProduct.id, // Use actual UUID for precise vendor product matching
   name: dbProduct.name,
   slug: dbProduct.slug,
   category: dbProduct.category,
