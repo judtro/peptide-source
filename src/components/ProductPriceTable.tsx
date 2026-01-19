@@ -14,13 +14,15 @@ interface ProductPriceTableProps {
 }
 
 export const ProductPriceTable = ({ productId, productName }: ProductPriceTableProps) => {
+  // Always fetch by both ID and name - use ID results if available, fallback to name matching
   const { data: productsByIdData, isLoading: isLoadingById } = useVendorProductsByProduct(productId || '');
-  const { data: productsByNameData, isLoading: isLoadingByName } = useVendorProductsByProductName(
-    !productId && productName ? productName : ''
-  );
+  const { data: productsByNameData, isLoading: isLoadingByName } = useVendorProductsByProductName(productName || '');
 
-  const vendorProducts = productId ? productsByIdData : productsByNameData;
-  const isLoading = productId ? isLoadingById : isLoadingByName;
+  // Prioritize ID-based results, but fallback to name-based matching if empty
+  const vendorProducts = (productsByIdData && productsByIdData.length > 0) 
+    ? productsByIdData 
+    : productsByNameData;
+  const isLoading = isLoadingById || isLoadingByName;
 
   if (isLoading) {
     return (

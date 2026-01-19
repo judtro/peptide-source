@@ -244,6 +244,18 @@ Extract exact prices in USD. If multiple sizes are available, include each as a 
         const products = extractedProducts.products || [];
         console.log(`Found ${products.length} products for ${vendor.name}`);
 
+        // Fetch all products from the products table to link vendor_products
+        const { data: dbProducts } = await supabase
+          .from('products')
+          .select('id, name');
+        
+        const productsMap = new Map<string, string>();
+        if (dbProducts) {
+          for (const p of dbProducts) {
+            productsMap.set(p.name.toLowerCase(), p.id);
+          }
+        }
+
         // Upsert products
         let updatedCount = 0;
         for (const product of products) {
@@ -251,10 +263,21 @@ Extract exact prices in USD. If multiple sizes are available, include each as a 
             ? product.price / product.sizeMg 
             : null;
 
+          // Try to find a matching product_id by name
+          let matchedProductId: string | null = null;
+          const productNameLower = product.name.toLowerCase();
+          for (const [dbName, dbId] of productsMap.entries()) {
+            if (productNameLower.includes(dbName) || dbName.includes(productNameLower)) {
+              matchedProductId = dbId;
+              break;
+            }
+          }
+
           const { error: upsertError } = await supabase
             .from('vendor_products')
             .upsert({
               vendor_id: vendor.id,
+              product_id: matchedProductId,
               product_name: product.name,
               price: product.price,
               price_per_mg: pricePerMg,

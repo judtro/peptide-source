@@ -68,7 +68,7 @@ export const useVendorProductsByProduct = (productId: string) => {
           )
         `)
         .eq('product_id', productId)
-        .eq('vendors.status', 'verified')
+        .in('vendors.status', ['verified', 'pending'])
         .order('price_per_mg', { ascending: true });
 
       if (error) throw error;
@@ -106,7 +106,7 @@ export const useVendorProductsByProductName = (productName: string) => {
           )
         `)
         .ilike('product_name', `%${productName}%`)
-        .eq('vendors.status', 'verified')
+        .in('vendors.status', ['verified', 'pending'])
         .order('price_per_mg', { ascending: true });
 
       if (error) throw error;
