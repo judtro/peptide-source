@@ -22,7 +22,7 @@ import AdminAudits from './components/AdminAudits';
 import AdminContent from './components/AdminContent';
 import AdminPrices from './components/AdminPrices';
 import AdminProducts from './components/AdminProducts';
-import logo from '@/assets/logo.png';
+
 
 type AdminSection = 'overview' | 'vendors' | 'products' | 'prices' | 'audits' | 'content';
 
@@ -78,16 +78,13 @@ export default function AdminDashboard() {
         <div className="border-b border-slate-700">
           {/* Logo Row */}
           <div className="h-14 flex items-center justify-between px-4">
-            {sidebarOpen ? (
-              <div className="flex items-center gap-3">
-                <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
-                <div className="flex flex-col">
-                  <span className="font-semibold text-slate-100 text-sm leading-tight">ChemVerify</span>
-                  <span className="text-xs text-slate-400 leading-tight">Admin Panel</span>
-                </div>
+          {sidebarOpen ? (
+              <div className="flex flex-col">
+                <span className="font-semibold text-slate-100 text-sm leading-tight">ChemVerify</span>
+                <span className="text-xs text-slate-400 leading-tight">Admin Panel</span>
               </div>
             ) : (
-              <img src={logo} alt="ChemVerify" className="h-8 w-auto mx-auto" />
+              <span className="font-semibold text-slate-100 text-sm">CV</span>
             )}
             <Button
               variant="ghost"
@@ -106,7 +103,7 @@ export default function AdminDashboard() {
               variant="outline"
               size="sm"
               className={cn(
-                "w-full border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100",
+                "w-full bg-white text-black border-slate-600 hover:bg-slate-100 hover:text-black",
                 !sidebarOpen && "px-0 justify-center"
               )}
             >
