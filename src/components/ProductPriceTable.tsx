@@ -178,6 +178,25 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                         <span className="font-mono text-muted-foreground">—</span>
                       )}
                     </TableCell>
+                    <TableCell className="text-right font-mono text-muted-foreground">
+                      {formatPricePerMg(item.pricePerMg)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {hasDiscount ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="font-mono font-semibold text-primary">
+                            {formatPricePerMg(discountedPrice)}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Tag className="h-3 w-3" />
+                            <code className="text-primary">{item.discountCode}</code>
+                            <span>(-{item.discountPercentage}%)</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="font-mono text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       {item.website ? (
                         <Button 
