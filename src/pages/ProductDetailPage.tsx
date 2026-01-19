@@ -9,7 +9,7 @@ import { useProduct } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -116,6 +116,71 @@ const ProductDetailPage = () => {
                   <Badge variant="outline" className="font-mono text-xs">
                     {product.category}
                   </Badge>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs">
+                        <FlaskConical className="h-3.5 w-3.5" />
+                        Molecular Info
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <FlaskConical className="h-5 w-5 text-primary" />
+                          Molecular Information
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-3">
+                          <div className="rounded-lg bg-muted/50 p-4">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Molecular Weight
+                            </p>
+                            <p className="mt-1 font-mono text-lg font-semibold">{product.molecularWeight}</p>
+                          </div>
+                          <div className="rounded-lg bg-muted/50 p-4">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Purity Standard
+                            </p>
+                            <p className="mt-1 font-mono text-lg font-semibold">{product.purityStandard}</p>
+                          </div>
+                          <div className="rounded-lg bg-muted/50 p-4">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Half-Life</p>
+                            <p className="mt-1 font-mono text-lg font-semibold">{product.halfLife}</p>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                            Amino Acid Sequence
+                          </p>
+                          <div className="overflow-x-auto rounded-lg bg-secondary/10 p-3">
+                            <code className="whitespace-nowrap font-mono text-xs text-foreground">
+                              {product.sequence}
+                            </code>
+                          </div>
+                        </div>
+
+                        {product.synonyms.length > 0 && (
+                          <>
+                            <Separator />
+                            <div>
+                              <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+                                Also Known As
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {product.synonyms.map((syn, i) => (
+                                  <Badge key={i} variant="secondary">{syn}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
@@ -161,73 +226,6 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
 
-            {/* Molecular Information - Collapsed by default */}
-            <Collapsible defaultOpen={false}>
-              <Card>
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <FlaskConical className="h-5 w-5 text-primary" />
-                        Molecular Information
-                      </span>
-                      <span className="text-xs text-muted-foreground font-normal">Click to expand</span>
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="rounded-lg bg-muted/50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          Molecular Weight
-                        </p>
-                        <p className="mt-1 font-mono text-lg font-semibold">{product.molecularWeight}</p>
-                      </div>
-                      <div className="rounded-lg bg-muted/50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          Purity Standard
-                        </p>
-                        <p className="mt-1 font-mono text-lg font-semibold">{product.purityStandard}</p>
-                      </div>
-                      <div className="rounded-lg bg-muted/50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Half-Life</p>
-                        <p className="mt-1 font-mono text-lg font-semibold">{product.halfLife}</p>
-                      </div>
-                    </div>
-
-                    <Separator className="my-6" />
-
-                    <div>
-                      <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-                        Amino Acid Sequence
-                      </p>
-                      <div className="overflow-x-auto rounded-lg bg-secondary/10 p-3">
-                        <code className="whitespace-nowrap font-mono text-xs text-foreground">
-                          {product.sequence}
-                        </code>
-                      </div>
-                    </div>
-
-                    {product.synonyms.length > 0 && (
-                      <>
-                        <Separator className="my-6" />
-                        <div>
-                          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-                            Also Known As
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {product.synonyms.map((syn, i) => (
-                              <Badge key={i} variant="secondary">{syn}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
 
             {/* Price Comparison */}
             <section id="price-table" className="scroll-mt-32">
