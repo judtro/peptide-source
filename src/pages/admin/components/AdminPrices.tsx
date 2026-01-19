@@ -408,9 +408,9 @@ export default function AdminPrices() {
                 <Label htmlFor="inStock">In Stock</Label>
               </div>
 
-              {/* Submit */}
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-500 text-slate-200 hover:bg-slate-700 hover:text-white">
+                  Cancel
                   Cancel
                 </Button>
                 <Button
@@ -557,7 +557,7 @@ export default function AdminPrices() {
                   key={product.id}
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className="text-xs border-slate-500 text-slate-200 hover:bg-slate-700 hover:text-white"
                   onClick={() => {
                     setEditingProduct(null);
                     setForm({
@@ -595,7 +595,7 @@ export default function AdminPrices() {
             <div className="text-center py-12 text-muted-foreground">
               <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No product prices found</p>
-              <Button variant="outline" className="mt-4" onClick={handleOpenCreate}>
+              <Button variant="outline" className="mt-4 border-slate-500 text-slate-200 hover:bg-slate-700 hover:text-white" onClick={handleOpenCreate}>
                 Add First Product Price
               </Button>
             </div>
@@ -651,6 +651,7 @@ export default function AdminPrices() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="text-slate-400 hover:text-slate-100 hover:bg-slate-700"
                             onClick={() => handleOpenEdit(vp)}
                           >
                             <Pencil className="h-4 w-4" />
@@ -658,7 +659,7 @@ export default function AdminPrices() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() => {
                               if (confirm('Delete this product price?')) {
                                 deleteMutation.mutate(vp.id);
