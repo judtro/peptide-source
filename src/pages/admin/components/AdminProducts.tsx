@@ -121,6 +121,23 @@ const categories = [
   'Other',
 ];
 
+// Normalize product name for matching vendor products
+function normalizeProductName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    // Remove size suffix (e.g., "10mg", "5mg", "50mg", "100mg")
+    .replace(/\s*\d+\s*(mg|mcg|ml|iu)$/i, '')
+    // Normalize Roman numerals to digits
+    .replace(/\bii\b/gi, '2')
+    .replace(/\biii\b/gi, '3')
+    .replace(/\biv\b/gi, '4')
+    // Normalize separators
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export default function AdminProducts() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,20 +177,41 @@ export default function AdminProducts() {
 
       if (vpError) throw vpError;
 
-      // Group vendor products by product name (case-insensitive)
-      const vpByProductName = new Map<string, VendorProductWithVendor[]>();
-      (vendorProducts || []).forEach((vp: any) => {
-        const key = vp.product_name.toLowerCase().trim();
-        if (!vpByProductName.has(key)) {
-          vpByProductName.set(key, []);
-        }
-        vpByProductName.get(key)!.push(vp);
-      });
+      // All vendor products for matching
+      const allVendorProducts = (vendorProducts || []) as VendorProductWithVendor[];
 
-      // Combine products with their vendor data
+      // Combine products with their vendor data using improved matching
       return (products || []).map((product) => {
-        const productKey = product.name.toLowerCase().trim();
-        const vendorProds = vpByProductName.get(productKey) || [];
+        const normalizedProductName = normalizeProductName(product.name);
+        const baseProductName = normalizedProductName.replace(/[^a-z0-9]/g, '');
+        
+        // Find vendor products that match this product
+        const vendorProds = allVendorProducts.filter((vp) => {
+          const normalizedVpName = normalizeProductName(vp.product_name);
+          const baseVpName = normalizedVpName.replace(/[^a-z0-9]/g, '');
+          
+          // Exact match after normalization
+          if (normalizedVpName === normalizedProductName) return true;
+          
+          // Vendor product starts with product name (e.g., "bpc 157 10mg" -> "bpc 157")
+          if (normalizedVpName.startsWith(normalizedProductName + ' ')) return true;
+          if (normalizedVpName.startsWith(normalizedProductName)) return true;
+          
+          // Base name match (removes all non-alphanumeric)
+          if (baseVpName.startsWith(baseProductName)) return true;
+          
+          // Check product_id match if available
+          if (vp.product_id === product.id) return true;
+          
+          return false;
+        }).filter((vp) => {
+          // Exclude combo products unless they exactly start with our product
+          const vpName = vp.product_name.toLowerCase();
+          if (vpName.includes(' & ') || vpName.includes(' + ') || vpName.includes(' mix ')) {
+            return vpName.toLowerCase().startsWith(product.name.toLowerCase());
+          }
+          return true;
+        });
         
         const prices = vendorProds
           .filter(vp => vp.price_per_mg != null)
