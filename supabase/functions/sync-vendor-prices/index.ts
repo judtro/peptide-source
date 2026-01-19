@@ -34,17 +34,25 @@ const extractPricesTool = {
   }
 };
 
-// URL patterns that indicate product pages
-const PRODUCT_URL_PATTERNS = [
-  '/product', '/products',
-  '/shop', '/store',
-  '/peptide', '/peptides',
-  '/catalog', '/category',
-  '/buy', '/order',
-  '/item', '/items'
+// HIGH PRIORITY: Individual product pages
+const PRODUCT_URL_PRIORITY_PATTERNS = [
+  '/product/',      // Individual product pages (highest priority)
+  '/products/',
+  '/peptide/',
+  '/peptides/',
+  '/item/',
 ];
 
-// URL patterns to exclude
+// SECONDARY: Category/shop listing pages
+const PRODUCT_URL_SECONDARY_PATTERNS = [
+  '/shop',
+  '/store', 
+  '/catalog',
+  '/category',
+  '/collection',
+];
+
+// URL patterns to exclude - be very specific
 const EXCLUDE_URL_PATTERNS = [
   '/cart', '/checkout', '/basket',
   '/account', '/login', '/register', '/signin', '/signup',
@@ -53,20 +61,27 @@ const EXCLUDE_URL_PATTERNS = [
   '/terms', '/privacy', '/policy', '/legal',
   '/shipping', '/returns', '/refund',
   '/track', '/order-status',
+  '/order-steps/', '/order-process/', '/how-to-order',  // Exclude order info pages
+  '/checkout-', '/payment', '/pay/',
+  '/my-account', '/wishlist', '/compare',
   '.pdf', '.jpg', '.png', '.gif', '.svg',
   '/cdn-cgi/', '/wp-admin/', '/admin/'
 ];
 
-function isProductUrl(url: string): boolean {
+function isPriorityProductUrl(url: string): boolean {
   const lowerUrl = url.toLowerCase();
-  
-  // Exclude unwanted URLs
   if (EXCLUDE_URL_PATTERNS.some(pattern => lowerUrl.includes(pattern))) {
     return false;
   }
-  
-  // Check for product-related patterns
-  return PRODUCT_URL_PATTERNS.some(pattern => lowerUrl.includes(pattern));
+  return PRODUCT_URL_PRIORITY_PATTERNS.some(pattern => lowerUrl.includes(pattern));
+}
+
+function isSecondaryProductUrl(url: string): boolean {
+  const lowerUrl = url.toLowerCase();
+  if (EXCLUDE_URL_PATTERNS.some(pattern => lowerUrl.includes(pattern))) {
+    return false;
+  }
+  return PRODUCT_URL_SECONDARY_PATTERNS.some(pattern => lowerUrl.includes(pattern));
 }
 
 async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Promise<string[]> {
@@ -81,7 +96,7 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
       },
       body: JSON.stringify({
         url: websiteUrl,
-        limit: 100,
+        limit: 200,  // Increased limit for better coverage
         includeSubdomains: false,
       }),
     });
@@ -96,27 +111,27 @@ async function discoverProductUrls(websiteUrl: string, firecrawlKey: string): Pr
     
     console.log(`Found ${allUrls.length} total URLs`);
     
-    // Filter for product-related URLs
-    const productUrls = allUrls.filter(isProductUrl);
-    console.log(`Found ${productUrls.length} product-related URLs`);
+    // Separate URLs by priority - prioritize actual product pages
+    const priorityProductUrls = allUrls.filter(isPriorityProductUrl);
+    const secondaryProductUrls = allUrls.filter(url => 
+      isSecondaryProductUrl(url) && !priorityProductUrls.includes(url)
+    );
     
-    // If no product URLs found, try to find shop/store main page
-    if (productUrls.length === 0) {
-      const shopPages = allUrls.filter(url => {
-        const lower = url.toLowerCase();
-        return lower.includes('/shop') || lower.includes('/products') || lower.includes('/store');
-      });
-      if (shopPages.length > 0) {
-        console.log(`Using ${shopPages.length} shop pages instead`);
-        return [...new Set([websiteUrl, ...shopPages.slice(0, 5)])];
-      }
-    }
+    console.log(`Found ${priorityProductUrls.length} priority product URLs`);
+    console.log(`Found ${secondaryProductUrls.length} secondary/category URLs`);
     
-    // Take top 5 product URLs + homepage
-    const selectedUrls = [...new Set([websiteUrl, ...productUrls.slice(0, 5)])];
-    console.log(`Selected ${selectedUrls.length} URLs to scrape`);
+    // Take up to 15 priority product pages + 3 category pages + homepage
+    const selectedUrls = [
+      websiteUrl,
+      ...priorityProductUrls.slice(0, 15),
+      ...secondaryProductUrls.slice(0, 3)
+    ];
     
-    return selectedUrls;
+    // Deduplicate
+    const uniqueUrls = [...new Set(selectedUrls)];
+    console.log(`Selected ${uniqueUrls.length} URLs to scrape`);
+    
+    return uniqueUrls;
   } catch (error) {
     console.error('Error discovering URLs:', error);
     return [websiteUrl];
@@ -329,10 +344,22 @@ IMPORTANT RULES:
 3. Prices may be in USD ($), EUR (€), GBP (£) - convert approximate value to USD if needed
 4. Common peptides to look for: BPC-157, TB-500, Semaglutide, Tirzepatide, Retatrutide, GHK-Cu, Ipamorelin, CJC-1295, GHRP-6, GHRP-2, Melanotan II, PT-141, Oxytocin, Selank, Semax, Epithalon, DSIP, AOD-9604, Fragment 176-191, MGF, IGF-1 LR3, Thymosin Alpha-1, LL-37, KPV, GLP-1, Tesamorelin, NAD+, Follistatin, MOTS-c, Humanin
 5. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
-6. If a product is out of stock, set inStock to false
-7. Include the product URL if visible in the content`
+6. Include the product URL if visible in the content
+
+STOCK STATUS DETECTION RULES (CRITICAL):
+1. Products are IN STOCK by default - set inStock: true unless you find explicit out-of-stock indicators
+2. OUT OF STOCK indicators to look for:
+   - "Out of Stock", "Sold Out", "Currently Unavailable", "Not Available"
+   - "Back Order", "Pre-Order", "Coming Soon", "Temporarily Unavailable"
+   - Explicitly disabled or greyed out "Add to Cart" buttons
+3. IN STOCK indicators (positive signals):
+   - "In Stock", "Available", "Add to Cart", "Buy Now", "Order Now"
+   - Price displayed with active purchase buttons
+   - Stock quantity shown (e.g., "5 in stock")
+4. CRITICAL: If you cannot determine stock status OR there is no explicit stock indicator, DEFAULT TO inStock: true
+5. Only set inStock: false if you see EXPLICIT out-of-stock text. Do NOT guess.`
               },
-              { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${combinedContent.substring(0, 60000)}` }
+              { role: 'user', content: `Extract ALL product prices from this vendor's website:\n\n${combinedContent.substring(0, 80000)}` }
             ],
             tools: [extractPricesTool],
             tool_choice: { type: "function", function: { name: "extract_product_prices" } }
