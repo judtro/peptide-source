@@ -42,6 +42,7 @@ import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { useArticleCategories, ArticleCategoryOption } from '@/hooks/useArticleCategories';
 
 interface DbArticle {
   id: string;
@@ -53,24 +54,6 @@ interface DbArticle {
   published_date: string | null;
   read_time: number | null;
 }
-
-// Zod validation schema
-const articleSchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, 'Title is required')
-    .max(200, 'Title must be less than 200 characters'),
-  summary: z.string()
-    .max(500, 'Summary must be less than 500 characters')
-    .optional()
-    .or(z.literal('')),
-  category: z.enum(['safety', 'handling', 'pharmacokinetics', 'verification', 'sourcing']),
-  readTime: z.string()
-    .refine(val => {
-      const num = parseInt(val);
-      return !isNaN(num) && num >= 1 && num <= 60;
-    }, 'Read time must be between 1 and 60 minutes'),
-});
 
 interface ArticleFormData {
   title: string;
@@ -85,6 +68,7 @@ interface GeneratedArticle {
   slug: string;
   category: string;
   categoryLabel: string;
+  isNewCategory?: boolean;
   tableOfContents: Array<{ id: string; title: string; level: number }>;
   content: Array<{
     type: 'heading' | 'paragraph' | 'list' | 'callout';
@@ -96,11 +80,11 @@ interface GeneratedArticle {
   }>;
   readTime: number;
   relatedPeptides: string[];
+  matchedPeptideSlugs?: string[];
 }
 
 interface AIGenerationForm {
   keyword: string;
-  category: string;
   targetLength: 'short' | 'standard' | 'long';
   additionalContext: string;
 }
@@ -114,23 +98,23 @@ const emptyFormData: ArticleFormData = {
 
 const emptyAIForm: AIGenerationForm = {
   keyword: '',
-  category: 'handling',
   targetLength: 'standard',
   additionalContext: '',
 };
-
-const categories = [
-  { value: 'safety', label: 'Safety' },
-  { value: 'handling', label: 'Handling' },
-  { value: 'pharmacokinetics', label: 'Pharmacokinetics' },
-  { value: 'verification', label: 'Verification' },
-  { value: 'sourcing', label: 'Sourcing' },
-];
 
 const lengthOptions = [
   { value: 'short', label: 'Short (~800-1000 words)' },
   { value: 'standard', label: 'Standard (~1200-1500 words)' },
   { value: 'long', label: 'Long (~2000-2500 words)' },
+];
+
+// Fallback categories in case database fetch fails
+const fallbackCategories: ArticleCategoryOption[] = [
+  { value: 'safety', label: 'Safety' },
+  { value: 'handling', label: 'Handling' },
+  { value: 'pharmacokinetics', label: 'Pharmacokinetics' },
+  { value: 'verification', label: 'Verification' },
+  { value: 'sourcing', label: 'Sourcing' },
 ];
 
 export default function AdminContent() {
@@ -151,6 +135,31 @@ export default function AdminContent() {
   const [generatedArticle, setGeneratedArticle] = useState<GeneratedArticle | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSavingGenerated, setIsSavingGenerated] = useState(false);
+
+  // Fetch dynamic categories from database
+  const { data: dbCategories, refetch: refetchCategories } = useArticleCategories();
+  const categories = dbCategories && dbCategories.length > 0 ? dbCategories : fallbackCategories;
+
+  // Create dynamic validation schema based on available categories
+  const createArticleSchema = (cats: ArticleCategoryOption[]) => z.object({
+    title: z.string()
+      .trim()
+      .min(1, 'Title is required')
+      .max(200, 'Title must be less than 200 characters'),
+    summary: z.string()
+      .max(500, 'Summary must be less than 500 characters')
+      .optional()
+      .or(z.literal('')),
+    category: z.string().refine(
+      val => cats.some(c => c.value === val),
+      'Invalid category'
+    ),
+    readTime: z.string()
+      .refine(val => {
+        const num = parseInt(val);
+        return !isNaN(num) && num >= 1 && num <= 60;
+      }, 'Read time must be between 1 and 60 minutes'),
+  });
 
   useEffect(() => {
     fetchArticles();
@@ -198,6 +207,7 @@ export default function AdminContent() {
   };
 
   const validateForm = (): boolean => {
+    const articleSchema = createArticleSchema(categories);
     const result = articleSchema.safeParse(formData);
     if (!result.success) {
       const errors: Record<string, string> = {};
@@ -312,7 +322,6 @@ export default function AdminContent() {
       const { data, error } = await supabase.functions.invoke('generate-article', {
         body: {
           keyword: aiForm.keyword.trim(),
-          category: aiForm.category,
           targetLength: aiForm.targetLength,
           additionalContext: aiForm.additionalContext.trim() || undefined,
         },
@@ -331,7 +340,14 @@ export default function AdminContent() {
       setGeneratedArticle(data.article);
       setIsAIDialogOpen(false);
       setIsPreviewOpen(true);
-      toast.success('Article generated successfully!');
+      
+      // If a new category was created, refetch categories
+      if (data.article.isNewCategory) {
+        refetchCategories();
+        toast.success(`Article generated with new category: ${data.article.categoryLabel}`);
+      } else {
+        toast.success('Article generated successfully!');
+      }
     } catch (err: any) {
       console.error('Error generating article:', err);
       toast.error(err.message || 'Failed to generate article');
@@ -385,7 +401,7 @@ export default function AdminContent() {
       pharmacokinetics: 'bg-[hsl(280,70%,50%,0.1)] text-[hsl(280,70%,60%)] border-[hsl(280,70%,50%,0.3)]',
       sourcing: 'bg-muted text-muted-foreground border-border',
     };
-    return colors[category] || colors.sourcing;
+    return colors[category] || 'bg-muted text-muted-foreground border-border';
   };
 
   const renderContentPreview = (content: GeneratedArticle['content']) => {
@@ -641,7 +657,7 @@ export default function AdminContent() {
         </DialogContent>
       </Dialog>
 
-      {/* AI Generation Dialog */}
+      {/* AI Generation Dialog - No category selection, AI auto-selects */}
       <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
         <DialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)] text-[hsl(210,40%,98%)] max-w-lg">
           <DialogHeader>
@@ -650,7 +666,7 @@ export default function AdminContent() {
               Generate SEO Article with AI
             </DialogTitle>
             <DialogDescription className="text-[hsl(215,20%,60%)]">
-              Enter a keyword or keyphrase to generate an SEO-optimized article
+              Enter a keyword — AI will automatically select the best category and identify related peptides
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -664,46 +680,26 @@ export default function AdminContent() {
                 disabled={isGenerating}
               />
               <p className="text-xs text-[hsl(215,20%,50%)]">
-                This keyword will be the focus of the article for SEO optimization
+                AI will analyze this and auto-select the best category
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select
-                  value={aiForm.category}
-                  onValueChange={(value) => setAIForm(prev => ({ ...prev, category: value }))}
-                  disabled={isGenerating}
-                >
-                  <SelectTrigger className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
-                    {categories.map(c => (
-                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Article Length</Label>
-                <Select
-                  value={aiForm.targetLength}
-                  onValueChange={(value: 'short' | 'standard' | 'long') => setAIForm(prev => ({ ...prev, targetLength: value }))}
-                  disabled={isGenerating}
-                >
-                  <SelectTrigger className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
-                    {lengthOptions.map(l => (
-                      <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label>Article Length</Label>
+              <Select
+                value={aiForm.targetLength}
+                onValueChange={(value: 'short' | 'standard' | 'long') => setAIForm(prev => ({ ...prev, targetLength: value }))}
+                disabled={isGenerating}
+              >
+                <SelectTrigger className="bg-[hsl(222,47%,7%)] border-[hsl(215,25%,25%)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)]">
+                  {lengthOptions.map(l => (
+                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -772,11 +768,18 @@ export default function AdminContent() {
                   <p className="text-xs text-[hsl(215,20%,50%)]">{generatedArticle.summary.length} characters</p>
                 </div>
 
-                {/* Metadata */}
+                {/* Metadata - shows auto-selected category */}
                 <div className="flex items-center gap-4 text-sm">
-                  <Badge variant="outline" className={getCategoryColor(generatedArticle.category)}>
-                    {generatedArticle.categoryLabel}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={getCategoryColor(generatedArticle.category)}>
+                      {generatedArticle.categoryLabel}
+                    </Badge>
+                    {generatedArticle.isNewCategory && (
+                      <Badge variant="secondary" className="bg-primary/20 text-primary text-xs">
+                        NEW
+                      </Badge>
+                    )}
+                  </div>
                   <span className="text-[hsl(215,20%,60%)] flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {generatedArticle.readTime} min read
@@ -814,7 +817,7 @@ export default function AdminContent() {
                 {/* Related Peptides */}
                 {generatedArticle.relatedPeptides.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-[hsl(215,20%,60%)]">Related Peptides</Label>
+                    <Label className="text-[hsl(215,20%,60%)]">Related Peptides (will be clickable links)</Label>
                     <div className="flex flex-wrap gap-2">
                       {generatedArticle.relatedPeptides.map((peptide, index) => (
                         <Badge key={index} variant="secondary" className="bg-[hsl(222,47%,15%)]">

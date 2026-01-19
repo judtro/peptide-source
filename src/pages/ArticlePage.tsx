@@ -1,23 +1,104 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
-import { useProduct } from '@/hooks/useProducts';
+import { useProducts } from '@/hooks/useProducts';
+import { ProductCard } from '@/components/ProductCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, Calendar, User, BookOpen, ExternalLink, ArrowUp, ChevronRight, Dna, Info, AlertTriangle, FileText, ShieldCheck } from 'lucide-react';
+import { Clock, Calendar, User, BookOpen, ExternalLink, ArrowUp, ChevronRight, Info, AlertTriangle, FileText, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import type { Product } from '@/types';
+
+// Utility to escape regex special characters
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Component to render text with clickable peptide links
+const LinkedText = ({ text, products }: { text: string; products: Product[] }) => {
+  const parts = useMemo(() => {
+    if (!products.length || !text) return [{ type: 'text' as const, content: text }];
+
+    // Build pattern from all product names and synonyms
+    const patterns: { pattern: string; slug: string; name: string }[] = [];
+    products.forEach(p => {
+      patterns.push({ pattern: p.name, slug: p.slug, name: p.name });
+      (p.synonyms || []).forEach(syn => {
+        if (syn.length > 2) patterns.push({ pattern: syn, slug: p.slug, name: p.name });
+      });
+    });
+
+    // Sort by length descending to match longer names first
+    patterns.sort((a, b) => b.pattern.length - a.pattern.length);
+
+    const result: Array<{ type: 'text' | 'link'; content: string; slug?: string }> = [];
+    let remaining = text;
+
+    while (remaining.length > 0) {
+      let found = false;
+      for (const { pattern, slug } of patterns) {
+        const regex = new RegExp(`\\b(${escapeRegex(pattern)})\\b`, 'i');
+        const match = remaining.match(regex);
+        if (match && match.index !== undefined) {
+          // Add text before match
+          if (match.index > 0) {
+            result.push({ type: 'text', content: remaining.slice(0, match.index) });
+          }
+          // Add the link
+          result.push({ type: 'link', content: match[1], slug });
+          remaining = remaining.slice(match.index + match[0].length);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        result.push({ type: 'text', content: remaining });
+        break;
+      }
+    }
+    return result;
+  }, [text, products]);
+
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.type === 'link' ? (
+          <Link
+            key={i}
+            to={`/product/${part.slug}`}
+            className="text-primary hover:underline font-medium"
+          >
+            {part.content}
+          </Link>
+        ) : (
+          <span key={i}>{part.content}</span>
+        )
+      )}
+    </>
+  );
+};
 
 const ArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: article, isLoading } = useArticle(slug || '');
   const { data: relatedArticles = [] } = useRelatedArticles(slug || '', 3);
+  const { data: allProducts = [] } = useProducts();
   const [activeSection, setActiveSection] = useState<string>('');
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Get products mentioned in the article
+  const mentionedProducts = useMemo(() => {
+    if (!article?.relatedPeptides?.length || !allProducts.length) return [];
+    return allProducts.filter(p =>
+      article.relatedPeptides.some(
+        rp => rp.toLowerCase() === p.name.toLowerCase() ||
+              (p.synonyms || []).some(syn => syn.toLowerCase() === rp.toLowerCase())
+      )
+    ).slice(0, 3);
+  }, [article?.relatedPeptides, allProducts]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,14 +146,27 @@ const ArticlePage = () => {
             <div className="prose-article mx-auto max-w-[650px]">
               {article.content.map((block, index) => {
                 if (block.type === 'heading') { const Tag = block.level === 1 ? 'h2' : 'h3'; return <Tag key={index} id={block.id} className={cn('scroll-mt-24 font-serif font-semibold text-foreground', block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl')}>{block.text}</Tag>; }
-                if (block.type === 'paragraph') return <p key={index} className="mb-5 font-serif text-base leading-[1.8] text-foreground/90">{block.text}</p>;
-                if (block.type === 'list') return <ul key={index} className="mb-5 space-y-2 pl-1">{block.items?.map((item, i) => <li key={i} className="flex items-start gap-3 text-foreground/90"><ChevronRight className="mt-1.5 h-4 w-4 shrink-0 text-primary" /><span className="font-serif text-base leading-relaxed">{item}</span></li>)}</ul>;
-                if (block.type === 'callout') return <div key={index} className={cn('my-8 flex items-start gap-4 rounded-lg border p-5', block.variant === 'info' && 'border-primary/30 bg-primary/5', block.variant === 'warning' && 'border-amber-500/30 bg-amber-500/5', block.variant === 'note' && 'border-border bg-muted/50')}>{block.variant === 'info' && <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />}{block.variant === 'warning' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />}{block.variant === 'note' && <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />}<p className="font-serif text-sm leading-relaxed text-foreground/90">{block.text}</p></div>;
+                if (block.type === 'paragraph') return <p key={index} className="mb-5 font-serif text-base leading-[1.8] text-foreground/90"><LinkedText text={block.text || ''} products={allProducts} /></p>;
+                if (block.type === 'list') return <ul key={index} className="mb-5 space-y-2 pl-1">{block.items?.map((item, i) => <li key={i} className="flex items-start gap-3 text-foreground/90"><ChevronRight className="mt-1.5 h-4 w-4 shrink-0 text-primary" /><span className="font-serif text-base leading-relaxed"><LinkedText text={item} products={allProducts} /></span></li>)}</ul>;
+                if (block.type === 'callout') return <div key={index} className={cn('my-8 flex items-start gap-4 rounded-lg border p-5', block.variant === 'info' && 'border-primary/30 bg-primary/5', block.variant === 'warning' && 'border-amber-500/30 bg-amber-500/5', block.variant === 'note' && 'border-border bg-muted/50')}>{block.variant === 'info' && <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />}{block.variant === 'warning' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />}{block.variant === 'note' && <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />}<p className="font-serif text-sm leading-relaxed text-foreground/90"><LinkedText text={block.text || ''} products={allProducts} /></p></div>;
                 if (block.type === 'citation') return <div key={index} className="my-6 border-l-2 border-primary/30 py-1 pl-4 font-serif text-sm italic text-muted-foreground"><sup className="mr-1 not-italic text-primary">[{block.citation?.number}]</sup>{block.citation?.text} — <span className="not-italic">{block.citation?.source}</span></div>;
                 return null;
               })}
             </div>
             {article.citations.length > 0 && (<section className="mx-auto mt-12 max-w-[650px]"><Separator className="mb-8" /><h2 className="mb-4 flex items-center gap-2 font-serif text-xl font-semibold"><BookOpen className="h-5 w-5 text-primary" />References</h2><div className="space-y-3">{article.citations.map((c) => <div key={c.number} className="flex items-start gap-3 text-sm"><span className="shrink-0 font-mono text-primary">[{c.number}]</span><div><span className="text-foreground">{c.text}</span><span className="text-muted-foreground"> — {c.source}</span>{c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex items-center gap-1 text-primary hover:underline"><ExternalLink className="h-3 w-3" />PubMed</a>}</div></div>)}</div></section>)}
+
+            {/* You Might Also Like - Related Peptides */}
+            {mentionedProducts.length > 0 && (
+              <section className="mx-auto mt-12 max-w-[650px]">
+                <Separator className="mb-8" />
+                <h2 className="mb-6 font-serif text-xl font-semibold text-foreground">You Might Also Like</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {mentionedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
           <aside className="hidden lg:block">
             <div className="sticky top-32 space-y-4">

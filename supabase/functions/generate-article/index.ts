@@ -8,7 +8,6 @@ const corsHeaders = {
 
 interface GenerateArticleRequest {
   keyword: string;
-  category: string;
   targetLength: 'short' | 'standard' | 'long';
   additionalContext?: string;
 }
@@ -32,10 +31,14 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
+
+    // Service role client for inserting new categories
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify JWT and get user claims
     const token = authHeader.replace('Bearer ', '');
@@ -84,14 +87,46 @@ serve(async (req) => {
 
     console.log('Admin access verified for user:', userId);
 
-    const { keyword, category, targetLength, additionalContext } = await req.json() as GenerateArticleRequest;
+    const { keyword, targetLength, additionalContext } = await req.json() as GenerateArticleRequest;
 
-    if (!keyword || !category) {
+    if (!keyword) {
       return new Response(
-        JSON.stringify({ error: 'Keyword and category are required' }),
+        JSON.stringify({ error: 'Keyword is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Fetch existing categories from database
+    const { data: existingCategories, error: categoriesError } = await supabase
+      .from('article_categories')
+      .select('value, label');
+
+    if (categoriesError) {
+      console.error('Error fetching categories:', categoriesError);
+    }
+
+    const categories = existingCategories || [
+      { value: 'safety', label: 'Safety' },
+      { value: 'handling', label: 'Handling' },
+      { value: 'pharmacokinetics', label: 'Pharmacokinetics' },
+      { value: 'verification', label: 'Verification' },
+      { value: 'sourcing', label: 'Sourcing' },
+    ];
+
+    // Fetch all products (peptides) from database for matching
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('name, slug, synonyms');
+
+    if (productsError) {
+      console.error('Error fetching products:', productsError);
+    }
+
+    const peptideList = (products || []).map(p => ({
+      name: p.name,
+      slug: p.slug,
+      synonyms: p.synonyms || [],
+    }));
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -106,14 +141,8 @@ serve(async (req) => {
     };
     const targetWords = wordCounts[targetLength] || wordCounts.standard;
 
-    // Category labels mapping
-    const categoryLabels: Record<string, string> = {
-      safety: 'Safety',
-      handling: 'Handling',
-      pharmacokinetics: 'Pharmacokinetics',
-      verification: 'Verification',
-      sourcing: 'Sourcing',
-    };
+    const categoryListText = categories.map(c => `"${c.value}" (${c.label})`).join(', ');
+    const peptideListText = peptideList.map(p => `"${p.name}" (slug: ${p.slug})`).join(', ');
 
     const systemPrompt = `You are an expert SEO content writer for ChemVerify, a peptide research information website. 
 Write comprehensive, scientifically accurate educational articles optimized for search engines.
@@ -135,18 +164,29 @@ Content Guidelines:
 - Include practical tips and best practices
 - Address common questions about the topic
 
+Category Selection:
+- Available categories: ${categoryListText}
+- Choose the MOST appropriate category for the article content
+- If NO existing category fits well, you may suggest a NEW category (use kebab-case for value)
+
+Peptide Matching:
+- Available peptides in our database: ${peptideListText}
+- Identify any peptides mentioned in your content and match them to our database
+- Use exact slug values when matching
+- Only match peptides that are actually relevant to the content
+
 Target length: ${targetWords} words`;
 
     const userPrompt = `Generate a complete SEO-optimized article about: "${keyword}"
 
-Category: ${categoryLabels[category] || category}
 ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
 Create a comprehensive article with:
 1. An engaging, SEO-optimized title including the keyword
 2. A meta description (summary) of 150-160 characters
-3. Well-structured content with headings, paragraphs, lists, and callouts
-4. Related peptide suggestions for internal linking`;
+3. Select the best category from available options (or suggest a new one if needed)
+4. Well-structured content with headings, paragraphs, lists, and callouts
+5. Identify any peptides mentioned and match them to our product database`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -165,7 +205,7 @@ Create a comprehensive article with:
             type: 'function',
             function: {
               name: 'generate_seo_article',
-              description: 'Generate a complete SEO-optimized article with structured content',
+              description: 'Generate a complete SEO-optimized article with structured content and automatic category/peptide matching',
               parameters: {
                 type: 'object',
                 properties: {
@@ -176,6 +216,18 @@ Create a comprehensive article with:
                   summary: {
                     type: 'string',
                     description: 'Meta description for SEO (150-160 characters)',
+                  },
+                  category: {
+                    type: 'string',
+                    description: 'Selected category value (kebab-case, e.g., "safety", "handling")',
+                  },
+                  categoryLabel: {
+                    type: 'string',
+                    description: 'Human-readable category label (e.g., "Safety", "Handling")',
+                  },
+                  isNewCategory: {
+                    type: 'boolean',
+                    description: 'True if this is a NEW category not in the existing list',
                   },
                   tableOfContents: {
                     type: 'array',
@@ -225,10 +277,15 @@ Create a comprehensive article with:
                   relatedPeptides: {
                     type: 'array',
                     items: { type: 'string' },
-                    description: 'List of related peptide names for internal linking (e.g., BPC-157, TB-500)',
+                    description: 'List of related peptide names (display names) mentioned in the article',
+                  },
+                  matchedPeptideSlugs: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'List of matched peptide slugs from our database for internal linking',
                   },
                 },
-                required: ['title', 'summary', 'tableOfContents', 'content', 'readTime', 'relatedPeptides'],
+                required: ['title', 'summary', 'category', 'categoryLabel', 'isNewCategory', 'tableOfContents', 'content', 'readTime', 'relatedPeptides', 'matchedPeptideSlugs'],
               },
             },
           },
@@ -268,6 +325,24 @@ Create a comprehensive article with:
 
     const article = JSON.parse(toolCall.function.arguments);
 
+    // If AI suggested a new category, insert it into the database
+    if (article.isNewCategory && article.category && article.categoryLabel) {
+      console.log('Creating new category:', article.category, article.categoryLabel);
+      const { error: insertCategoryError } = await supabaseAdmin
+        .from('article_categories')
+        .insert({
+          value: article.category,
+          label: article.categoryLabel,
+        });
+
+      if (insertCategoryError) {
+        // Log but don't fail - category might already exist
+        console.error('Error inserting new category:', insertCategoryError);
+      } else {
+        console.log('New category created successfully');
+      }
+    }
+
     // Generate slug from title
     const slug = article.title
       .toLowerCase()
@@ -276,18 +351,22 @@ Create a comprehensive article with:
       .replace(/[^a-z0-9-]/g, '')
       .substring(0, 100);
 
-    // Get category label
-    const categoryLabel = categoryLabels[category] || category;
-
     // Return complete article data
     return new Response(
       JSON.stringify({
         success: true,
         article: {
-          ...article,
+          title: article.title,
+          summary: article.summary,
           slug,
-          category,
-          categoryLabel,
+          category: article.category,
+          categoryLabel: article.categoryLabel,
+          isNewCategory: article.isNewCategory || false,
+          tableOfContents: article.tableOfContents,
+          content: article.content,
+          readTime: article.readTime,
+          relatedPeptides: article.relatedPeptides || [],
+          matchedPeptideSlugs: article.matchedPeptideSlugs || [],
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
