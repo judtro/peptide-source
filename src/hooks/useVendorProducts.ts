@@ -123,6 +123,65 @@ function normalizeProductName(name: string): string {
     .trim();
 }
 
+function foldForContains(input: string): string {
+  return input.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+const FOLDED_ALIAS_INDEX: Array<{ canonical: string; folded: string }> = Object.entries(PRODUCT_ALIASES)
+  .flatMap(([canonical, aliases]) => {
+    const terms = [canonical, ...aliases];
+    return terms
+      .map((t) => foldForContains(t))
+      .filter((folded) => folded.length > 0)
+      // Avoid ultra-short terms that create false positives (e.g. "mb")
+      .filter((folded) => folded.length >= 4 || /\d/.test(folded))
+      .map((folded) => ({ canonical, folded }));
+  });
+
+function detectCanonicalKeysFromText(text: string): Set<string> {
+  const folded = foldForContains(normalizeProductName(text));
+  const matches = new Set<string>();
+
+  for (const { canonical, folded: term } of FOLDED_ALIAS_INDEX) {
+    if (folded.includes(term)) matches.add(canonical);
+  }
+
+  return matches;
+}
+
+function filterVendorProductsToProduct(
+  items: VendorProductWithVendor[],
+  productName?: string
+): VendorProductWithVendor[] {
+  if (!productName) return items;
+
+  // Use the product name to infer the canonical "component set" for this page.
+  const allowedKeys = detectCanonicalKeysFromText(productName);
+  if (allowedKeys.size === 0) return items;
+
+  const allowedOnly = allowedKeys.size === 1 ? (allowedKeys.values().next().value as string) : null;
+
+  return items.filter((item) => {
+    // Use both display name and source URL for detection (some vendors label combos as "BPC-157" but encode details in URL).
+    const evidence = `${item.productName} ${item.sourceUrl ?? ''}`;
+    const itemKeys = detectCanonicalKeysFromText(evidence);
+
+    // If we can't confidently detect anything, don't hide it.
+    if (itemKeys.size === 0) return true;
+
+    // Single-compound page: reject anything that includes additional canonical compounds.
+    if (allowedOnly) {
+      return itemKeys.size === 1 && itemKeys.has(allowedOnly);
+    }
+
+    // Combo page: require an exact set match (no missing components, no extras).
+    for (const k of allowedKeys) if (!itemKeys.has(k)) return false;
+    for (const k of itemKeys) if (!allowedKeys.has(k)) return false;
+
+    return true;
+  });
+}
+
 interface DbVendorProductWithVendor {
   id: string;
   vendor_id: string;
@@ -164,9 +223,9 @@ const transformVendorProduct = (item: DbVendorProductWithVendor): VendorProductW
   status: item.vendors.status as VendorStatus,
 });
 
-export const useVendorProductsByProduct = (productId: string) => {
+export const useVendorProductsByProduct = (productId: string, productName?: string) => {
   return useQuery({
-    queryKey: ['vendor-products', 'product', productId],
+    queryKey: ['vendor-products', 'product', productId, productName ?? null],
     queryFn: async (): Promise<VendorProductWithVendor[]> => {
       const { data, error } = await supabase
         .from('vendor_products')
@@ -196,7 +255,14 @@ export const useVendorProductsByProduct = (productId: string) => {
         .order('price_per_mg', { ascending: true });
 
       if (error) throw error;
-      return (data || []).map((item) => transformVendorProduct(item as unknown as DbVendorProductWithVendor));
+
+      const transformed = (data || []).map((item) =>
+        transformVendorProduct(item as unknown as DbVendorProductWithVendor)
+      );
+
+      // Some vendor rows can be mis-associated in the backend (e.g. combo product URLs tagged to a single product_id).
+      // Filter here to guarantee product pages only show prices for the exact compound(s) represented by the page.
+      return filterVendorProductsToProduct(transformed, productName);
     },
     enabled: !!productId,
     staleTime: 5 * 60 * 1000,
@@ -250,11 +316,11 @@ export const useVendorProductsByProductName = (productName: string) => {
       const normalizedSearch = normalizeProductName(productName);
       const allValidTerms = searchTerms.map(t => normalizeProductName(t));
       
-      return transformed.filter((item) => {
+      const filtered = transformed.filter((item) => {
         const normalizedItemName = normalizeProductName(item.productName);
-        
+
         // Check if item matches any of our valid search terms
-        const matchesTerm = allValidTerms.some(term => {
+        const matchesTerm = allValidTerms.some((term) => {
           if (normalizedItemName === term) return true;
           if (normalizedItemName.startsWith(term)) return true;
           // Also check base alphanumeric match
@@ -263,39 +329,40 @@ export const useVendorProductsByProductName = (productName: string) => {
           if (baseItem.startsWith(baseTerm)) return true;
           return false;
         });
-        
+
         if (!matchesTerm) return false;
-        
+
         // Determine if search is for a combo product
         const searchLower = productName.toLowerCase();
-        const searchIsCombo = /[&\/\+]/.test(searchLower) || 
-          /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(searchLower);
-        
+        const searchIsCombo = /[&\/\+]/.test(searchLower) || /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(searchLower);
+
         // Determine if this item is a combo product
         const nameLower = item.productName.toLowerCase();
-        const itemIsCombo = /[&\/\+]/.test(nameLower) || 
-          /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower);
-        
+        const itemIsCombo = /[&\/\+]/.test(nameLower) || /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower);
+
         // Strictly reject combos when searching for single products
         if (!searchIsCombo && itemIsCombo) {
           return false;
         }
-        
+
         // For combo searches, require all components to be present
         if (searchIsCombo && itemIsCombo) {
           const searchComponents = searchLower
             .split(/[&\/\+]/)
-            .map(s => s.replace(/\b(mix|blend|combo)\b/gi, '').trim())
-            .filter(s => s.length > 2);
-          
-          const allComponentsMatch = searchComponents.every(comp => 
+            .map((s) => s.replace(/\b(mix|blend|combo)\b/gi, '').trim())
+            .filter((s) => s.length > 2);
+
+          const allComponentsMatch = searchComponents.every((comp) =>
             normalizedItemName.includes(normalizeProductName(comp))
           );
           if (!allComponentsMatch) return false;
         }
-        
+
         return true;
       });
+
+      // Additional hard guard: filter out mis-associated rows even if the backend tagged them with the correct product_id.
+      return filterVendorProductsToProduct(filtered, productName);
     },
     enabled: !!productName,
     staleTime: 5 * 60 * 1000,
