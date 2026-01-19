@@ -293,6 +293,7 @@ export type Database = {
           created_at: string
           description: string | null
           discount_code: string | null
+          discount_percentage: number | null
           id: string
           last_verified: string | null
           location: string | null
@@ -316,6 +317,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_code?: string | null
+          discount_percentage?: number | null
           id?: string
           last_verified?: string | null
           location?: string | null
@@ -339,6 +341,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_code?: string | null
+          discount_percentage?: number | null
           id?: string
           last_verified?: string | null
           location?: string | null

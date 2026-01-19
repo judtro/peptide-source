@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { VendorTable } from '@/components/VendorTable';
 import { ReconstitutionCalculator } from '@/components/ReconstitutionCalculator';
+import { ProductPriceTable } from '@/components/ProductPriceTable';
 import { useProduct } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -242,6 +243,10 @@ const ProductDetailPage = () => {
                 <p className="leading-relaxed text-foreground">{product.description}</p>
               </CardContent>
             </Card>
+
+            <section id="price-table" className="scroll-mt-32">
+              <ProductPriceTable productId={product.id} productName={product.name} />
+            </section>
 
             <ReconstitutionCalculator />
 
