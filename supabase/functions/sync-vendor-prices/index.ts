@@ -55,7 +55,7 @@ const PRODUCT_ALIASES: Record<string, string[]> = {
   'thymosin alpha-1': ['ta1', 'thymosin alpha 1', 'ta-1'],
   'semaglutide': ['sema', 'glp-1', 'ozempic', 'wegovy'],
   'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1'],
-  'retatrutide': ['reta', 'triple g'],
+  'retatrutide': ['reta', 'triple g', 'triple-g', 'glp3', 'glp-3', 'glp 3', 'ly3437943', 'triple agonist'],
   'tesamorelin': ['th9507', 'egrifta'],
   'epithalon': ['epitalon', 'epitalone'],
   'mots-c': ['motsc', 'mots c'],

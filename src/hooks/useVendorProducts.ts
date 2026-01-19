@@ -2,6 +2,60 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { VendorProductWithVendor, VendorStatus, StockStatus } from '@/types';
 
+// Product name aliases for matching vendor products to canonical names
+const PRODUCT_ALIASES: Record<string, string[]> = {
+  'retatrutide': ['glp3', 'glp-3', 'glp 3', 'triple g', 'triple-g', 'ly3437943', 'triple agonist', 'reta'],
+  'melanotan 2': ['melanotan ii', 'melanotan-2', 'mt-2', 'mt2', 'mt 2', 'mt-ii'],
+  'semaglutide': ['sema', 'glp-1', 'ozempic', 'wegovy'],
+  'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1'],
+  'bpc-157': ['bpc 157', 'bpc157', 'body protection compound'],
+  'tb-500': ['tb500', 'tb 500', 'thymosin beta-4', 'thymosin beta 4'],
+  'pt-141': ['pt141', 'pt 141', 'bremelanotide'],
+  'ghk-cu': ['ghk cu', 'ghkcu', 'copper peptide', 'ghk copper'],
+  'cjc-1295': ['cjc1295', 'cjc 1295'],
+  'ipamorelin': ['ipam', 'ipa'],
+  'epithalon': ['epitalon', 'epitalone'],
+};
+
+// Get all search terms for a product (canonical name + all aliases)
+function getSearchTerms(productName: string): string[] {
+  const normalized = productName.toLowerCase().trim()
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ');
+  
+  const terms = new Set<string>([normalized, productName.toLowerCase().trim()]);
+  
+  // Check if this product has aliases
+  for (const [canonical, aliases] of Object.entries(PRODUCT_ALIASES)) {
+    const canonicalNormalized = canonical.replace(/[-_]/g, ' ');
+    
+    // If input matches canonical or any alias, add all terms
+    if (normalized === canonicalNormalized || 
+        normalized.includes(canonicalNormalized) ||
+        aliases.some(a => normalized === a || normalized.includes(a))) {
+      terms.add(canonical);
+      terms.add(canonicalNormalized);
+      aliases.forEach(a => terms.add(a));
+      break;
+    }
+  }
+  
+  return [...terms];
+}
+
+// Normalize product name for filtering
+function normalizeProductName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s*\d+\s*(mg|mcg|ml|iu)$/i, '') // Remove size suffix
+    .replace(/\bii\b/gi, '2')
+    .replace(/\biii\b/gi, '3')
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 interface DbVendorProductWithVendor {
   id: string;
   vendor_id: string;
@@ -86,6 +140,14 @@ export const useVendorProductsByProductName = (productName: string) => {
   return useQuery({
     queryKey: ['vendor-products', 'product-name', productName],
     queryFn: async (): Promise<VendorProductWithVendor[]> => {
+      // Get all search terms including aliases
+      const searchTerms = getSearchTerms(productName);
+      
+      // Build OR filter for all search terms
+      const orConditions = searchTerms
+        .map(term => `product_name.ilike.%${term}%`)
+        .join(',');
+
       const { data, error } = await supabase
         .from('vendor_products')
         .select(`
@@ -109,7 +171,7 @@ export const useVendorProductsByProductName = (productName: string) => {
             status
           )
         `)
-        .ilike('product_name', `%${productName}%`)
+        .or(orConditions)
         .in('vendors.status', ['verified', 'pending'])
         .order('price_per_mg', { ascending: true });
 
@@ -117,29 +179,33 @@ export const useVendorProductsByProductName = (productName: string) => {
       
       const transformed = (data || []).map((item) => transformVendorProduct(item as unknown as DbVendorProductWithVendor));
       
-      // Filter to exclude combo products - only match exact product or same product with size indicator
-      const searchLower = productName.toLowerCase().trim();
+      // Get the normalized base name and all its aliases for filtering
+      const normalizedSearch = normalizeProductName(productName);
+      const allValidTerms = searchTerms.map(t => normalizeProductName(t));
       
       return transformed.filter((item) => {
-        const nameLower = item.productName.toLowerCase().trim();
+        const normalizedItemName = normalizeProductName(item.productName);
         
-        // Exact match
-        if (nameLower === searchLower) return true;
+        // Check if item matches any of our valid search terms
+        const matchesTerm = allValidTerms.some(term => {
+          if (normalizedItemName === term) return true;
+          if (normalizedItemName.startsWith(term)) return true;
+          // Also check base alphanumeric match
+          const baseItem = normalizedItemName.replace(/[^a-z0-9]/g, '');
+          const baseTerm = term.replace(/[^a-z0-9]/g, '');
+          if (baseItem.startsWith(baseTerm)) return true;
+          return false;
+        });
         
-        // Check if product name starts with search term followed by size (e.g., "BPC-157 5mg")
-        if (nameLower.startsWith(searchLower)) {
-          const remainder = nameLower.slice(searchLower.length).trim();
-          // Allow if remainder is just a size like "5mg", "10mg", etc.
-          if (/^\d+\s*(mg|mcg)?$/i.test(remainder)) return true;
-        }
+        if (!matchesTerm) return false;
         
-        // Reject combo products (contains &, /, "and", "mix", "blend", or parentheses with other compounds)
+        // Reject combo products
+        const nameLower = item.productName.toLowerCase();
         if (/[&\/]/.test(nameLower) || /\band\b|\bmix\b|\bblend\b|\bcombo\b/.test(nameLower)) {
           return false;
         }
         
-        // If it's just the product name with no modifiers, allow it
-        return nameLower === searchLower;
+        return true;
       });
     },
     enabled: !!productName,

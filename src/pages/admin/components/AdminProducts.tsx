@@ -121,6 +121,19 @@ const categories = [
   'Other',
 ];
 
+// Product aliases for matching vendor products to canonical names
+const PRODUCT_ALIASES: Record<string, string[]> = {
+  'retatrutide': ['glp3', 'glp-3', 'glp 3', 'triple g', 'triple-g', 'ly3437943', 'triple agonist', 'reta'],
+  'melanotan 2': ['melanotan ii', 'melanotan-2', 'mt-2', 'mt2', 'mt 2', 'mt-ii'],
+  'semaglutide': ['sema', 'glp-1', 'ozempic', 'wegovy'],
+  'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1'],
+  'bpc-157': ['bpc 157', 'bpc157'],
+  'tb-500': ['tb500', 'tb 500', 'thymosin beta-4'],
+  'pt-141': ['pt141', 'pt 141', 'bremelanotide'],
+  'ghk-cu': ['ghk cu', 'ghkcu', 'copper peptide'],
+  'epithalon': ['epitalon', 'epitalone'],
+};
+
 // Normalize product name for matching vendor products
 function normalizeProductName(name: string): string {
   return name
@@ -136,6 +149,24 @@ function normalizeProductName(name: string): string {
     .replace(/[-_]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+// Get all aliases for a product name
+function getProductAliases(productName: string): string[] {
+  const normalized = normalizeProductName(productName);
+  const aliases: string[] = [normalized];
+  
+  for (const [canonical, productAliases] of Object.entries(PRODUCT_ALIASES)) {
+    const canonicalNormalized = normalizeProductName(canonical);
+    if (normalized === canonicalNormalized || 
+        productAliases.some(a => normalizeProductName(a) === normalized)) {
+      aliases.push(canonicalNormalized);
+      productAliases.forEach(a => aliases.push(normalizeProductName(a)));
+      break;
+    }
+  }
+  
+  return [...new Set(aliases)];
 }
 
 export default function AdminProducts() {
@@ -185,20 +216,28 @@ export default function AdminProducts() {
         const normalizedProductName = normalizeProductName(product.name);
         const baseProductName = normalizedProductName.replace(/[^a-z0-9]/g, '');
         
-        // Find vendor products that match this product
+        // Get all aliases for this product
+        const productAliases = getProductAliases(product.name);
+        
+        // Find vendor products that match this product (including aliases)
         const vendorProds = allVendorProducts.filter((vp) => {
           const normalizedVpName = normalizeProductName(vp.product_name);
           const baseVpName = normalizedVpName.replace(/[^a-z0-9]/g, '');
           
-          // Exact match after normalization
-          if (normalizedVpName === normalizedProductName) return true;
-          
-          // Vendor product starts with product name (e.g., "bpc 157 10mg" -> "bpc 157")
-          if (normalizedVpName.startsWith(normalizedProductName + ' ')) return true;
-          if (normalizedVpName.startsWith(normalizedProductName)) return true;
-          
-          // Base name match (removes all non-alphanumeric)
-          if (baseVpName.startsWith(baseProductName)) return true;
+          // Check against all aliases
+          for (const alias of productAliases) {
+            const baseAlias = alias.replace(/[^a-z0-9]/g, '');
+            
+            // Exact match after normalization
+            if (normalizedVpName === alias) return true;
+            
+            // Vendor product starts with alias
+            if (normalizedVpName.startsWith(alias + ' ')) return true;
+            if (normalizedVpName.startsWith(alias)) return true;
+            
+            // Base name match (removes all non-alphanumeric)
+            if (baseVpName.startsWith(baseAlias) && baseAlias.length >= 3) return true;
+          }
           
           // Check product_id match if available
           if (vp.product_id === product.id) return true;
