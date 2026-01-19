@@ -10,7 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  Shield,
   DollarSign,
   FlaskConical,
 } from 'lucide-react';
@@ -21,6 +20,7 @@ import AdminAudits from './components/AdminAudits';
 import AdminContent from './components/AdminContent';
 import AdminPrices from './components/AdminPrices';
 import AdminProducts from './components/AdminProducts';
+import logo from '@/assets/logo.png';
 
 type AdminSection = 'overview' | 'vendors' | 'products' | 'prices' | 'audits' | 'content';
 
@@ -73,18 +73,20 @@ export default function AdminDashboard() {
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[hsl(215,25%,20%)]">
-          {sidebarOpen && (
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700">
+          {sidebarOpen ? (
             <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="font-semibold text-[hsl(210,40%,98%)]">ChemVerify</span>
+              <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
+              <span className="font-semibold text-slate-100">Admin</span>
             </div>
+          ) : (
+            <img src={logo} alt="ChemVerify" className="h-8 w-auto" />
           )}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-[hsl(210,40%,98%)] hover:bg-[hsl(215,25%,17%)]"
+            className="text-slate-100 hover:bg-slate-800"
           >
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -100,7 +102,7 @@ export default function AdminDashboard() {
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left',
                 activeSection === item.id
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-[hsl(215,20%,70%)] hover:bg-[hsl(215,25%,17%)] hover:text-[hsl(210,40%,98%)]'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-slate-100'
               )}
             >
               <item.icon className="h-5 w-5 shrink-0" />
@@ -110,9 +112,9 @@ export default function AdminDashboard() {
         </nav>
 
         {/* User Info & Logout */}
-        <div className="p-4 border-t border-[hsl(215,25%,20%)]">
+        <div className="p-4 border-t border-slate-700">
           {sidebarOpen && user && (
-            <p className="text-xs text-[hsl(215,20%,50%)] mb-3 truncate">
+            <p className="text-xs text-slate-400 mb-3 truncate">
               {user.email}
             </p>
           )}
@@ -120,7 +122,7 @@ export default function AdminDashboard() {
             onClick={handleLogout}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-              'text-[hsl(215,20%,70%)] hover:bg-destructive/10 hover:text-destructive'
+              'text-slate-300 hover:bg-destructive/10 hover:text-destructive'
             )}
           >
             <LogOut className="h-5 w-5 shrink-0" />
@@ -137,11 +139,11 @@ export default function AdminDashboard() {
         )}
       >
         {/* Header */}
-        <header className="h-16 bg-[hsl(222,47%,9%)] border-b border-[hsl(215,25%,20%)] flex items-center justify-between px-6">
-          <h1 className="text-xl font-semibold text-[hsl(210,40%,98%)] capitalize">
+        <header className="h-16 bg-slate-950 border-b border-slate-700 flex items-center justify-between px-6">
+          <h1 className="text-xl font-semibold text-slate-100 capitalize">
             {activeSection}
           </h1>
-          <div className="flex items-center gap-2 text-sm text-[hsl(215,20%,60%)]">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
             <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
             Admin Session Active
           </div>
