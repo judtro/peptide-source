@@ -4,17 +4,69 @@ import type { VendorProductWithVendor, VendorStatus, StockStatus } from '@/types
 
 // Product name aliases for matching vendor products to canonical names
 const PRODUCT_ALIASES: Record<string, string[]> = {
+  // Metabolic / Weight Loss
   'retatrutide': ['glp3', 'glp-3', 'glp 3', 'triple g', 'triple-g', 'ly3437943', 'triple agonist', 'reta'],
-  'melanotan 2': ['melanotan ii', 'melanotan-2', 'mt-2', 'mt2', 'mt 2', 'mt-ii'],
-  'semaglutide': ['sema', 'glp-1', 'ozempic', 'wegovy'],
-  'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1'],
-  'bpc-157': ['bpc 157', 'bpc157', 'body protection compound'],
-  'tb-500': ['tb500', 'tb 500', 'thymosin beta-4', 'thymosin beta 4'],
+  'semaglutide': ['sema', 'glp-1', 'glp 1', 'ozempic', 'wegovy', 'rybelsus'],
+  'tirzepatide': ['tirz', 'mounjaro', 'gip/glp-1', 'zepbound', 'gip glp-1'],
+  'cagrilintide': ['cagri', 'nn9838'],
+  'aod-9604': ['aod9604', 'aod 9604', 'hgh fragment'],
+  'fragment 176-191': ['frag 176-191', 'hgh fragment', 'hgh frag', 'fragment 176 191'],
+  '5-amino-1mq': ['5amino1mq', '5 amino 1mq', '5-amino 1mq', 'amino 1mq'],
+  'aicar': ['acadesine', 'aica ribonucleotide'],
+  'mots-c': ['motsc', 'mots c', 'mots-c peptide'],
+  
+  // Tanning / Sexual Health
+  'melanotan 2': ['melanotan ii', 'melanotan-2', 'mt-2', 'mt2', 'mt 2', 'mt-ii', 'melanotan-ii'],
   'pt-141': ['pt141', 'pt 141', 'bremelanotide'],
-  'ghk-cu': ['ghk cu', 'ghkcu', 'copper peptide', 'ghk copper'],
-  'cjc-1295': ['cjc1295', 'cjc 1295'],
-  'ipamorelin': ['ipam', 'ipa'],
-  'epithalon': ['epitalon', 'epitalone'],
+  'kisspeptin': ['kiss-1', 'kiss1', 'kisspeptin-10', 'kp-10'],
+  'oxytocin': ['oxt', 'pitocin'],
+  
+  // Recovery / Healing
+  'bpc-157': ['bpc 157', 'bpc157', 'body protection compound', 'bepecin', 'pl 14736', 'pl14736'],
+  'tb-500': ['tb500', 'tb 500', 'thymosin beta-4', 'thymosin beta 4', 'thymosin b4'],
+  'll-37': ['ll37', 'll 37', 'cathelicidin'],
+  'kpv': ['alpha-msh fragment', 'kpv tripeptide'],
+  'thymosin alpha-1': ['ta1', 'thymosin alpha 1', 'ta-1', 'thymalfasin', 'zadaxin'],
+  'vip': ['vasoactive intestinal peptide', 'vasoactive intestinal polypeptide'],
+  
+  // Skin / Cosmetic
+  'ghk-cu': ['ghk cu', 'ghkcu', 'copper peptide', 'ghk copper', 'copper tripeptide'],
+  'ahk-cu': ['ahk cu', 'ahkcu', 'ahk copper'],
+  'snap-8': ['snap8', 'snap 8', 'acetyl octapeptide-3'],
+  
+  // Growth Hormone Releasing
+  'cjc-1295': ['cjc1295', 'cjc 1295', 'cjc-1295 dac', 'cjc-1295 with dac'],
+  'cjc-1295 no dac': ['cjc-1295 (no dac)', 'cjc-1295 without dac', 'cjc no dac', 'mod grf 1-29', 'mod grf', 'mod-grf', 'modified grf'],
+  'ipamorelin': ['ipam', 'ipa', 'nnc 26-0161'],
+  'ghrp-6': ['ghrp6', 'ghrp 6'],
+  'ghrp-2': ['ghrp2', 'ghrp 2'],
+  'tesamorelin': ['th9507', 'egrifta', 'tesamorelin acetate'],
+  'hexarelin': ['hex', 'examorelin'],
+  'sermorelin': ['grf 1-29', 'geref'],
+  
+  // IGF / Growth Factors
+  'igf-1 lr3': ['igf1 lr3', 'igf-1lr3', 'igf1lr3', 'long r3 igf-1', 'lr3 igf-1'],
+  'igf-1 des': ['igf1 des', 'des igf-1', 'des(1-3)igf-1'],
+  'mgf': ['mechano growth factor', 'igf-1ec'],
+  'peg-mgf': ['pegylated mgf', 'peg mgf'],
+  'follistatin': ['fst', 'follistatin 344', 'follistatin-344', 'fs344'],
+  'ace-031': ['ace031', 'ace 031', 'acvr2b'],
+  
+  // Longevity / Anti-Aging
+  'epithalon': ['epitalon', 'epitalone', 'epithalone', 'epithalon peptide'],
+  'humanin': ['hn', 'humanin peptide'],
+  'ss-31': ['ss31', 'ss 31', 'elamipretide', 'bendavia', 'mtp-131'],
+  'nad+': ['nad plus', 'nicotinamide adenine dinucleotide', 'nad'],
+  
+  // Cognitive / Neurological
+  'selank': ['selank peptide', 'tp-7'],
+  'semax': ['semax peptide', 'semax acetate'],
+  'dsip': ['delta sleep inducing peptide', 'delta sleep peptide'],
+  'pe-22-28': ['pe2228', 'pe 22 28', 'spadin'],
+  'dihexa': ['pnb-0408'],
+  
+  // Other
+  'lle': [],
 };
 
 // Get all search terms for a product (canonical name + all aliases)
