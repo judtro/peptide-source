@@ -189,6 +189,9 @@ interface DbVendorProductWithVendor {
   product_name: string;
   price: number | null;
   price_per_mg: number | null;
+  price_usd: number | null;
+  price_per_mg_usd: number | null;
+  currency: string | null;
   size_mg: number | null;
   in_stock: boolean | null;
   stock_status: string | null;
@@ -204,24 +207,37 @@ interface DbVendorProductWithVendor {
   };
 }
 
-const transformVendorProduct = (item: DbVendorProductWithVendor): VendorProductWithVendor => ({
-  id: item.id,
-  vendorId: item.vendor_id,
-  productId: item.product_id || '',
-  productName: item.product_name,
-  price: Number(item.price) || 0,
-  pricePerMg: Number(item.price_per_mg) || 0,
-  sizeMg: Number(item.size_mg) || 0,
-  inStock: item.in_stock ?? true,
-  stockStatus: (item.stock_status as StockStatus) || 'in_stock',
-  sourceUrl: item.source_url || undefined,
-  vendorName: item.vendors.name,
-  vendorSlug: item.vendors.slug,
-  discountCode: item.vendors.discount_code || undefined,
-  discountPercentage: Number(item.vendors.discount_percentage) || 0,
-  website: item.vendors.website || undefined,
-  status: item.vendors.status as VendorStatus,
-});
+const transformVendorProduct = (item: DbVendorProductWithVendor): VendorProductWithVendor => {
+  const price = Number(item.price) || 0;
+  const pricePerMg = Number(item.price_per_mg) || 0;
+  const currency = item.currency || 'USD';
+  
+  // Use USD prices if available, otherwise fall back to original prices
+  const priceUsd = Number(item.price_usd) || price;
+  const pricePerMgUsd = Number(item.price_per_mg_usd) || pricePerMg;
+  
+  return {
+    id: item.id,
+    vendorId: item.vendor_id,
+    productId: item.product_id || '',
+    productName: item.product_name,
+    price,
+    pricePerMg,
+    priceUsd,
+    pricePerMgUsd,
+    currency,
+    sizeMg: Number(item.size_mg) || 0,
+    inStock: item.in_stock ?? true,
+    stockStatus: (item.stock_status as StockStatus) || 'in_stock',
+    sourceUrl: item.source_url || undefined,
+    vendorName: item.vendors.name,
+    vendorSlug: item.vendors.slug,
+    discountCode: item.vendors.discount_code || undefined,
+    discountPercentage: Number(item.vendors.discount_percentage) || 0,
+    website: item.vendors.website || undefined,
+    status: item.vendors.status as VendorStatus,
+  };
+};
 
 export const useVendorProductsByProduct = (productId: string, productName?: string) => {
   return useQuery({
@@ -236,6 +252,9 @@ export const useVendorProductsByProduct = (productId: string, productName?: stri
           product_name,
           price,
           price_per_mg,
+          price_usd,
+          price_per_mg_usd,
+          currency,
           size_mg,
           in_stock,
           stock_status,
@@ -252,7 +271,7 @@ export const useVendorProductsByProduct = (productId: string, productName?: stri
         `)
         .eq('product_id', productId)
         .in('vendors.status', ['verified', 'pending'])
-        .order('price_per_mg', { ascending: true });
+        .order('price_per_mg_usd', { ascending: true, nullsFirst: false });
 
       if (error) throw error;
 
@@ -290,6 +309,9 @@ export const useVendorProductsByProductName = (productName: string) => {
           product_name,
           price,
           price_per_mg,
+          price_usd,
+          price_per_mg_usd,
+          currency,
           size_mg,
           in_stock,
           stock_status,
@@ -306,7 +328,7 @@ export const useVendorProductsByProductName = (productName: string) => {
         `)
         .or(orConditions)
         .in('vendors.status', ['verified', 'pending'])
-        .order('price_per_mg', { ascending: true });
+        .order('price_per_mg_usd', { ascending: true, nullsFirst: false });
 
       if (error) throw error;
       
@@ -383,6 +405,9 @@ export const useVendorProductsForVendor = (vendorId: string) => {
           product_name,
           price,
           price_per_mg,
+          price_usd,
+          price_per_mg_usd,
+          currency,
           size_mg,
           in_stock,
           stock_status,

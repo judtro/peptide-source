@@ -83,10 +83,10 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
     );
   }
 
-  // Sort by discounted price and find the best deal
+  // Sort by discounted USD price per mg and find the best deal
   const sortedProducts = [...vendorProducts].sort((a, b) => {
-    const priceA = calculateDiscountedPrice(a.pricePerMg, a.discountPercentage);
-    const priceB = calculateDiscountedPrice(b.pricePerMg, b.discountPercentage);
+    const priceA = calculateDiscountedPrice(a.pricePerMgUsd, a.discountPercentage);
+    const priceB = calculateDiscountedPrice(b.pricePerMgUsd, b.discountPercentage);
     return priceA - priceB;
   });
 
@@ -111,7 +111,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                 <TableHead>Vendor</TableHead>
                 <TableHead className="text-center">Size</TableHead>
                 <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-right">Price (USD)</TableHead>
                 <TableHead className="text-right">Price/mg</TableHead>
                 <TableHead className="text-right">With Discount</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -119,7 +119,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
             </TableHeader>
             <TableBody>
               {sortedProducts.map((item) => {
-                const discountedPrice = calculateDiscountedPrice(item.pricePerMg, item.discountPercentage);
+                const discountedPricePerMg = calculateDiscountedPrice(item.pricePerMgUsd, item.discountPercentage);
                 const hasDiscount = item.discountPercentage && item.discountPercentage > 0;
                 const isBestDeal = item.id === bestDealId;
                 const stockConfig = stockStatusConfig[item.stockStatus] || stockStatusConfig.in_stock;
@@ -158,35 +158,16 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {formatPrice(item.price)}
+                      {formatPrice(item.priceUsd)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-muted-foreground">
-                      {formatPricePerMg(item.pricePerMg)}
+                      {formatPricePerMg(item.pricePerMgUsd)}
                     </TableCell>
                     <TableCell className="text-right">
                       {hasDiscount ? (
                         <div className="flex flex-col items-end gap-0.5">
                           <span className="font-mono font-semibold text-primary">
-                            {formatPricePerMg(discountedPrice)}
-                          </span>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Tag className="h-3 w-3" />
-                            <code className="text-primary">{item.discountCode}</code>
-                            <span>(-{item.discountPercentage}%)</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="font-mono text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-muted-foreground">
-                      {formatPricePerMg(item.pricePerMg)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {hasDiscount ? (
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span className="font-mono font-semibold text-primary">
-                            {formatPricePerMg(discountedPrice)}
+                            {formatPricePerMg(discountedPricePerMg)}
                           </span>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Tag className="h-3 w-3" />
@@ -231,7 +212,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
         </div>
         <div className="px-4 py-3 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            Prices are based on the listed sizes. Use discount codes at checkout for additional savings.
+            All prices shown in USD. Use discount codes at checkout for additional savings.
           </p>
         </div>
       </CardContent>

@@ -20,7 +20,12 @@ const extractPricesTool = {
             type: "object",
             properties: {
               name: { type: "string", description: "Product name (peptide name)" },
-              price: { type: "number", description: "Price in USD or EUR" },
+              price: { type: "number", description: "Price value (number only, without currency symbol)" },
+              currency: { 
+                type: "string", 
+                enum: ["USD", "EUR", "GBP", "PLN", "CHF"],
+                description: "Detected currency from symbol: $ = USD, € = EUR, £ = GBP, zł/PLN = PLN, CHF = CHF. Default to USD if unclear."
+              },
               sizeMg: { type: "number", description: "Size in milligrams" },
               stockStatus: { 
                 type: "string", 
@@ -29,7 +34,7 @@ const extractPricesTool = {
               },
               url: { type: "string", description: "Product page URL if available" }
             },
-            required: ["name", "price", "stockStatus"]
+            required: ["name", "price", "currency", "stockStatus"]
           }
         }
       },
@@ -37,6 +42,21 @@ const extractPricesTool = {
     }
   }
 };
+
+// Exchange rates to USD (updated periodically)
+const EXCHANGE_RATES: Record<string, number> = {
+  USD: 1.0,
+  EUR: 1.08,  // 1 EUR = 1.08 USD
+  GBP: 1.27,  // 1 GBP = 1.27 USD
+  PLN: 0.25,  // 1 PLN = 0.25 USD
+  CHF: 1.12,  // 1 CHF = 1.12 USD
+};
+
+// Convert price to USD using exchange rates
+function convertToUsd(price: number, currency: string): number {
+  const rate = EXCHANGE_RATES[currency] || 1.0;
+  return Math.round(price * rate * 100) / 100;
+}
 
 // Common product name aliases for matching
 const PRODUCT_ALIASES: Record<string, string[]> = {
@@ -248,7 +268,13 @@ ${productsList}
 ## EXTRACTION RULES:
 1. Extract EVERY peptide product found, including ALL size variants
 2. For products with multiple sizes, create SEPARATE entries (BPC-157 5mg, BPC-157 10mg = 2 entries)
-3. Prices may be in USD ($), EUR (€), GBP (£) - keep the value as shown
+3. DETECT the currency from the symbol or context:
+   - $ or USD → "USD"
+   - € or EUR → "EUR"
+   - £ or GBP → "GBP"
+   - zł or PLN → "PLN"
+   - CHF → "CHF"
+   If no symbol, check the website's region/locale or default to USD.
 4. Extract the sizeMg as a number (e.g., "5mg" -> 5, "10 mg" -> 10)
 5. Include the product URL if visible in the content
 6. For PRIORITY PRODUCTS above, use the standard name format shown
@@ -812,6 +838,15 @@ serve(async (req) => {
                 ? product.price / product.sizeMg 
                 : null;
 
+              // Detect currency (default to USD if not specified)
+              const currency = product.currency || 'USD';
+              
+              // Convert to USD for consistent comparison
+              const priceUsd = convertToUsd(product.price, currency);
+              const pricePerMgUsd = pricePerMg ? convertToUsd(pricePerMg, currency) : null;
+              
+              console.log(`[CURRENCY] ${product.name}: ${product.price} ${currency} -> $${priceUsd} USD`);
+
               // Use enhanced matching to find product_id
               const matchedProduct = findMatchingProduct(product.name, productsMap);
               const matchedProductId = matchedProduct?.id || null;
@@ -835,6 +870,9 @@ serve(async (req) => {
                   product_name: normalizedName,
                   price: product.price,
                   price_per_mg: pricePerMg,
+                  price_usd: priceUsd,
+                  price_per_mg_usd: pricePerMgUsd,
+                  currency: currency,
                   size_mg: product.sizeMg || null,
                   in_stock: inStock,
                   stock_status: validatedStockStatus,
@@ -1012,6 +1050,15 @@ serve(async (req) => {
             ? product.price / product.sizeMg 
             : null;
 
+          // Detect currency (default to USD if not specified)
+          const currency = product.currency || 'USD';
+          
+          // Convert to USD for consistent comparison
+          const priceUsd = convertToUsd(product.price, currency);
+          const pricePerMgUsd = pricePerMg ? convertToUsd(pricePerMg, currency) : null;
+          
+          console.log(`[CURRENCY] ${product.name}: ${product.price} ${currency} -> $${priceUsd} USD`);
+
           // Use enhanced matching to find product_id
           const matchedProduct = findMatchingProduct(product.name, productsMap);
           const matchedProductId = matchedProduct?.id || null;
@@ -1035,6 +1082,9 @@ serve(async (req) => {
               product_name: normalizedName,
               price: product.price,
               price_per_mg: pricePerMg,
+              price_usd: priceUsd,
+              price_per_mg_usd: pricePerMgUsd,
+              currency: currency,
               size_mg: product.sizeMg || null,
               in_stock: inStock,
               stock_status: validatedStockStatus,
