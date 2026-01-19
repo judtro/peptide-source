@@ -136,6 +136,7 @@ export default function AdminVendors() {
   const [isScrapingUrl, setIsScrapingUrl] = useState(false);
   const [isSyncingPrices, setIsSyncingPrices] = useState(false);
   const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
+  const [syncProgress, setSyncProgress] = useState<{ current: number; total: number; vendorName: string } | null>(null);
 
   useEffect(() => {
     fetchVendors();
@@ -302,7 +303,7 @@ export default function AdminVendors() {
       
       for (let i = 0; i < vendorsWithWebsite.length; i++) {
         const vendor = vendorsWithWebsite[i];
-        toast.info(`Syncing ${vendor.name} (${i + 1}/${vendorsWithWebsite.length})...`);
+        setSyncProgress({ current: i + 1, total: vendorsWithWebsite.length, vendorName: vendor.name });
         
         try {
           const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
@@ -325,6 +326,7 @@ export default function AdminVendors() {
       }
 
       toast.success(`Synced ${totalSuccess} vendor(s), updated ${totalProducts} product prices`);
+      setSyncProgress(null);
       setIsSyncingPrices(false);
     }
   };
@@ -510,18 +512,34 @@ export default function AdminVendors() {
           <p className="text-sm text-[hsl(215,20%,60%)]">Add, edit, and manage verified suppliers</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => handleSyncPrices()}
-            disabled={isSyncingPrices}
-          >
-            {isSyncingPrices ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-            ) : (
+          {isSyncingPrices && syncProgress ? (
+            <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-md">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-foreground">
+                  Syncing {syncProgress.current}/{syncProgress.total}
+                </span>
+                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                  {syncProgress.vendorName}
+                </span>
+              </div>
+              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${(syncProgress.current / syncProgress.total) * 100}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              onClick={() => handleSyncPrices()}
+              disabled={isSyncingPrices}
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
-            )}
-            Sync All Prices
-          </Button>
+              Sync All Prices
+            </Button>
+          )}
           <Button variant="outline" onClick={handleOpenUrlDialog}>
             <Link className="mr-2 h-4 w-4" />
             Add by URL
