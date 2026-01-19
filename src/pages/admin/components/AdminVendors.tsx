@@ -374,7 +374,7 @@ export default function AdminVendors() {
         if (error) throw error;
         toast.success(`Vendor "${formData.name}" updated successfully`);
       } else {
-        const { error } = await supabase
+        const { data: newVendor, error } = await supabase
           .from('vendors')
           .insert({
             name: formData.name.trim(),
@@ -386,10 +386,37 @@ export default function AdminVendors() {
             discount_code: formData.discountCode.trim() || null,
             discount_percentage: formData.discountPercentage || 0,
             description: formData.description.trim() || null,
-          });
+          })
+          .select('id')
+          .single();
 
         if (error) throw error;
         toast.success(`Vendor "${formData.name}" added successfully`);
+
+        // Auto-sync prices for the newly created vendor if it has a website
+        if (newVendor?.id && formData.website.trim()) {
+          toast.info('Syncing prices for new vendor...');
+          try {
+            const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-vendor-prices', {
+              body: { vendorId: newVendor.id }
+            });
+
+            if (syncError) {
+              console.error('Auto-sync error:', syncError);
+              toast.warning('Vendor created, but price sync failed. You can manually sync later.');
+            } else if (syncData?.success) {
+              const result = syncData.results?.[0];
+              if (result?.productsFound > 0) {
+                toast.success(`Synced ${result.productsUpdated} products from ${result.pagesScraped || 1} pages`);
+              } else {
+                toast.info('No products found on vendor website');
+              }
+            }
+          } catch (syncErr) {
+            console.error('Auto-sync error:', syncErr);
+            toast.warning('Vendor created, but price sync failed. You can manually sync later.');
+          }
+        }
       }
 
       handleCloseForm();
