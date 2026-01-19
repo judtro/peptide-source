@@ -194,19 +194,19 @@ export const Header = () => {
                     {t('nav.products')}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-[260px] p-3">
-                      {/* Featured Section */}
+                    <div className="w-[600px] p-4">
+                      {/* Featured Section - Horizontal Pills */}
                       {featuredProducts.length > 0 && (
-                        <div className="mb-2">
-                          <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <div className="mb-3">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Featured
                           </p>
-                          <div className="flex flex-col">
+                          <div className="flex flex-wrap gap-2">
                             {featuredProducts.map((product) => (
                               <NavigationMenuLink key={product.id} asChild>
                                 <Link
                                   to={`/product/${product.id}`}
-                                  className="rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+                                  className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
                                 >
                                   {product.name}
                                 </Link>
@@ -217,20 +217,21 @@ export const Header = () => {
                       )}
                       
                       {/* Divider */}
-                      <div className="my-2 h-px bg-border" />
+                      <div className="my-3 h-px bg-border" />
                       
-                      {/* All Peptides Section */}
-                      <div className="mb-2">
-                        <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {/* All Peptides Section - 4 Column Grid */}
+                      <div className="mb-3">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           All Peptides
                         </p>
-                        <ScrollArea className="max-h-[280px]">
-                          <div className="flex flex-col">
+                        <ScrollArea className="max-h-[320px]">
+                          <div className="grid grid-cols-4 gap-x-2 gap-y-1">
                             {allProductsAlphabetical.map((product) => (
                               <NavigationMenuLink key={product.id} asChild>
                                 <Link
                                   to={`/product/${product.id}`}
-                                  className="rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                                  className="truncate rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                                  title={product.name}
                                 >
                                   {product.name}
                                 </Link>
@@ -384,41 +385,46 @@ export const Header = () => {
                             </span>
                           </AccordionTrigger>
                           <AccordionContent className="pb-0 pt-1">
-                            <div className="flex flex-col gap-1 pl-2 sm:pl-4">
-                              {/* Featured Section */}
+                            <div className="flex flex-col gap-2 pl-2 sm:pl-4">
+                              {/* Featured Section - Horizontal Pills */}
                               {featuredProducts.length > 0 && (
                                 <>
-                                  <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                  <p className="px-1 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                     Featured
                                   </p>
-                                  {featuredProducts.map((product) => (
-                                    <Link
-                                      key={product.id}
-                                      to={`/product/${product.id}`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="min-h-[40px] rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                                    >
-                                      {product.name}
-                                    </Link>
-                                  ))}
+                                  <div className="flex flex-wrap gap-2">
+                                    {featuredProducts.map((product) => (
+                                      <Link
+                                        key={product.id}
+                                        to={`/product/${product.id}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="rounded-md bg-accent/50 px-2.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+                                      >
+                                        {product.name}
+                                      </Link>
+                                    ))}
+                                  </div>
                                   <div className="my-1 h-px bg-border" />
                                 </>
                               )}
                               
-                              {/* All Peptides Section */}
-                              <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                              {/* All Peptides Section - 2 Column Grid */}
+                              <p className="px-1 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 All Peptides
                               </p>
-                              {allProductsAlphabetical.map((product) => (
-                                <Link
-                                  key={product.id}
-                                  to={`/product/${product.id}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="min-h-[40px] rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-                                >
-                                  {product.name}
-                                </Link>
-                              ))}
+                              <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                {allProductsAlphabetical.map((product) => (
+                                  <Link
+                                    key={product.id}
+                                    to={`/product/${product.id}`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="truncate rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                                    title={product.name}
+                                  >
+                                    {product.name}
+                                  </Link>
+                                ))}
+                              </div>
                               
                               <Link
                                 to="/products"
