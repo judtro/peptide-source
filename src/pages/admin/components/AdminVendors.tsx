@@ -137,7 +137,14 @@ export default function AdminVendors() {
   const [isSyncingPrices, setIsSyncingPrices] = useState(false);
   const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
   const [syncProgress, setSyncProgress] = useState<{ current: number; total: number; vendorName: string } | null>(null);
-  const [syncType, setSyncType] = useState<'fast' | 'full'>('fast');
+  const [syncType, setSyncType] = useState<'fast' | 'full' | 'complete'>('fast');
+  const [completeSyncProgress, setCompleteSyncProgress] = useState<{
+    phase: 'discovery' | 'processing' | 'finalizing';
+    current: number;
+    total: number;
+    vendorName: string;
+  } | null>(null);
+  const [cancelCompleteSync, setCancelCompleteSync] = useState(false);
 
   useEffect(() => {
     fetchVendors();
@@ -258,7 +265,7 @@ export default function AdminVendors() {
     }
   };
 
-  const handleSyncPrices = async (vendorId?: string, overrideSyncType?: 'fast' | 'full') => {
+  const handleSyncPrices = async (vendorId?: string, overrideSyncType?: 'fast' | 'full' | 'complete') => {
     const currentSyncType = overrideSyncType || syncType;
     
     // Ensure we have a valid session before calling the edge function
@@ -269,8 +276,108 @@ export default function AdminVendors() {
       return;
     }
 
+    // Handle COMPLETE sync for single vendor
+    if (currentSyncType === 'complete' && vendorId) {
+      setSyncingVendorId(vendorId);
+      setCancelCompleteSync(false);
+      
+      try {
+        const vendor = vendorList.find(v => v.id === vendorId);
+        const vendorName = vendor?.name || 'Vendor';
+        
+        // Phase 1: Discovery
+        setCompleteSyncProgress({ phase: 'discovery', current: 0, total: 0, vendorName });
+        toast.info(`Discovering all product pages for ${vendorName}...`);
+        
+        const { data: discoveryData, error: discoveryError } = await supabase.functions.invoke('sync-vendor-prices', {
+          body: { vendorId, syncType: 'complete', discoverOnly: true }
+        });
+
+        if (discoveryError) throw discoveryError;
+        if (!discoveryData?.success) throw new Error(discoveryData?.error || 'Discovery failed');
+
+        const productUrls: string[] = discoveryData.productUrls || [];
+        const syncStartedAt = discoveryData.syncStartedAt;
+        
+        if (productUrls.length === 0) {
+          toast.info('No product pages found');
+          setSyncingVendorId(null);
+          setCompleteSyncProgress(null);
+          return;
+        }
+
+        toast.info(`Found ${productUrls.length} product pages. Starting extraction...`);
+        
+        // Phase 2: Process URLs in batches
+        const batchSize = 5;
+        let totalUpserted = 0;
+        let totalExtracted = 0;
+        
+        for (let i = 0; i < productUrls.length; i += batchSize) {
+          if (cancelCompleteSync) {
+            toast.warning('Sync cancelled');
+            break;
+          }
+          
+          const batch = productUrls.slice(i, i + batchSize);
+          setCompleteSyncProgress({
+            phase: 'processing',
+            current: Math.min(i + batchSize, productUrls.length),
+            total: productUrls.length,
+            vendorName
+          });
+          
+          const { data: batchData, error: batchError } = await supabase.functions.invoke('sync-vendor-prices', {
+            body: { 
+              vendorId, 
+              syncType: 'complete', 
+              urls: batch,
+              syncStartedAt,
+              batchSize
+            }
+          });
+
+          if (batchError) {
+            console.error('Batch error:', batchError);
+            continue;
+          }
+
+          if (batchData?.success) {
+            totalUpserted += batchData.productsUpserted || 0;
+            totalExtracted += batchData.productsExtracted || 0;
+          }
+        }
+
+        // Phase 3: Finalize (cleanup stale products)
+        if (!cancelCompleteSync) {
+          setCompleteSyncProgress({ phase: 'finalizing', current: productUrls.length, total: productUrls.length, vendorName });
+          
+          const { data: finalizeData, error: finalizeError } = await supabase.functions.invoke('sync-vendor-prices', {
+            body: { vendorId, syncType: 'complete', finalize: true, syncStartedAt }
+          });
+
+          if (finalizeError) {
+            console.error('Finalize error:', finalizeError);
+          }
+
+          const staleRemoved = finalizeData?.staleRemoved || 0;
+          const staleInfo = staleRemoved > 0 ? `, removed ${staleRemoved} stale` : '';
+          toast.success(`Complete sync done! ${totalUpserted} products synced from ${productUrls.length} pages${staleInfo}`);
+        }
+
+      } catch (err: any) {
+        console.error('Complete sync error:', err);
+        toast.error(err.message || 'Complete sync failed');
+      } finally {
+        setSyncingVendorId(null);
+        setCompleteSyncProgress(null);
+        setCancelCompleteSync(false);
+      }
+      return;
+    }
+
     if (vendorId) {
-      // Sync single vendor
+      // Sync single vendor (fast/full)
       setSyncingVendorId(vendorId);
       try {
         toast.info(`Syncing prices (${currentSyncType} sync)...`);
@@ -298,7 +405,7 @@ export default function AdminVendors() {
         setSyncingVendorId(null);
       }
     } else {
-      // Sync all vendors one-by-one to prevent timeout
+      // Sync all vendors one-by-one (fast/full only, no complete for all)
       setIsSyncingPrices(true);
       let totalSuccess = 0;
       let totalProducts = 0;
@@ -312,7 +419,7 @@ export default function AdminVendors() {
         
         try {
           const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
-            body: { vendorId: vendor.id, syncType: currentSyncType }
+            body: { vendorId: vendor.id, syncType: currentSyncType === 'complete' ? 'full' : currentSyncType }
           });
 
           if (error) {
@@ -519,7 +626,32 @@ export default function AdminVendors() {
           <p className="text-sm text-[hsl(215,20%,60%)]">Add, edit, and manage verified suppliers</p>
         </div>
         <div className="flex items-center gap-2">
-          {isSyncingPrices && syncProgress ? (
+          {completeSyncProgress ? (
+            <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-md">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-foreground">
+                  {completeSyncProgress.phase === 'discovery' ? 'Discovering pages...' :
+                   completeSyncProgress.phase === 'finalizing' ? 'Finalizing...' :
+                   `Processing ${completeSyncProgress.current}/${completeSyncProgress.total}`}
+                </span>
+                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                  {completeSyncProgress.vendorName}
+                </span>
+              </div>
+              {completeSyncProgress.phase === 'processing' && (
+                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{ width: `${(completeSyncProgress.current / completeSyncProgress.total) * 100}%` }}
+                  />
+                </div>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => setCancelCompleteSync(true)}>
+                Cancel
+              </Button>
+            </div>
+          ) : isSyncingPrices && syncProgress ? (
             <div className="flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-md">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               <div className="flex flex-col">
@@ -539,13 +671,14 @@ export default function AdminVendors() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Select value={syncType} onValueChange={(val: 'fast' | 'full') => setSyncType(val)}>
-                <SelectTrigger className="w-[110px]">
+              <Select value={syncType} onValueChange={(val: 'fast' | 'full' | 'complete') => setSyncType(val)}>
+                <SelectTrigger className="w-[130px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fast">Fast Sync</SelectItem>
                   <SelectItem value="full">Full Sync</SelectItem>
+                  <SelectItem value="complete">Complete</SelectItem>
                 </SelectContent>
               </Select>
               <Button 
