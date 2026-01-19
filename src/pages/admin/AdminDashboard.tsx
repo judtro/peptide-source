@@ -11,18 +11,21 @@ import {
   Menu,
   X,
   Shield,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AdminOverview from './components/AdminOverview';
 import AdminVendors from './components/AdminVendors';
 import AdminAudits from './components/AdminAudits';
 import AdminContent from './components/AdminContent';
+import AdminPrices from './components/AdminPrices';
 
-type AdminSection = 'overview' | 'vendors' | 'audits' | 'content';
+type AdminSection = 'overview' | 'vendors' | 'prices' | 'audits' | 'content';
 
 const navItems = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
   { id: 'vendors' as const, label: 'Vendors', icon: Store },
+  { id: 'prices' as const, label: 'Prices', icon: DollarSign },
   { id: 'audits' as const, label: 'Audits', icon: FileCheck },
   { id: 'content' as const, label: 'Content', icon: FileText },
 ];
@@ -44,6 +47,8 @@ export default function AdminDashboard() {
         return <AdminOverview />;
       case 'vendors':
         return <AdminVendors />;
+      case 'prices':
+        return <AdminPrices />;
       case 'audits':
         return <AdminAudits />;
       case 'content':
