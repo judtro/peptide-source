@@ -239,6 +239,7 @@ export type Database = {
           product_name: string
           size_mg: number | null
           source_url: string | null
+          stock_status: string | null
           updated_at: string | null
           vendor_id: string
         }
@@ -253,6 +254,7 @@ export type Database = {
           product_name: string
           size_mg?: number | null
           source_url?: string | null
+          stock_status?: string | null
           updated_at?: string | null
           vendor_id: string
         }
@@ -267,6 +269,7 @@ export type Database = {
           product_name?: string
           size_mg?: number | null
           source_url?: string | null
+          stock_status?: string | null
           updated_at?: string | null
           vendor_id?: string
         }

@@ -56,6 +56,8 @@ export interface Vendor {
 // VENDOR PRODUCT TYPES
 // ============================================
 
+export type StockStatus = 'in_stock' | 'out_of_stock' | 'backorder' | 'preorder' | 'coming_soon';
+
 export interface VendorProduct {
   id: string;
   vendorId: string;
@@ -65,6 +67,7 @@ export interface VendorProduct {
   pricePerMg: number;
   sizeMg: number;
   inStock: boolean;
+  stockStatus: StockStatus;
   sourceUrl?: string;
 }
 

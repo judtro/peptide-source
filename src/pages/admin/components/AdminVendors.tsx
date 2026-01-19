@@ -137,6 +137,7 @@ export default function AdminVendors() {
   const [isSyncingPrices, setIsSyncingPrices] = useState(false);
   const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
   const [syncProgress, setSyncProgress] = useState<{ current: number; total: number; vendorName: string } | null>(null);
+  const [syncType, setSyncType] = useState<'fast' | 'full'>('fast');
 
   useEffect(() => {
     fetchVendors();
@@ -257,7 +258,9 @@ export default function AdminVendors() {
     }
   };
 
-  const handleSyncPrices = async (vendorId?: string) => {
+  const handleSyncPrices = async (vendorId?: string, overrideSyncType?: 'fast' | 'full') => {
+    const currentSyncType = overrideSyncType || syncType;
+    
     // Ensure we have a valid session before calling the edge function
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
@@ -270,10 +273,10 @@ export default function AdminVendors() {
       // Sync single vendor
       setSyncingVendorId(vendorId);
       try {
-        toast.info('Syncing prices for vendor...');
+        toast.info(`Syncing prices (${currentSyncType} sync)...`);
         
         const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
-          body: { vendorId }
+          body: { vendorId, syncType: currentSyncType }
         });
 
         if (error) throw error;
@@ -283,7 +286,8 @@ export default function AdminVendors() {
 
         const result = data.results?.[0];
         if (result?.productsUpdated > 0) {
-          toast.success(`Synced ${result.productsUpdated} products`);
+          const staleInfo = result.staleRemoved > 0 ? `, removed ${result.staleRemoved} stale` : '';
+          toast.success(`Synced ${result.productsUpdated} products${staleInfo}`);
         } else {
           toast.info('No products found');
         }
@@ -298,6 +302,7 @@ export default function AdminVendors() {
       setIsSyncingPrices(true);
       let totalSuccess = 0;
       let totalProducts = 0;
+      let totalStaleRemoved = 0;
 
       const vendorsWithWebsite = vendorList.filter(v => v.website);
       
@@ -307,7 +312,7 @@ export default function AdminVendors() {
         
         try {
           const { data, error } = await supabase.functions.invoke('sync-vendor-prices', {
-            body: { vendorId: vendor.id }
+            body: { vendorId: vendor.id, syncType: currentSyncType }
           });
 
           if (error) {
@@ -319,13 +324,15 @@ export default function AdminVendors() {
             totalSuccess++;
             const result = data.results?.[0];
             totalProducts += result?.productsUpdated || 0;
+            totalStaleRemoved += result?.staleRemoved || 0;
           }
         } catch (err) {
           console.error(`Error syncing ${vendor.name}:`, err);
         }
       }
 
-      toast.success(`Synced ${totalSuccess} vendor(s), updated ${totalProducts} product prices`);
+      const staleInfo = totalStaleRemoved > 0 ? `, removed ${totalStaleRemoved} stale products` : '';
+      toast.success(`Synced ${totalSuccess} vendor(s), updated ${totalProducts} products${staleInfo}`);
       setSyncProgress(null);
       setIsSyncingPrices(false);
     }
@@ -531,14 +538,25 @@ export default function AdminVendors() {
               </div>
             </div>
           ) : (
-            <Button 
-              variant="outline" 
-              onClick={() => handleSyncPrices()}
-              disabled={isSyncingPrices}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Sync All Prices
-            </Button>
+            <div className="flex items-center gap-2">
+              <Select value={syncType} onValueChange={(val: 'fast' | 'full') => setSyncType(val)}>
+                <SelectTrigger className="w-[110px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fast">Fast Sync</SelectItem>
+                  <SelectItem value="full">Full Sync</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="outline" 
+                onClick={() => handleSyncPrices()}
+                disabled={isSyncingPrices}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Sync All
+              </Button>
+            </div>
           )}
           <Button variant="outline" onClick={handleOpenUrlDialog}>
             <Link className="mr-2 h-4 w-4" />
