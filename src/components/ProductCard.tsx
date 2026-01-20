@@ -16,16 +16,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Card className="group border-border transition-all hover:border-primary/50 hover:shadow-lg">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-            <Dna className="h-6 w-6 text-primary" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Dna className="h-5 w-5 text-primary" />
           </div>
           <Badge variant="outline" className="font-mono text-xs">
             {product.category}
           </Badge>
         </div>
-        <CardTitle className="mt-3 flex items-center gap-2 text-xl font-bold">
+        <CardTitle className="mt-3 flex items-center gap-2 text-lg font-bold">
           {product.name}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -39,20 +39,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           </Tooltip>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2 rounded-lg bg-muted/50 p-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t('common.molecular_weight')}</span>
-            <span className="font-mono text-xs">{product.molecularWeight}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t('common.purity')}</span>
-            <span className="font-mono text-xs">{product.purityStandard}</span>
-          </div>
-        </div>
+      <CardContent className="space-y-3 pt-0">
         <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
-        <Link to={`/product/${product.id}`}>
-          <Button className="w-full gap-2 transition-all group-hover:gap-3">
+        <Link to={`/product/${product.slug}`}>
+          <Button className="w-full gap-2" size="sm">
             {t('common.view_details')}
             <ArrowRight className="h-4 w-4" />
           </Button>
