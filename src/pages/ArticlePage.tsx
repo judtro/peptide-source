@@ -1,7 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
-import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
+import { useTranslatedArticle, useRelatedArticles } from '@/hooks/useArticles';
 import { useProducts } from '@/hooks/useProducts';
 import { ProductCardMinimal } from '@/components/ProductCardMinimal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, Calendar, User, BookOpen, ExternalLink, ArrowUp, ChevronRight, Info, AlertTriangle, FileText, ShieldCheck } from 'lucide-react';
+import { Clock, Calendar, User, BookOpen, ExternalLink, ArrowUp, ChevronRight, Info, AlertTriangle, FileText, ShieldCheck, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import type { Product } from '@/types';
@@ -83,11 +84,14 @@ const LinkedText = ({ text, products }: { text: string; products: Product[] }) =
 
 const ArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: article, isLoading } = useArticle(slug || '');
+  const { i18n } = useTranslation();
+  const { data: article, isLoading } = useTranslatedArticle(slug || '');
   const { data: relatedArticles = [] } = useRelatedArticles(slug || '', 3);
   const { data: allProducts = [] } = useProducts();
   const [activeSection, setActiveSection] = useState<string>('');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  
+  const currentLang = i18n.language?.split('-')[0] || 'en';
 
   // Get products mentioned in the article
   const mentionedProducts = useMemo(() => {
@@ -126,14 +130,25 @@ const ArticlePage = () => {
     return (<Layout title="Article Not Found | ChemVerify"><div className="container mx-auto px-4 py-20 text-center"><h1 className="mb-4 text-2xl font-bold">Article Not Found</h1><Link to="/education"><Button>Back to Knowledge Hub</Button></Link></div></Layout>);
   }
 
+  // SEO title uses metaTitle if available, otherwise falls back to title
+  const seoTitle = article.metaTitle || article.title;
+
   return (
-    <Layout title={`${article.title} | ChemVerify Education`} description={article.summary}>
+    <Layout title={`${seoTitle} | ChemVerify Education`} description={article.summary}>
       <article className="container mx-auto max-w-7xl px-4 py-8">
         <Breadcrumbs items={[{ label: 'Knowledge Hub', href: '/education' }, { label: article.title }]} />
         <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
           <div className="min-w-0">
             <header className="mb-8">
-              <Badge variant="secondary" className="mb-4">{article.categoryLabel}</Badge>
+              <div className="flex items-center gap-2 mb-4">
+                <Badge variant="secondary">{article.categoryLabel}</Badge>
+                {currentLang !== 'en' && (
+                  <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                    <Globe className="h-3 w-3" />
+                    {currentLang.toUpperCase()}
+                  </Badge>
+                )}
+              </div>
               <h1 className="mb-4 font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">{article.title}</h1>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">{article.summary}</p>
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
