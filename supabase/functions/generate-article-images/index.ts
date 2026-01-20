@@ -6,15 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface SectionSuggestion {
+  sectionId: string;
+  sectionTitle: string;
+  imagePrompt: string;
+  contentSummary?: string;    // Summary of section content for richer prompts
+  keyTerms?: string[];        // Specific terms/peptides mentioned
+}
+
 interface ImageRequest {
   articleTitle: string;
   articleSummary: string;
-  sectionSuggestions: Array<{
-    sectionId: string;
-    sectionTitle: string;
-    imagePrompt: string;
-  }>;
-  // For regenerating specific images
+  sectionSuggestions: SectionSuggestion[];
   regenerateFeatured?: boolean;
   regenerateSections?: string[]; // Section IDs to regenerate
 }
@@ -216,16 +219,49 @@ serve(async (req) => {
     let featuredImageUrl: string | null = null;
     const contentImages: ContentImage[] = [];
 
+    // Extract key terms from section suggestions for a more specific featured image
+    const allKeyTerms: string[] = [];
+    const allTopics: string[] = [];
+    (sectionSuggestions || []).forEach(section => {
+      if (section.keyTerms) {
+        allKeyTerms.push(...section.keyTerms);
+      }
+      if (section.sectionTitle) {
+        allTopics.push(section.sectionTitle);
+      }
+    });
+    const uniqueKeyTerms = [...new Set(allKeyTerms)].slice(0, 6);
+    const topicsText = allTopics.slice(0, 3).join(', ');
+
     // 1. Generate featured image (with retry logic)
     if (regenerateFeatured) {
       console.log('Generating featured image with retry logic...');
-      const featuredPrompt = `Create a professional scientific illustration for a research article titled "${articleTitle}". 
-Style: Clean, modern, dark slate-900 background (#0f172a) with cyan and electric blue molecular/scientific accents. 
-Subject: Abstract visualization of ${articleSummary?.substring(0, 100) || 'peptide research'}. 
-High-tech laboratory aesthetic. Professional, clinical, authoritative.
-16:9 aspect ratio. Ultra high resolution.
-IMPORTANT: No text, no labels, no words - purely visual illustration.`;
+      
+      // Build a SPECIFIC featured image prompt using article content
+      const keyTermsText = uniqueKeyTerms.length > 0 
+        ? `Key visual elements to include: ${uniqueKeyTerms.join(', ')}.` 
+        : '';
+      const topicsHint = topicsText 
+        ? `Main topics covered: ${topicsText}.` 
+        : '';
+      
+      const featuredPrompt = `Create a HIGHLY SPECIFIC scientific illustration for the research article: "${articleTitle}".
 
+Article summary: ${articleSummary || 'peptide research article'}
+${topicsHint}
+${keyTermsText}
+
+CRITICAL REQUIREMENTS:
+- Visualize the EXACT subject matter - show specific molecules, equipment, or processes related to: ${articleSummary?.substring(0, 150) || articleTitle}
+- DO NOT create generic "abstract science" imagery
+- Include recognizable scientific elements that match the article content
+
+Style: Dark slate-900 background (#0f172a), cyan and electric blue molecular/scientific accents.
+Professional, clinical, high-tech laboratory aesthetic.
+16:9 aspect ratio. Ultra high resolution.
+IMPORTANT: No text, no labels, no words - purely visual illustration of the specific topic.`;
+
+      console.log('Featured image prompt:', featuredPrompt.substring(0, 200) + '...');
       const featuredBase64 = await generateImageWithRetry(featuredPrompt);
 
       if (featuredBase64) {
@@ -248,13 +284,29 @@ IMPORTANT: No text, no labels, no words - purely visual illustration.`;
       const section = filteredSections[i];
       console.log(`Generating section image ${i + 1}/${filteredSections.length}: ${section.sectionTitle} (ID: ${section.sectionId})`);
 
-      const sectionPrompt = `Create a scientific illustration for a section titled "${section.sectionTitle}".
-${section.imagePrompt}
-Style: Clean, minimal, dark slate-900 background (#0f172a), cyan/electric blue accents.
-Professional research/laboratory aesthetic. 
-16:9 aspect ratio. Ultra high resolution.
-IMPORTANT: No text, no labels, no words - purely visual illustration.`;
+      // Build enhanced section prompt using all available context
+      const keyTermsHint = section.keyTerms && section.keyTerms.length > 0
+        ? `Visual elements to include: ${section.keyTerms.join(', ')}.`
+        : '';
+      const contentHint = section.contentSummary
+        ? `This section discusses: ${section.contentSummary.substring(0, 200)}`
+        : '';
 
+      const sectionPrompt = `Create a SPECIFIC scientific illustration for the section: "${section.sectionTitle}"
+From article: "${articleTitle}"
+
+${section.imagePrompt}
+${contentHint}
+${keyTermsHint}
+
+CRITICAL: Visualize the EXACT concepts mentioned in this section - specific equipment, molecules, processes, or research methods discussed.
+DO NOT create generic laboratory imagery.
+
+Style: Dark slate-900 background (#0f172a), cyan/electric blue scientific accents.
+Professional research aesthetic. 16:9 aspect ratio. Ultra high resolution.
+IMPORTANT: No text, no labels, no words - purely visual illustration of the specific topic.`;
+
+      console.log(`Section ${i + 1} prompt:`, sectionPrompt.substring(0, 150) + '...');
       const sectionBase64 = await generateImageWithRetry(sectionPrompt, 2); // 2 retries for sections
 
       if (sectionBase64) {

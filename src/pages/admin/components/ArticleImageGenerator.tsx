@@ -43,6 +43,114 @@ interface ArticleImageGeneratorProps {
   onImagesUpdated: () => void;
 }
 
+interface SectionWithContent {
+  sectionId: string;
+  sectionTitle: string;
+  contentSummary: string;
+  keyTerms: string[];
+  imagePrompt: string;
+}
+
+// Helper: Extract content after a heading until the next heading
+const extractSectionContent = (
+  content: ArticleContentBlock[],
+  headingIndex: number
+): string => {
+  const paragraphs: string[] = [];
+  
+  for (let i = headingIndex + 1; i < content.length; i++) {
+    const block = content[i];
+    // Stop at the next heading
+    if (block.type === 'heading') {
+      break;
+    }
+    if (block.type === 'paragraph' && block.text) {
+      paragraphs.push(block.text);
+    }
+    if (block.type === 'list' && block.items) {
+      paragraphs.push(block.items.join('. '));
+    }
+  }
+  
+  return paragraphs.join(' ').substring(0, 600); // Limit to 600 chars
+};
+
+// Helper: Extract key scientific terms from text
+const extractKeyTerms = (text: string): string[] => {
+  const terms: string[] = [];
+  const lowerText = text.toLowerCase();
+  
+  // Common peptide names and scientific terms to look for
+  const peptidePatterns = [
+    /\b(BPC-157|TB-500|GHK-Cu|Thymosin|Ipamorelin|CJC-1295|GHRP-6|GHRP-2|Melanotan|PT-141|Semax|Selank|Epithalon|AOD-9604|Hexarelin|Sermorelin|Tesamorelin|Kisspeptin|MGF|IGF-1)\b/gi,
+    /\b(peptide|amino acid|sequence|purity|HPLC|mass spectrometry|lyophilized|reconstitution|bacteriostatic|subcutaneous|intramuscular)\b/gi,
+    /\b(certificate of analysis|COA|third-party testing|laboratory|quality control|quality assurance)\b/gi,
+    /\b(vial|syringe|storage|freezer|temperature|stability|degradation|contamination|sterile)\b/gi,
+    /\b(research|clinical|mechanism|receptor|binding|synthesis|metabolism|bioavailability)\b/gi,
+  ];
+  
+  peptidePatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) {
+      matches.forEach(match => {
+        const normalized = match.toLowerCase();
+        if (!terms.includes(normalized)) {
+          terms.push(normalized);
+        }
+      });
+    }
+  });
+  
+  return terms.slice(0, 8); // Return top 8 terms
+};
+
+// Helper: Build a detailed, content-specific image prompt
+const buildDetailedPrompt = (
+  sectionTitle: string,
+  contentSummary: string,
+  keyTerms: string[],
+  articleTitle: string
+): string => {
+  const termsStr = keyTerms.length > 0 
+    ? `Visual elements to include: ${keyTerms.slice(0, 5).join(', ')}.` 
+    : '';
+  
+  const contentContext = contentSummary.length > 50
+    ? `The section discusses: ${contentSummary.substring(0, 250)}`
+    : '';
+  
+  return `Create a SPECIFIC scientific illustration for "${sectionTitle}" in the article "${articleTitle}".
+${contentContext}
+${termsStr}
+CRITICAL: Visualize the EXACT concepts discussed - show specific equipment, molecules, or processes mentioned. DO NOT create generic lab imagery.
+Style: Dark slate-900 background, cyan/electric blue accents, professional research aesthetic, ultra high resolution, 16:9 aspect ratio.`;
+};
+
+// Helper: Extract sections with their content for image generation
+const extractSectionsWithContent = (
+  content: ArticleContentBlock[],
+  articleTitle: string
+): SectionWithContent[] => {
+  const sections: SectionWithContent[] = [];
+  
+  content.forEach((block, index) => {
+    if (block.type === 'heading' && block.id && block.text && block.level === 1) {
+      const contentSummary = extractSectionContent(content, index);
+      const keyTerms = extractKeyTerms(`${block.text} ${contentSummary}`);
+      
+      sections.push({
+        sectionId: block.id,
+        sectionTitle: block.text,
+        contentSummary,
+        keyTerms,
+        imagePrompt: buildDetailedPrompt(block.text, contentSummary, keyTerms, articleTitle)
+      });
+    }
+  });
+  
+  return sections.slice(0, 3); // Max 3 sections
+};
+
 export function ArticleImageGenerator({
   article,
   isOpen,
@@ -55,17 +163,8 @@ export function ArticleImageGenerator({
   const [localFeaturedImage, setLocalFeaturedImage] = useState<string | null>(article.featured_image_url);
   const [localContentImages, setLocalContentImages] = useState<ContentImage[]>(article.content_images || []);
 
-  // Extract section headings from article content
-  const sectionHeadings = (article.content || [])
-    .filter((block): block is ArticleContentBlock & { type: 'heading'; id: string; text: string } => 
-      block.type === 'heading' && !!block.id && !!block.text && block.level === 1
-    )
-    .slice(0, 3)
-    .map(block => ({
-      sectionId: block.id,
-      sectionTitle: block.text,
-      imagePrompt: `Scientific illustration depicting the concept of ${block.text} in the context of ${article.title}`,
-    }));
+  // Extract section headings WITH their content for context-aware prompts
+  const sectionHeadings = extractSectionsWithContent(article.content || [], article.title);
 
   const handleGenerateFeatured = async () => {
     setIsGeneratingFeatured(true);

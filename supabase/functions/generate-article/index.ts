@@ -278,15 +278,27 @@ Create a comprehensive article with:
                   },
                   imageSuggestions: {
                     type: 'array',
-                    description: 'Suggestions for AI-generated images to enhance the article (max 3 sections)',
+                    description: 'Detailed suggestions for AI-generated images (max 3 sections). Analyze the ACTUAL CONTENT of each section to create SPECIFIC prompts.',
                     items: {
                       type: 'object',
                       properties: {
-                        sectionId: { type: 'string', description: 'The section ID this image should appear under' },
+                        sectionId: { type: 'string', description: 'The section ID this image should appear under (matches content heading id)' },
                         sectionTitle: { type: 'string', description: 'The section title for context' },
-                        imagePrompt: { type: 'string', description: 'A detailed prompt for generating a scientific illustration for this section' },
+                        imagePrompt: { 
+                          type: 'string', 
+                          description: 'A HIGHLY SPECIFIC prompt describing EXACTLY what to visualize from this section. Include specific peptides, equipment, processes, molecules discussed. Example: "Illustration showing HPLC chromatography equipment analyzing BPC-157 sample purity, with chromatogram peaks visible, laboratory setting with mass spectrometer" NOT "Abstract illustration of peptide testing"'
+                        },
+                        contentSummary: {
+                          type: 'string',
+                          description: 'A 2-3 sentence summary of what this section actually discusses for image context'
+                        },
+                        keyTerms: {
+                          type: 'array',
+                          items: { type: 'string' },
+                          description: 'Specific scientific terms, peptide names, equipment, or concepts from this section that should be visualized (max 6)'
+                        },
                       },
-                      required: ['sectionId', 'sectionTitle', 'imagePrompt'],
+                      required: ['sectionId', 'sectionTitle', 'imagePrompt', 'contentSummary', 'keyTerms'],
                     },
                   },
                 },
