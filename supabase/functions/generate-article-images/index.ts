@@ -14,6 +14,9 @@ interface ImageRequest {
     sectionTitle: string;
     imagePrompt: string;
   }>;
+  // For regenerating specific images
+  regenerateFeatured?: boolean;
+  regenerateSections?: string[]; // Section IDs to regenerate
 }
 
 interface ContentImage {
@@ -78,7 +81,13 @@ serve(async (req) => {
       );
     }
 
-    const { articleTitle, articleSummary, sectionSuggestions } = await req.json() as ImageRequest;
+    const { 
+      articleTitle, 
+      articleSummary, 
+      sectionSuggestions,
+      regenerateFeatured = true,
+      regenerateSections
+    } = await req.json() as ImageRequest;
 
     if (!articleTitle) {
       return new Response(
@@ -88,41 +97,71 @@ serve(async (req) => {
     }
 
     console.log('Generating images for article:', articleTitle);
+    console.log('Regenerate featured:', regenerateFeatured);
+    console.log('Section suggestions:', sectionSuggestions?.length || 0);
 
-    // Helper function to generate a single image
-    const generateImage = async (prompt: string): Promise<string | null> => {
-      try {
-        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash-image-preview',
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            modalities: ['image', 'text'],
-          }),
-        });
+    // Helper function to generate a single image with retry logic
+    const generateImageWithRetry = async (prompt: string, maxRetries = 3): Promise<string | null> => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`Image generation attempt ${attempt}/${maxRetries}`);
+          
+          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-2.5-flash-image-preview',
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt,
+                },
+              ],
+              modalities: ['image', 'text'],
+            }),
+          });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Image generation error:', response.status, errorText);
-          return null;
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Image generation error (attempt ${attempt}):`, response.status, errorText);
+            
+            // If rate limited or server error, wait and retry
+            if (response.status === 429 || response.status >= 500) {
+              if (attempt < maxRetries) {
+                const waitTime = attempt * 2000; // 2s, 4s, 6s
+                console.log(`Waiting ${waitTime}ms before retry...`);
+                await new Promise(r => setTimeout(r, waitTime));
+                continue;
+              }
+            }
+            return null;
+          }
+
+          const data = await response.json();
+          const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+          
+          if (imageUrl) {
+            console.log('Image generated successfully');
+            return imageUrl;
+          }
+          
+          console.error('No image URL in response');
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 2000));
+          }
+        } catch (error) {
+          console.error(`Error generating image (attempt ${attempt}):`, error);
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 2000));
+          }
         }
-
-        const data = await response.json();
-        const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-        return imageUrl || null;
-      } catch (error) {
-        console.error('Error generating image:', error);
-        return null;
       }
+      
+      console.error('All retry attempts failed for image generation');
+      return null;
     };
 
     // Helper function to upload base64 image to Supabase Storage
@@ -174,30 +213,40 @@ serve(async (req) => {
       .substring(0, 50);
     const timestamp = Date.now();
 
-    // 1. Generate featured image
-    console.log('Generating featured image...');
-    const featuredPrompt = `Create a professional scientific illustration for a research article titled "${articleTitle}". 
+    let featuredImageUrl: string | null = null;
+    const contentImages: ContentImage[] = [];
+
+    // 1. Generate featured image (with retry logic)
+    if (regenerateFeatured) {
+      console.log('Generating featured image with retry logic...');
+      const featuredPrompt = `Create a professional scientific illustration for a research article titled "${articleTitle}". 
 Style: Clean, modern, dark slate-900 background (#0f172a) with cyan and electric blue molecular/scientific accents. 
-Subject: Abstract visualization of ${articleSummary.substring(0, 100)}. 
+Subject: Abstract visualization of ${articleSummary?.substring(0, 100) || 'peptide research'}. 
 High-tech laboratory aesthetic. Professional, clinical, authoritative.
 16:9 aspect ratio. Ultra high resolution.
 IMPORTANT: No text, no labels, no words - purely visual illustration.`;
 
-    const featuredBase64 = await generateImage(featuredPrompt);
-    let featuredImageUrl: string | null = null;
+      const featuredBase64 = await generateImageWithRetry(featuredPrompt);
 
-    if (featuredBase64) {
-      featuredImageUrl = await uploadImage(featuredBase64, `${filePrefix}-featured-${timestamp}`);
-      console.log('Featured image uploaded:', featuredImageUrl ? 'success' : 'failed');
+      if (featuredBase64) {
+        featuredImageUrl = await uploadImage(featuredBase64, `${filePrefix}-featured-${timestamp}`);
+        console.log('Featured image uploaded:', featuredImageUrl ? 'success' : 'failed');
+      } else {
+        console.error('Featured image generation failed after all retries');
+      }
     }
 
     // 2. Generate section images (max 3)
-    const contentImages: ContentImage[] = [];
     const sectionsToProcess = (sectionSuggestions || []).slice(0, 3);
+    
+    // If regenerateSections is specified, only process those sections
+    const filteredSections = regenerateSections 
+      ? sectionsToProcess.filter(s => regenerateSections.includes(s.sectionId))
+      : sectionsToProcess;
 
-    for (let i = 0; i < sectionsToProcess.length; i++) {
-      const section = sectionsToProcess[i];
-      console.log(`Generating section image ${i + 1}/${sectionsToProcess.length}: ${section.sectionTitle}`);
+    for (let i = 0; i < filteredSections.length; i++) {
+      const section = filteredSections[i];
+      console.log(`Generating section image ${i + 1}/${filteredSections.length}: ${section.sectionTitle} (ID: ${section.sectionId})`);
 
       const sectionPrompt = `Create a scientific illustration for a section titled "${section.sectionTitle}".
 ${section.imagePrompt}
@@ -206,7 +255,7 @@ Professional research/laboratory aesthetic.
 16:9 aspect ratio. Ultra high resolution.
 IMPORTANT: No text, no labels, no words - purely visual illustration.`;
 
-      const sectionBase64 = await generateImage(sectionPrompt);
+      const sectionBase64 = await generateImageWithRetry(sectionPrompt, 2); // 2 retries for sections
 
       if (sectionBase64) {
         const sectionUrl = await uploadImage(sectionBase64, `${filePrefix}-${section.sectionId}-${timestamp}`);
@@ -216,7 +265,7 @@ IMPORTANT: No text, no labels, no words - purely visual illustration.`;
             imageUrl: sectionUrl,
             altText: `Illustration for ${section.sectionTitle}`,
           });
-          console.log(`Section image ${i + 1} uploaded successfully`);
+          console.log(`Section image ${i + 1} uploaded successfully (sectionId: ${section.sectionId})`);
         }
       }
     }
