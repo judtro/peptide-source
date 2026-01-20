@@ -144,6 +144,7 @@ export interface Article {
   id: string;
   slug: string;
   title: string;
+  metaTitle?: string;
   summary: string;
   category: ArticleCategory;
   categoryLabel: string;
