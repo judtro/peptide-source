@@ -276,8 +276,21 @@ Create a comprehensive article with:
                     items: { type: 'string' },
                     description: 'List of matched peptide slugs from our database for internal linking',
                   },
+                  imageSuggestions: {
+                    type: 'array',
+                    description: 'Suggestions for AI-generated images to enhance the article (max 3 sections)',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        sectionId: { type: 'string', description: 'The section ID this image should appear under' },
+                        sectionTitle: { type: 'string', description: 'The section title for context' },
+                        imagePrompt: { type: 'string', description: 'A detailed prompt for generating a scientific illustration for this section' },
+                      },
+                      required: ['sectionId', 'sectionTitle', 'imagePrompt'],
+                    },
+                  },
                 },
-                required: ['title', 'summary', 'category', 'categoryLabel', 'isNewCategory', 'tableOfContents', 'content', 'readTime', 'relatedPeptides', 'matchedPeptideSlugs'],
+                required: ['title', 'summary', 'category', 'categoryLabel', 'isNewCategory', 'tableOfContents', 'content', 'readTime', 'relatedPeptides', 'matchedPeptideSlugs', 'imageSuggestions'],
               },
             },
           },
@@ -359,6 +372,7 @@ Create a comprehensive article with:
           readTime: article.readTime,
           relatedPeptides: article.relatedPeptides || [],
           matchedPeptideSlugs: article.matchedPeptideSlugs || [],
+          imageSuggestions: article.imageSuggestions || [],
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

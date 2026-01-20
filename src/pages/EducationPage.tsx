@@ -156,7 +156,17 @@ const EducationPage = () => {
             {filteredArticles.map((article) => (
               <Link key={article.id} to={`/education/${article.slug}`}>
                 <Card className="group h-full transition-all hover:border-primary/50 hover:shadow-md">
-                  <div className="relative h-32 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/5 to-primary/10">
+                  <div className="relative h-32 overflow-hidden rounded-t-lg">
+                    {article.featuredImageUrl ? (
+                      <img 
+                        src={article.featuredImageUrl} 
+                        alt={article.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-primary/5 to-primary/10" />
+                    )}
                     <Badge className={`absolute right-3 top-3 text-xs border ${CATEGORY_COLORS[article.category]}`} variant="outline">
                       {article.categoryLabel}
                     </Badge>

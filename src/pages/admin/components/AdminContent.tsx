@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -81,6 +81,18 @@ interface GeneratedArticle {
   readTime: number;
   relatedPeptides: string[];
   matchedPeptideSlugs?: string[];
+  imageSuggestions?: Array<{
+    sectionId: string;
+    sectionTitle: string;
+    imagePrompt: string;
+  }>;
+  // Generated images
+  featuredImageUrl?: string;
+  contentImages?: Array<{
+    sectionId: string;
+    imageUrl: string;
+    altText: string;
+  }>;
 }
 
 interface AIGenerationForm {
@@ -135,6 +147,7 @@ export default function AdminContent() {
   const [generatedArticle, setGeneratedArticle] = useState<GeneratedArticle | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSavingGenerated, setIsSavingGenerated] = useState(false);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
 
   // Fetch dynamic categories from database
   const { data: dbCategories, refetch: refetchCategories } = useArticleCategories();
@@ -337,16 +350,48 @@ export default function AdminContent() {
         throw new Error('No article generated');
       }
 
-      setGeneratedArticle(data.article);
+      const article = data.article as GeneratedArticle;
+      setGeneratedArticle(article);
       setIsAIDialogOpen(false);
       setIsPreviewOpen(true);
       
       // If a new category was created, refetch categories
-      if (data.article.isNewCategory) {
+      if (article.isNewCategory) {
         refetchCategories();
-        toast.success(`Article generated with new category: ${data.article.categoryLabel}`);
+        toast.success(`Article generated with new category: ${article.categoryLabel}`);
       } else {
-        toast.success('Article generated successfully!');
+        toast.success('Article generated! Now generating images...');
+      }
+
+      // Auto-generate images
+      if (article.imageSuggestions && article.imageSuggestions.length > 0) {
+        setIsGeneratingImages(true);
+        try {
+          const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-article-images', {
+            body: {
+              articleTitle: article.title,
+              articleSummary: article.summary,
+              sectionSuggestions: article.imageSuggestions,
+            },
+          });
+
+          if (imageError) {
+            console.error('Image generation error:', imageError);
+            toast.error('Failed to generate images, but article is ready');
+          } else if (imageData?.success) {
+            setGeneratedArticle(prev => prev ? {
+              ...prev,
+              featuredImageUrl: imageData.featuredImageUrl,
+              contentImages: imageData.contentImages,
+            } : null);
+            toast.success('Images generated successfully!');
+          }
+        } catch (imgErr) {
+          console.error('Error generating images:', imgErr);
+          toast.error('Failed to generate images, but article is ready');
+        } finally {
+          setIsGeneratingImages(false);
+        }
       }
     } catch (err: any) {
       console.error('Error generating article:', err);
@@ -374,6 +419,8 @@ export default function AdminContent() {
           table_of_contents: generatedArticle.tableOfContents,
           content: generatedArticle.content,
           related_peptides: generatedArticle.relatedPeptides,
+          featured_image_url: generatedArticle.featuredImageUrl || null,
+          content_images: generatedArticle.contentImages || [],
           published_date: new Date().toISOString(),
           author_name: 'ChemVerify Team',
           author_role: 'Editorial',
@@ -784,6 +831,37 @@ export default function AdminContent() {
                     <Clock className="h-3 w-3" />
                     {generatedArticle.readTime} min read
                   </span>
+                </div>
+
+                {/* Generated Images */}
+                <div className="space-y-2">
+                  <Label className="text-[hsl(215,20%,60%)] flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Generated Images
+                    {isGeneratingImages && <Loader2 className="h-3 w-3 animate-spin" />}
+                  </Label>
+                  {isGeneratingImages ? (
+                    <div className="bg-[hsl(222,47%,7%)] rounded-md p-4 text-center">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
+                      <p className="text-sm text-[hsl(215,20%,60%)]">Generating AI images...</p>
+                    </div>
+                  ) : generatedArticle.featuredImageUrl ? (
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs text-[hsl(215,20%,50%)] mb-1">Featured Image</p>
+                        <img src={generatedArticle.featuredImageUrl} alt="Featured" className="w-full h-32 object-cover rounded-md" />
+                      </div>
+                      {generatedArticle.contentImages && generatedArticle.contentImages.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {generatedArticle.contentImages.map((img, i) => (
+                            <img key={i} src={img.imageUrl} alt={img.altText} className="w-full h-20 object-cover rounded" />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[hsl(215,20%,50%)] bg-[hsl(222,47%,7%)] rounded-md p-3">No images generated yet</p>
+                  )}
                 </div>
 
                 {/* Table of Contents */}

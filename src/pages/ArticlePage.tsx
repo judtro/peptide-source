@@ -142,14 +142,61 @@ const ArticlePage = () => {
                 <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /><span>Published {new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span></div>
               </div>
             </header>
+            {/* Featured Hero Image */}
+            {article.featuredImageUrl && (
+              <div className="mb-8 overflow-hidden rounded-lg">
+                <img 
+                  src={article.featuredImageUrl} 
+                  alt={article.title}
+                  className="h-64 w-full object-cover md:h-80"
+                />
+              </div>
+            )}
             <Separator className="mb-8" />
             <div className="prose-article mx-auto max-w-[650px]">
               {article.content.map((block, index) => {
-                if (block.type === 'heading') { const Tag = block.level === 1 ? 'h2' : 'h3'; return <Tag key={index} id={block.id} className={cn('scroll-mt-24 font-serif font-semibold text-foreground', block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl')}>{block.text}</Tag>; }
+                if (block.type === 'heading') {
+                  const Tag = block.level === 1 ? 'h2' : 'h3';
+                  // Check if there's an inline image for this section
+                  const sectionImage = article.contentImages?.find(img => img.sectionId === block.id);
+                  return (
+                    <div key={index}>
+                      <Tag id={block.id} className={cn('scroll-mt-24 font-serif font-semibold text-foreground', block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl')}>{block.text}</Tag>
+                      {sectionImage && (
+                        <figure className="my-6">
+                          <img 
+                            src={sectionImage.imageUrl} 
+                            alt={sectionImage.altText}
+                            className="w-full rounded-lg object-cover"
+                            loading="lazy"
+                          />
+                          <figcaption className="mt-2 text-center text-sm text-muted-foreground">
+                            {sectionImage.altText}
+                          </figcaption>
+                        </figure>
+                      )}
+                    </div>
+                  );
+                }
                 if (block.type === 'paragraph') return <p key={index} className="mb-5 font-serif text-base leading-[1.8] text-foreground/90"><LinkedText text={block.text || ''} products={allProducts} /></p>;
                 if (block.type === 'list') return <ul key={index} className="mb-5 space-y-2 pl-1">{block.items?.map((item, i) => <li key={i} className="flex items-start gap-3 text-foreground/90"><ChevronRight className="mt-1.5 h-4 w-4 shrink-0 text-primary" /><span className="font-serif text-base leading-relaxed"><LinkedText text={item} products={allProducts} /></span></li>)}</ul>;
                 if (block.type === 'callout') return <div key={index} className={cn('my-8 flex items-start gap-4 rounded-lg border p-5', block.variant === 'info' && 'border-primary/30 bg-primary/5', block.variant === 'warning' && 'border-amber-500/30 bg-amber-500/5', block.variant === 'note' && 'border-border bg-muted/50')}>{block.variant === 'info' && <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />}{block.variant === 'warning' && <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />}{block.variant === 'note' && <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />}<p className="font-serif text-sm leading-relaxed text-foreground/90"><LinkedText text={block.text || ''} products={allProducts} /></p></div>;
                 if (block.type === 'citation') return <div key={index} className="my-6 border-l-2 border-primary/30 py-1 pl-4 font-serif text-sm italic text-muted-foreground"><sup className="mr-1 not-italic text-primary">[{block.citation?.number}]</sup>{block.citation?.text} — <span className="not-italic">{block.citation?.source}</span></div>;
+                if (block.type === 'image') return (
+                  <figure key={index} className="my-8">
+                    <img 
+                      src={block.imageUrl} 
+                      alt={block.imageAlt || 'Article illustration'}
+                      className="w-full rounded-lg object-cover"
+                      loading="lazy"
+                    />
+                    {block.imageAlt && (
+                      <figcaption className="mt-2 text-center text-sm text-muted-foreground">
+                        {block.imageAlt}
+                      </figcaption>
+                    )}
+                  </figure>
+                );
                 return null;
               })}
             </div>
