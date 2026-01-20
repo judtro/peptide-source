@@ -44,7 +44,7 @@ serve(async (req) => {
   }
 
   try {
-    const { articleId, targetLanguage, translateAll } = await req.json();
+    const { articleId, targetLanguage, targetLanguages, translateAll } = await req.json();
 
     if (!articleId) {
       throw new Error("articleId is required");
@@ -72,11 +72,17 @@ serve(async (req) => {
     }
 
     // Determine which languages to translate
-    const languages: SupportedLanguage[] = translateAll
-      ? SUPPORTED_LANGUAGES.filter(l => l !== 'en')
-      : targetLanguage && SUPPORTED_LANGUAGES.includes(targetLanguage)
-        ? [targetLanguage as SupportedLanguage]
-        : [];
+    let languages: SupportedLanguage[] = [];
+    
+    if (translateAll) {
+      languages = SUPPORTED_LANGUAGES.filter(l => l !== 'en') as SupportedLanguage[];
+    } else if (targetLanguages && Array.isArray(targetLanguages)) {
+      languages = targetLanguages.filter((l: string) => 
+        SUPPORTED_LANGUAGES.includes(l as SupportedLanguage) && l !== 'en'
+      ) as SupportedLanguage[];
+    } else if (targetLanguage && SUPPORTED_LANGUAGES.includes(targetLanguage)) {
+      languages = [targetLanguage as SupportedLanguage];
+    }
 
     if (languages.length === 0) {
       throw new Error("No valid target language specified");
