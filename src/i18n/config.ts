@@ -7,6 +7,7 @@ import de from './locales/de.json';
 import fr from './locales/fr.json';
 import es from './locales/es.json';
 import pl from './locales/pl.json';
+import nl from './locales/nl.json';
 
 const savedLanguage = localStorage.getItem('chemverify-language') || 'en';
 
@@ -20,6 +21,7 @@ i18n
       fr: { translation: fr },
       es: { translation: es },
       pl: { translation: pl },
+      nl: { translation: nl },
     },
     lng: savedLanguage,
     fallbackLng: 'en',
