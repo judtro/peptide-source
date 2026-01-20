@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,10 +63,8 @@ const ProductsPage = () => {
   
   const [sortBy, setSortBy] = useState<SortOption>('relevance');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(true);
-  const [priceExpanded, setPriceExpanded] = useState(true);
 
   const isLoading = productsLoading || vendorsLoading;
 
@@ -86,28 +83,11 @@ const ProductsPage = () => {
     localStorage.setItem('chemverify-view-mode', viewMode);
   }, [viewMode]);
 
-  const priceBounds = useMemo(() => {
-    const allPrices = products
-      .map(p => getLowestPrice(p.id))
-      .filter(p => p > 0);
-    return {
-      min: Math.min(...allPrices, 0),
-      max: Math.max(...allPrices, 1),
-    };
-  }, [products, vendors]);
-
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
     if (selectedCategories.length > 0) {
       result = result.filter(p => selectedCategories.includes(p.category));
-    }
-
-    if (priceRange[0] > priceBounds.min || priceRange[1] < priceBounds.max) {
-      result = result.filter(p => {
-        const price = getLowestPrice(p.id);
-        return price >= priceRange[0] && price <= priceRange[1];
-      });
     }
 
     switch (sortBy) {
@@ -126,14 +106,12 @@ const ProductsPage = () => {
     }
 
     return result;
-  }, [products, selectedCategories, priceRange, sortBy, priceBounds, vendors]);
+  }, [products, selectedCategories, sortBy, vendors]);
 
-  const hasActiveFilters = selectedCategories.length > 0 || 
-    priceRange[0] > priceBounds.min || priceRange[1] < priceBounds.max;
+  const hasActiveFilters = selectedCategories.length > 0;
 
   const resetFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([priceBounds.min, priceBounds.max]);
   };
 
   const toggleCategory = (category: string) => {
@@ -168,33 +146,6 @@ const ProductsPage = () => {
                 </Label>
               </div>
             ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Separator />
-
-      <Collapsible open={priceExpanded} onOpenChange={setPriceExpanded}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between py-2">
-          <span className="text-sm font-semibold uppercase tracking-wide text-foreground">
-            Price Range
-          </span>
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", priceExpanded && "rotate-180")} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-4">
-          <div className="space-y-4">
-            <Slider
-              value={priceRange}
-              onValueChange={(value) => setPriceRange(value as [number, number])}
-              min={priceBounds.min}
-              max={priceBounds.max}
-              step={0.01}
-              className="w-full"
-            />
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>${priceRange[0].toFixed(2)}/mg</span>
-              <span>${priceRange[1].toFixed(2)}/mg</span>
-            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>

@@ -80,6 +80,56 @@ export type Database = {
         }
         Relationships: []
       }
+      article_translations: {
+        Row: {
+          article_id: string
+          content: Json
+          created_at: string
+          id: string
+          is_auto_translated: boolean | null
+          language: string
+          meta_title: string | null
+          summary: string | null
+          table_of_contents: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          content?: Json
+          created_at?: string
+          id?: string
+          is_auto_translated?: boolean | null
+          language: string
+          meta_title?: string | null
+          summary?: string | null
+          table_of_contents?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          is_auto_translated?: boolean | null
+          language?: string
+          meta_title?: string | null
+          summary?: string | null
+          table_of_contents?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_translations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           author_name: string | null
@@ -92,6 +142,7 @@ export type Database = {
           created_at: string
           featured_image_url: string | null
           id: string
+          meta_title: string | null
           published_date: string | null
           read_time: number | null
           related_peptides: string[] | null
@@ -112,6 +163,7 @@ export type Database = {
           created_at?: string
           featured_image_url?: string | null
           id?: string
+          meta_title?: string | null
           published_date?: string | null
           read_time?: number | null
           related_peptides?: string[] | null
@@ -132,6 +184,7 @@ export type Database = {
           created_at?: string
           featured_image_url?: string | null
           id?: string
+          meta_title?: string | null
           published_date?: string | null
           read_time?: number | null
           related_peptides?: string[] | null

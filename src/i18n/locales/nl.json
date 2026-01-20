@@ -1,0 +1,243 @@
+{
+  "common": {
+    "search_placeholder": "Zoek moleculen, leveranciers of gegevens...",
+    "verify_batch_btn": "Batch Verifiëren",
+    "view_details": "Details Bekijken",
+    "visit_site": "Bezoek Site",
+    "loading": "Laden...",
+    "no_results": "Geen resultaten gevonden.",
+    "view_all_products": "Bekijk Alle Producten →",
+    "details": "Details",
+    "visit": "Bezoeken",
+    "delivers_to": "Levert aan:",
+    "purity": "Zuiverheid:",
+    "price": "Prijs:",
+    "ships_to": "Verzendt naar:",
+    "warehouse_location": "Magazijn locatie:",
+    "lab_tested": "Laboratorium Getest & Geverifieerd",
+    "cas": "CAS:",
+    "molar_mass": "Molaire Massa:",
+    "professional_research": "Alleen Professionele Onderzoeksgegevens",
+    "discount_code": "Kortingscode:"
+  },
+  "nav": {
+    "home": "Home",
+    "vendors": "Geverifieerde Leveranciers",
+    "products": "Producten",
+    "verify": "Batch Verifiëren",
+    "calculator": "Calculator",
+    "about": "Over Ons",
+    "knowledge_hub": "Kenniscentrum",
+    "research_tools": "Onderzoekstools",
+    "information": "Informatie",
+    "reconstitution_calculator": "Reconstitutie Calculator",
+    "batch_search": "Batch Zoeken"
+  },
+  "hero": {
+    "title": "De Wereldwijde Standaard voor Peptide Verificatie.",
+    "subtitle": "Onafhankelijke audits, HPLC-gegevens en transparantie in sourcing voor professionele onderzoekers.",
+    "cta_primary": "Verifieer een Batch",
+    "cta_secondary": "Bekijk Geverifieerde Leveranciers",
+    "region_label": "Regio:",
+    "stats": {
+      "verified_vendors": "Geverifieerde Leveranciers",
+      "max_purity": "Max Zuiverheid",
+      "research_peptides": "Onderzoekspeptiden",
+      "regions": "Regio's"
+    }
+  },
+  "region": {
+    "detected": "We hebben gedetecteerd dat u uit",
+    "confirm": "Is dit correct?",
+    "stay": "Blijf in {{region}} Winkel",
+    "switch": "Wissel van Regio",
+    "us": "Verenigde Staten",
+    "eu": "Europese Unie",
+    "uk": "Verenigd Koninkrijk",
+    "ca": "Canada"
+  },
+  "features": {
+    "coa_verified": {
+      "title": "COA Geverifieerd",
+      "description": "Alle leveranciers ondergaan verificatie van het analysecertificaat door derden"
+    },
+    "region_filtered": {
+      "title": "Regio Gefilterd",
+      "description": "Automatisch gefilterd op uw regio voor relevante toegang tot leveranciers"
+    },
+    "purity_tested": {
+      "title": "Zuiverheid Getest",
+      "description": "HPLC- en MS-tests bevestigen peptide-identiteit en zuiverheid"
+    },
+    "anonymous_access": {
+      "title": "Anonieme Toegang",
+      "description": "Geen account vereist. Uw onderzoeksprivacy is beschermd"
+    }
+  },
+  "vendors": {
+    "title": "Geverifieerde Leveranciers",
+    "subtitle": "Door derden geteste en COA-geverifieerde peptidebronnen",
+    "name": "Leverancier",
+    "region": "Regio",
+    "purity": "Zuiverheid",
+    "coa": "COA Geverifieerd",
+    "price": "Prijs/mg",
+    "status": "Status",
+    "action": "Bezoek Site",
+    "verified": "Geverifieerd",
+    "warning": "Waarschuwing",
+    "scam": "Oplichting",
+    "warehouse": "Magazijn",
+    "ships_to": "Verzendt Naar",
+    "no_vendors_title": "Geen leveranciers beschikbaar",
+    "no_vendors_description": "Momenteel verzenden er geen leveranciers naar de {{region}} markt voor dit product."
+  },
+  "products": {
+    "title": "Onderzoekspeptiden",
+    "subtitle": "Gedetailleerde moleculaire informatie en geverifieerde leverancierslijsten",
+    "video_section_title": "Werkingsmechanisme (Educatief)",
+    "video_disclaimer": "Deze media is uitsluitend ter educatieve referentie betreffende het chemische werkingsmechanisme. Het vormt geen medisch advies of een aanbeveling voor menselijke consumptie."
+  },
+  "video_gallery": {
+    "title": "Wetenschappelijke Videobibliotheek",
+    "subtitle": "Samengestelde educatieve inhoud over werkingsmechanismen, onderzoekstoepassingen en klinische bevindingen voor onderzoekspeptiden.",
+    "search_placeholder": "Zoek video's op verbindingsnaam...",
+    "all_videos": "Alle Educatieve Video's",
+    "videos_available": "Video's Beschikbaar",
+    "research_areas": "Onderzoeksgebieden",
+    "educational": "Educatief",
+    "watch_now": "Nu Bekijken",
+    "view_full_profile": "Bekijk Volledig Profiel",
+    "no_videos_found": "Geen Video's Gevonden",
+    "try_adjusting": "Probeer uw zoekopdracht of filtercriteria aan te passen.",
+    "clear_filters": "Filters Wissen",
+    "back_to_hub": "Terug naar Kenniscentrum"
+  },
+  "calculator": {
+    "title": "Peptide Reconstitutie Calculator",
+    "peptideAmount": "Peptide Hoeveelheid",
+    "waterVolume": "Bacteriostatisch Water",
+    "result": "Concentratie",
+    "perUnit": "per 0,1ml (10 eenheden)"
+  },
+  "compliance": {
+    "warning": "UITSLUITEND VOOR LABORATORIUMONDERZOEK. NIET VOOR MENSELIJKE CONSUMPTIE. 18+ VEREIST."
+  },
+  "faq": {
+    "title": "Veelgestelde Vragen over Onderzoeksverificatie",
+    "subtitle": "Begrijp ons platform, compliance en verificatiestandaarden.",
+    "still_questions": "Nog vragen? Bekijk ons Kenniscentrum voor gedetailleerde handleidingen.",
+    "visit_hub": "Bezoek Kenniscentrum",
+    "q1": {
+      "question": "Verkoopt ChemVerify peptiden direct?",
+      "answer": "Nee. ChemVerify is een onafhankelijk data-aggregatie en auditplatform. Wij produceren, bewaren of verkopen geen chemische verbindingen. Wij beoordelen en vermelden leveranciers van derden die aan onze strenge testvereisten voldoen."
+    },
+    "q2": {
+      "question": "Zijn deze producten veilig voor menselijke consumptie?",
+      "answer": "Absoluut niet. Alle vermelde verbindingen zijn uitsluitend bedoeld voor laboratoriumonderzoek en ontwikkelingsdoeleinden (in-vitro of diermodelstudies). Ze zijn niet goedgekeurd door de FDA voor menselijk gebruik, en elke vermelding van persoonlijk gebruik is strikt verboden op dit platform."
+    },
+    "q3": {
+      "question": "Hoe werkt uw verificatieproces?",
+      "answer": "Wij auditen leveranciers op basis van hun transparantie. Om als 'Geverifieerd' te worden vermeld, moet een leverancier up-to-date Analysecertificaten (COA's) verstrekken van gerenommeerde laboratoria van derden (zoals Janoshik of MZ Biolabs) die overeenkomen met specifieke batchnummers."
+    },
+    "q4": {
+      "question": "Ik woon in de EU/Europa. Kan ik veilig bestellen?",
+      "answer": "Douanevoorschriften variëren per land. Wij raden sterk aan om onze 'Regiofilter' te gebruiken (schakelaar bovenaan de pagina) om 'EU Markt' te selecteren. Dit filtert de database om alleen leveranciers te tonen die vanuit de Europese Unie verzenden, wat douanerisico's aanzienlijk vermindert."
+    },
+    "q5": {
+      "question": "Wat is een 'Batchnummer'?",
+      "answer": "Een batchnummer is een unieke code die op een flesje is gedrukt en die een specifieke productierun identificeert. U kunt onze 'Batch Zoeken' tool gebruiken om te verifiëren of het specifieke flesje dat u heeft is getest en het bijbehorende laboratoriumrapport te bekijken."
+    },
+    "q6": {
+      "question": "Waarom variëren zuiverheidsniveaus (bijv. 98% vs 99%)?",
+      "answer": "Bij chemische synthese kunnen kleine bijproducten of vocht achterblijven. Een zuiverheid van 98%+ wordt over het algemeen beschouwd als de 'Gouden Standaard' voor peptiden van onderzoekskwaliteit. Lagere zuiverheid kan de nauwkeurigheid van uw onderzoeksgegevens beïnvloeden."
+    }
+  },
+  "footer": {
+    "privacy": "Privacybeleid",
+    "legal": "Juridische Kennisgeving",
+    "disclaimer": "Disclaimer",
+    "sitemap": "Sitemap",
+    "description": "Het definitieve verificatieplatform voor onderzoekspeptidebronnen. COA-geverifieerd door derden en vertrouwd door laboratoria wereldwijd.",
+    "quick_links": "Snelle Links",
+    "testing_partners": "Testpartners van Derden",
+    "copyright": "© {{year}} ChemVerify. Alle rechten voorbehouden. Alleen voor onderzoeksdoeleinden.",
+    "for_vendors": "Voor Leveranciers"
+  },
+  "partners": {
+    "hero": {
+      "badge": "B2B PARTNERPROGRAMMA",
+      "title": "Zet Transparantie Om in Omzet.",
+      "subtitle": "Sluit u aan bij het geverifieerde netwerk. 100k+ maandelijkse onderzoekers gebruiken ChemVerify om hun leveranciers te kiezen.",
+      "cta": "Aanvraag voor Verificatie"
+    },
+    "stats": {
+      "researchers": "Maandelijkse Onderzoekers",
+      "conversion": "Hogere Conversie",
+      "domain": "Domein Autoriteit"
+    },
+    "problem": {
+      "title": "Vertrouwen is de Enige Valuta",
+      "subtitle": "In een ongereguleerde markt, als u niet geverifieerd bent, bent u onzichtbaar.",
+      "unverified": {
+        "title": "Generieke Niet-Geverifieerde Leverancier",
+        "subtitle": "Geen validatie door derden",
+        "point1": "Nul organisch verkeer van verificatieplatforms",
+        "point2": "Klantvertrouwen opgebouwd vanaf nul bij elke verkoop",
+        "point3": "Geen differentiatie van oplichtersoperaties"
+      },
+      "verified": {
+        "title": "ChemVerify Partner",
+        "badge": "GEVERIFIEERD",
+        "point1": "Uitgelicht in zoekopdrachten met hoge koopintentie",
+        "point2": "Directe geloofwaardigheid met auditbadge",
+        "point3": "Directe backlinks die SEO-autoriteit stimuleren"
+      }
+    },
+    "benefits": {
+      "title": "Waarom Partners Kiezen voor ChemVerify",
+      "traffic": {
+        "title": "Direct Verkeer met Hoge Intentie",
+        "description": "Kopers die actief zoeken naar specifieke zuiverheidsniveaus (99%+) en geverifieerde COA's landen direct op uw vermelding."
+      },
+      "badge": {
+        "title": "Badge Autoriteit",
+        "description": "Toon het 'ChemVerify Audit' zegel op uw eigen checkout. Direct vertrouwenssignaal voor aarzelende klanten."
+      },
+      "seo": {
+        "title": "SEO Boost",
+        "description": "Do-follow backlinks van ons domein met hoge autoriteit (DA 45+) verbeteren direct uw Google-rankings."
+      }
+    },
+    "process": {
+      "title": "Eenvoudig 3-Stappen Verificatieproces",
+      "subtitle": "Van aanvraag tot live vermelding in minder dan 7 dagen.",
+      "step1": {
+        "title": "Dien COA's In",
+        "description": "Upload uw laatste Analysecertificaten van Janoshik, MZ Biolabs of gelijkwaardige laboratoria."
+      },
+      "step2": {
+        "title": "Onafhankelijke Kruiscontrole",
+        "description": "Ons team verifieert batchnummers rechtstreeks bij het testlaboratorium via API."
+      },
+      "step3": {
+        "title": "Vermelding Gaat Live",
+        "description": "Uw geverifieerde profiel verschijnt in regionale zoekresultaten met de officiële auditbadge."
+      }
+    },
+    "form": {
+      "title": "Aanvraag voor Verificatie",
+      "subtitle": "Sluit u aan bij het netwerk dat wordt vertrouwd door professionele onderzoekers wereldwijd.",
+      "name_label": "Contactnaam",
+      "name_placeholder": "Jan Jansen",
+      "url_label": "Bedrijfswebsite",
+      "url_placeholder": "https://uwbedrijf.nl",
+      "telegram_label": "Telegram ID (optioneel)",
+      "telegram_placeholder": "@uwhandle",
+      "submit": "Aanvraag Indienen",
+      "success": "Aanvraag ingediend! We nemen binnen 48 uur contact met u op.",
+      "error_required": "Vul alstublieft alle verplichte velden in.",
+      "privacy_note": "We zullen uw informatie nooit delen. Reactie op beoordeling binnen 48 uur."
+    }
+  }
+}

@@ -14,6 +14,7 @@ import {
   FlaskConical,
   Home,
   ChevronLeft,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AdminOverview from './components/AdminOverview';
@@ -22,12 +23,14 @@ import AdminAudits from './components/AdminAudits';
 import AdminContent from './components/AdminContent';
 import AdminPrices from './components/AdminPrices';
 import AdminProducts from './components/AdminProducts';
+import AdminAnalytics from './components/AdminAnalytics';
 
 
-type AdminSection = 'overview' | 'vendors' | 'products' | 'prices' | 'audits' | 'content';
+type AdminSection = 'overview' | 'vendors' | 'products' | 'prices' | 'audits' | 'content' | 'analytics';
 
 const navItems = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
+  { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
   { id: 'vendors' as const, label: 'Vendors', icon: Store },
   { id: 'products' as const, label: 'Products', icon: FlaskConical },
   { id: 'prices' as const, label: 'Prices', icon: DollarSign },
@@ -50,6 +53,8 @@ export default function AdminDashboard() {
     switch (activeSection) {
       case 'overview':
         return <AdminOverview />;
+      case 'analytics':
+        return <AdminAnalytics />;
       case 'vendors':
         return <AdminVendors />;
       case 'products':
