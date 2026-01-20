@@ -111,14 +111,14 @@ const emptyFormData: ProductFormData = {
 };
 
 const categories = [
-  'Recovery',
-  'Growth Hormone',
-  'Metabolic',
   'Anti-Aging',
   'Cognitive',
+  'Growth Hormone',
+  'Hormone',
   'Immunity',
-  'Sexual Health',
-  'Other',
+  'Metabolic',
+  'Recovery',
+  'Specialty',
 ];
 
 // Product aliases for matching vendor products to canonical names
@@ -700,7 +700,7 @@ export default function AdminProducts() {
                       <TableRow className="border-[hsl(215,25%,20%)] hover:bg-[hsl(215,25%,15%)]">
                         <TableCell>
                           <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-white">
                               {expandedProducts.has(product.id) ? (
                                 <ChevronDown className="h-4 w-4" />
                               ) : (
@@ -713,7 +713,7 @@ export default function AdminProducts() {
                           {product.name}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="border-[hsl(215,25%,25%)]">
+                          <Badge variant="outline" className="border-[hsl(215,25%,25%)] text-white">
                             {product.category}
                           </Badge>
                         </TableCell>
