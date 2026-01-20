@@ -157,11 +157,19 @@ const ArticlePage = () => {
               {article.content.map((block, index) => {
                 if (block.type === 'heading') {
                   const Tag = block.level === 1 ? 'h2' : 'h3';
+                  // Get ID from block or fallback to matching ToC entry by text
+                  let headingId = block.id;
+                  if (!headingId && block.text) {
+                    const tocMatch = article.tableOfContents.find(
+                      toc => toc.title.toLowerCase().trim() === block.text?.toLowerCase().trim()
+                    );
+                    headingId = tocMatch?.id || block.text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                  }
                   // Check if there's an inline image for this section
-                  const sectionImage = article.contentImages?.find(img => img.sectionId === block.id);
+                  const sectionImage = article.contentImages?.find(img => img.sectionId === headingId || img.sectionId === block.id);
                   return (
                     <div key={index}>
-                      <Tag id={block.id} className={cn('scroll-mt-24 font-serif font-semibold text-foreground', block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl')}>{block.text}</Tag>
+                      <Tag id={headingId} className={cn('scroll-mt-24 font-serif font-semibold text-foreground', block.level === 1 ? 'mb-4 mt-10 text-2xl' : 'mb-3 mt-8 text-xl')}>{block.text}</Tag>
                       {sectionImage && (
                         <figure className="my-6">
                           <img 
