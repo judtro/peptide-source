@@ -39,7 +39,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon, ImagePlus, Languages, Check, X, Globe } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon, ImagePlus, Languages, Check, X, Globe, Type } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -190,6 +190,9 @@ export default function AdminContent() {
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
   const [translatingLanguages, setTranslatingLanguages] = useState<Set<LanguageCode>>(new Set());
   const [isBulkTranslating, setIsBulkTranslating] = useState(false);
+
+  // Meta title generation state
+  const [isGeneratingMetaTitles, setIsGeneratingMetaTitles] = useState(false);
 
   // Fetch dynamic categories from database
   const { data: dbCategories, refetch: refetchCategories } = useArticleCategories();
@@ -454,6 +457,30 @@ export default function AdminContent() {
     }
   };
 
+  // Meta title generation handler
+  const handleGenerateMetaTitles = async () => {
+    setIsGeneratingMetaTitles(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-meta-titles');
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const summary = data?.summary;
+      if (summary) {
+        toast.success(`Generated ${summary.success} meta titles. ${summary.exists} already existed.`);
+      } else {
+        toast.success('Meta titles generated successfully!');
+      }
+    } catch (err: any) {
+      console.error('Error generating meta titles:', err);
+      toast.error(err.message || 'Failed to generate meta titles');
+    } finally {
+      setIsGeneratingMetaTitles(false);
+    }
+  };
+
   // AI Generation handlers
   const handleOpenAIDialog = () => {
     setAIForm(emptyAIForm);
@@ -677,6 +704,18 @@ export default function AdminContent() {
           <p className="text-sm text-[hsl(215,20%,60%)]">Manage educational articles and blog posts</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={handleGenerateMetaTitles}
+            disabled={isGeneratingMetaTitles}
+          >
+            {isGeneratingMetaTitles ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Type className="mr-2 h-4 w-4" />
+            )}
+            {isGeneratingMetaTitles ? 'Generating...' : 'Generate Meta Titles'}
+          </Button>
           <Button variant="outline" onClick={handleOpenAIDialog}>
             <Sparkles className="mr-2 h-4 w-4" />
             Generate with AI

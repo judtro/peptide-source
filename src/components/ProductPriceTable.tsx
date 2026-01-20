@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExternalLink, DollarSign, Award, Tag, Package, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { useCurrency } from '@/context/CurrencyContext';
 import type { VendorProductWithVendor, StockStatus } from '@/types';
 
 const stockStatusConfig: Record<StockStatus, { label: string; variant: 'default' | 'destructive' | 'secondary' | 'outline'; icon: typeof CheckCircle }> = {
@@ -22,6 +23,8 @@ interface ProductPriceTableProps {
 }
 
 export const ProductPriceTable = ({ productId, productName }: ProductPriceTableProps) => {
+  const { formatPrice, currency, currencySymbol } = useCurrency();
+  
   // Always fetch by both ID and name - use ID results if available, fallback to name matching
   // Also pass productName into the ID-based hook to hard-filter mis-associated rows (e.g. combo URLs tagged to a single product_id).
   const { data: productsByIdData, isLoading: isLoadingById } = useVendorProductsByProduct(productId || '', productName || '');
@@ -92,8 +95,17 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
 
   const bestDealId = sortedProducts[0]?.id;
 
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
-  const formatPricePerMg = (price: number) => `$${price.toFixed(3)}/mg`;
+  // Format price per mg with the current currency
+  const formatPricePerMg = (priceUsd: number) => {
+    const converted = formatPrice(priceUsd, false);
+    if (currency === 'PLN') {
+      return `${converted} ${currencySymbol}/mg`;
+    }
+    if (currency === 'CHF') {
+      return `${currencySymbol} ${converted}/mg`;
+    }
+    return `${currencySymbol}${converted}/mg`;
+  };
 
   return (
     <Card>
@@ -111,7 +123,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
                 <TableHead>Vendor</TableHead>
                 <TableHead className="text-center">Size</TableHead>
                 <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Price (USD)</TableHead>
+                <TableHead className="text-right">Price ({currency})</TableHead>
                 <TableHead className="text-right">Price/mg</TableHead>
                 <TableHead className="text-right">With Discount</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -212,7 +224,7 @@ export const ProductPriceTable = ({ productId, productName }: ProductPriceTableP
         </div>
         <div className="px-4 py-3 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            All prices shown in USD. Use discount codes at checkout for additional savings.
+            Prices shown in {currency}. Use discount codes at checkout for additional savings.
           </p>
         </div>
       </CardContent>
