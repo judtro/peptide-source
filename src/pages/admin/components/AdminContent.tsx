@@ -44,6 +44,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { useArticleCategories, ArticleCategoryOption } from '@/hooks/useArticleCategories';
 import { ArticleImageGenerator } from './ArticleImageGenerator';
+import { ArticleScheduler } from './ArticleScheduler';
 
 interface ArticleContentBlock {
   type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation' | 'image';
@@ -435,6 +436,29 @@ export default function AdminContent() {
     setIsSavingGenerated(true);
 
     try {
+      // Sync content heading IDs with tableOfContents to ensure navigation works
+      const syncedContent = generatedArticle.content.map(block => {
+        if (block.type === 'heading' && block.text) {
+          // Try to find matching ToC entry by title
+          const tocEntry = generatedArticle.tableOfContents.find(
+            toc => toc.title.toLowerCase().trim() === block.text?.toLowerCase().trim()
+          );
+          if (tocEntry && !block.id) {
+            return { ...block, id: tocEntry.id };
+          }
+        }
+        return block;
+      });
+
+      // Also rebuild tableOfContents from synced content to ensure consistency
+      const rebuiltToC = syncedContent
+        .filter(block => block.type === 'heading' && block.id)
+        .map(block => ({
+          id: block.id!,
+          title: block.text!,
+          level: block.level || 2,
+        }));
+
       const { error } = await supabase
         .from('articles')
         .insert({
@@ -444,8 +468,8 @@ export default function AdminContent() {
           category: generatedArticle.category,
           category_label: generatedArticle.categoryLabel,
           read_time: generatedArticle.readTime,
-          table_of_contents: generatedArticle.tableOfContents,
-          content: generatedArticle.content,
+          table_of_contents: rebuiltToC.length > 0 ? rebuiltToC : generatedArticle.tableOfContents,
+          content: syncedContent,
           related_peptides: generatedArticle.relatedPeptides,
           featured_image_url: generatedArticle.featuredImageUrl || null,
           content_images: generatedArticle.contentImages || [],
@@ -536,6 +560,9 @@ export default function AdminContent() {
 
   return (
     <div className="space-y-6">
+      {/* Article Scheduler */}
+      <ArticleScheduler />
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-[hsl(210,40%,98%)]">Content Management</h2>

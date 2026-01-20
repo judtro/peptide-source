@@ -167,6 +167,13 @@ Peptide Matching:
 - Use exact slug values when matching
 - Only match peptides that are actually relevant to the content
 
+CRITICAL - Table of Contents and Content ID Matching:
+- For EVERY heading in the content array, you MUST include an "id" field
+- This "id" MUST EXACTLY match the corresponding entry in tableOfContents
+- Example: If tableOfContents has {"id": "safety-protocols", "title": "Safety Protocols", "level": 2}
+  Then the content heading MUST be {"type": "heading", "id": "safety-protocols", "level": 2, "text": "Safety Protocols"}
+- Without matching IDs, navigation will not work!
+
 Target length: ${targetWords} words`;
 
     const userPrompt = `Generate a complete SEO-optimized article about: "${keyword}"

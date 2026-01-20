@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      article_schedules: {
+        Row: {
+          additional_context: string | null
+          created_at: string
+          day_of_week: number | null
+          frequency: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          next_run_at: string | null
+          target_length: string
+          time_of_day: string
+          updated_at: string
+        }
+        Insert: {
+          additional_context?: string | null
+          created_at?: string
+          day_of_week?: number | null
+          frequency: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          target_length?: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Update: {
+          additional_context?: string | null
+          created_at?: string
+          day_of_week?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          target_length?: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_name: string | null
