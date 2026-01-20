@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
 import { useProducts } from '@/hooks/useProducts';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductCardMinimal } from '@/components/ProductCardMinimal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -207,9 +207,9 @@ const ArticlePage = () => {
               <section className="mx-auto mt-12 max-w-[650px]">
                 <Separator className="mb-8" />
                 <h2 className="mb-6 font-serif text-xl font-semibold text-foreground">You Might Also Like</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {mentionedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCardMinimal key={product.id} product={product} />
                   ))}
                 </div>
               </section>

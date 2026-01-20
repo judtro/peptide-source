@@ -245,21 +245,25 @@ serve(async (req) => {
         ? `Main topics covered: ${topicsText}.` 
         : '';
       
-      const featuredPrompt = `Create a HIGHLY SPECIFIC scientific illustration for the research article: "${articleTitle}".
+      const featuredPrompt = `Create a PHOTOREALISTIC, high-resolution photograph for the research article: "${articleTitle}".
+
+PHOTOGRAPHY REQUIREMENTS:
+- Must look like an actual photograph taken with a professional DSLR camera (Canon 5D, Sony A7)
+- Shot with 85mm lens, shallow depth of field, natural lighting with subtle rim light
+- Real laboratory equipment, real chemical compounds, real scientific settings
+- NO illustrations, NO CGI, NO abstract art, NO digital renders
+- Think: editorial photography for Nature, Science, or JAMA medical journals
 
 Article summary: ${articleSummary || 'peptide research article'}
 ${topicsHint}
 ${keyTermsText}
 
-CRITICAL REQUIREMENTS:
-- Visualize the EXACT subject matter - show specific molecules, equipment, or processes related to: ${articleSummary?.substring(0, 150) || articleTitle}
-- DO NOT create generic "abstract science" imagery
-- Include recognizable scientific elements that match the article content
-
-Style: Dark slate-900 background (#0f172a), cyan and electric blue molecular/scientific accents.
-Professional, clinical, high-tech laboratory aesthetic.
-16:9 aspect ratio. Ultra high resolution.
-IMPORTANT: No text, no labels, no words - purely visual illustration of the specific topic.`;
+Subject: Photograph real laboratory scene showing ${articleSummary?.substring(0, 100) || 'peptide research'}.
+Setting: Modern research laboratory, pharmaceutical facility, or clinical environment with authentic equipment.
+Lighting: Professional studio/natural lighting with realistic shadows and depth.
+Composition: 16:9 aspect ratio, rule of thirds, shallow depth of field.
+Quality: Ultra high resolution, photorealistic, magazine-quality photography.
+IMPORTANT: No text, no labels, no words, no overlays - purely photographic.`;
 
       console.log('Featured image prompt:', featuredPrompt.substring(0, 200) + '...');
       const featuredBase64 = await generateImageWithRetry(featuredPrompt);
@@ -292,19 +296,23 @@ IMPORTANT: No text, no labels, no words - purely visual illustration of the spec
         ? `This section discusses: ${section.contentSummary.substring(0, 200)}`
         : '';
 
-      const sectionPrompt = `Create a SPECIFIC scientific illustration for the section: "${section.sectionTitle}"
+      const sectionPrompt = `Create a PHOTOREALISTIC photograph for the section: "${section.sectionTitle}"
 From article: "${articleTitle}"
+
+PHOTOGRAPHY REQUIREMENTS:
+- Must look like an actual photograph, NOT an illustration or CGI render
+- Professional DSLR quality (Canon/Nikon/Sony), 85mm lens, shallow depth of field
+- Real laboratory equipment, real scientific processes, authentic settings
+- Editorial/documentary photography style for scientific publications
 
 ${section.imagePrompt}
 ${contentHint}
 ${keyTermsHint}
 
-CRITICAL: Visualize the EXACT concepts mentioned in this section - specific equipment, molecules, processes, or research methods discussed.
-DO NOT create generic laboratory imagery.
-
-Style: Dark slate-900 background (#0f172a), cyan/electric blue scientific accents.
-Professional research aesthetic. 16:9 aspect ratio. Ultra high resolution.
-IMPORTANT: No text, no labels, no words - purely visual illustration of the specific topic.`;
+Subject: Photograph showing ${section.sectionTitle.toLowerCase()} - real equipment, processes, or materials.
+Style: Photorealistic, magazine-quality, natural lighting with professional setup.
+Composition: 16:9 aspect ratio. Ultra high resolution.
+IMPORTANT: No text, no labels, no words, no overlays - purely photographic.`;
 
       console.log(`Section ${i + 1} prompt:`, sectionPrompt.substring(0, 150) + '...');
       const sectionBase64 = await generateImageWithRetry(sectionPrompt, 2); // 2 retries for sections
