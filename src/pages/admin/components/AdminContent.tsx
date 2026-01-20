@@ -37,14 +37,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon, ImagePlus } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon, ImagePlus, Languages, Check, X, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useArticleCategories, ArticleCategoryOption } from '@/hooks/useArticleCategories';
 import { ArticleImageGenerator } from './ArticleImageGenerator';
 import { ArticleScheduler } from './ArticleScheduler';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'de', label: 'German', flag: '🇩🇪' },
+  { code: 'fr', label: 'French', flag: '🇫🇷' },
+  { code: 'pl', label: 'Polish', flag: '🇵🇱' },
+  { code: 'nl', label: 'Dutch', flag: '🇳🇱' },
+  { code: 'es', label: 'Spanish', flag: '🇪🇸' },
+] as const;
+
+type LanguageCode = typeof SUPPORTED_LANGUAGES[number]['code'];
 
 interface ArticleContentBlock {
   type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation' | 'image';
@@ -172,6 +184,13 @@ export default function AdminContent() {
   // Image generation for existing articles
   const [imageGenArticle, setImageGenArticle] = useState<DbArticle | null>(null);
 
+  // Translation management state
+  const [translationStatusMap, setTranslationStatusMap] = useState<Record<string, LanguageCode[]>>({});
+  const [translatingArticle, setTranslatingArticle] = useState<DbArticle | null>(null);
+  const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
+  const [translatingLanguages, setTranslatingLanguages] = useState<Set<LanguageCode>>(new Set());
+  const [isBulkTranslating, setIsBulkTranslating] = useState(false);
+
   // Fetch dynamic categories from database
   const { data: dbCategories, refetch: refetchCategories } = useArticleCategories();
   const categories = dbCategories && dbCategories.length > 0 ? dbCategories : fallbackCategories;
@@ -199,7 +218,96 @@ export default function AdminContent() {
 
   useEffect(() => {
     fetchArticles();
+    fetchTranslationStatus();
   }, []);
+
+  const fetchTranslationStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('article_translations')
+        .select('article_id, language');
+
+      if (error) throw error;
+
+      const statusMap: Record<string, LanguageCode[]> = {};
+      (data || []).forEach(row => {
+        if (!statusMap[row.article_id]) {
+          statusMap[row.article_id] = [];
+        }
+        statusMap[row.article_id].push(row.language as LanguageCode);
+      });
+      setTranslationStatusMap(statusMap);
+    } catch (err) {
+      if (import.meta.env.DEV) console.error('Error fetching translation status:', err);
+    }
+  };
+
+  const handleTranslateArticle = async (article: DbArticle, targetLang: LanguageCode) => {
+    setTranslatingLanguages(prev => new Set(prev).add(targetLang));
+
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-article', {
+        body: {
+          articleId: article.id,
+          targetLanguage: targetLang,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`Translated to ${SUPPORTED_LANGUAGES.find(l => l.code === targetLang)?.label}`);
+      await fetchTranslationStatus();
+    } catch (err: any) {
+      console.error('Translation error:', err);
+      toast.error(err.message || `Failed to translate to ${targetLang}`);
+    } finally {
+      setTranslatingLanguages(prev => {
+        const next = new Set(prev);
+        next.delete(targetLang);
+        return next;
+      });
+    }
+  };
+
+  const handleTranslateAllLanguages = async (article: DbArticle) => {
+    const existingTranslations = translationStatusMap[article.id] || [];
+    const missingLanguages = SUPPORTED_LANGUAGES
+      .filter(l => l.code !== 'en' && !existingTranslations.includes(l.code))
+      .map(l => l.code);
+
+    if (missingLanguages.length === 0) {
+      toast.info('All translations already exist');
+      return;
+    }
+
+    setIsBulkTranslating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-article', {
+        body: {
+          articleId: article.id,
+          targetLanguages: missingLanguages,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`Translated to ${missingLanguages.length} languages`);
+      await fetchTranslationStatus();
+    } catch (err: any) {
+      console.error('Bulk translation error:', err);
+      toast.error(err.message || 'Failed to translate');
+    } finally {
+      setIsBulkTranslating(false);
+    }
+  };
+
+  const openTranslationDialog = (article: DbArticle) => {
+    setTranslatingArticle(article);
+    setIsTranslationDialogOpen(true);
+  };
 
   const fetchArticles = async () => {
     try {
@@ -588,6 +696,7 @@ export default function AdminContent() {
                 <TableHead className="text-[hsl(215,20%,70%)]">Title</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Category</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Images</TableHead>
+                <TableHead className="text-[hsl(215,20%,70%)]">Translations</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Published</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Read Time</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)] text-right">Actions</TableHead>
@@ -596,7 +705,7 @@ export default function AdminContent() {
             <TableBody>
               {articleList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-[hsl(215,20%,60%)]">
+                  <TableCell colSpan={7} className="text-center py-8 text-[hsl(215,20%,60%)]">
                     No articles found. Create your first article to get started.
                   </TableCell>
                 </TableRow>
@@ -643,6 +752,43 @@ export default function AdminContent() {
                           )}
                         </span>
                       </Button>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openTranslationDialog(article)}
+                            className="h-auto py-1 px-2 text-[hsl(215,20%,50%)] hover:text-primary hover:bg-primary/10"
+                          >
+                            <Globe className="h-3.5 w-3.5 mr-1.5" />
+                            <div className="flex gap-0.5">
+                              {SUPPORTED_LANGUAGES.filter(l => l.code !== 'en').map(lang => {
+                                const hasTranslation = translationStatusMap[article.id]?.includes(lang.code);
+                                return (
+                                  <Tooltip key={lang.code}>
+                                    <TooltipTrigger asChild>
+                                      <span
+                                        className={`text-xs ${
+                                          hasTranslation
+                                            ? 'text-success'
+                                            : 'text-[hsl(215,20%,35%)]'
+                                        }`}
+                                      >
+                                        {lang.flag}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{lang.label}: {hasTranslation ? 'Translated' : 'Not translated'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                );
+                              })}
+                            </div>
+                          </Button>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                     <TableCell className="text-[hsl(215,20%,70%)]">
                       <div className="flex items-center gap-1">
@@ -1049,6 +1195,101 @@ export default function AdminContent() {
           }}
         />
       )}
+
+      {/* Translation Management Dialog */}
+      <Dialog open={isTranslationDialogOpen} onOpenChange={setIsTranslationDialogOpen}>
+        <DialogContent className="bg-[hsl(222,47%,11%)] border-[hsl(215,25%,20%)] text-[hsl(210,40%,98%)] max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Languages className="h-5 w-5 text-primary" />
+              Manage Translations
+            </DialogTitle>
+            <DialogDescription className="text-[hsl(215,20%,60%)]">
+              {translatingArticle?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          {translatingArticle && (
+            <div className="space-y-4">
+              {/* Translate All Button */}
+              <Button
+                onClick={() => handleTranslateAllLanguages(translatingArticle)}
+                disabled={isBulkTranslating || translatingLanguages.size > 0}
+                className="w-full"
+              >
+                {isBulkTranslating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Translating All...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="mr-2 h-4 w-4" />
+                    Translate to All Languages
+                  </>
+                )}
+              </Button>
+
+              <div className="border-t border-[hsl(215,25%,20%)] pt-4">
+                <Label className="text-[hsl(215,20%,60%)] text-sm mb-3 block">Individual Languages</Label>
+                <div className="space-y-2">
+                  {SUPPORTED_LANGUAGES.filter(l => l.code !== 'en').map(lang => {
+                    const hasTranslation = translationStatusMap[translatingArticle.id]?.includes(lang.code);
+                    const isTranslating = translatingLanguages.has(lang.code);
+
+                    return (
+                      <div
+                        key={lang.code}
+                        className="flex items-center justify-between p-3 rounded-md bg-[hsl(222,47%,7%)] border border-[hsl(215,25%,20%)]"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{lang.flag}</span>
+                          <span className="text-[hsl(210,40%,98%)]">{lang.label}</span>
+                          {hasTranslation && (
+                            <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-xs">
+                              <Check className="h-3 w-3 mr-1" />
+                              Translated
+                            </Badge>
+                          )}
+                        </div>
+                        <Button
+                          variant={hasTranslation ? 'outline' : 'default'}
+                          size="sm"
+                          onClick={() => handleTranslateArticle(translatingArticle, lang.code)}
+                          disabled={isTranslating || isBulkTranslating}
+                        >
+                          {isTranslating ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : hasTranslation ? (
+                            'Re-translate'
+                          ) : (
+                            'Translate'
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* English (Original) indicator */}
+              <div className="flex items-center gap-3 p-3 rounded-md bg-primary/5 border border-primary/20">
+                <span className="text-lg">🇬🇧</span>
+                <span className="text-[hsl(210,40%,98%)]">English</span>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+                  Original
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4 border-t border-[hsl(215,25%,20%)]">
+            <Button variant="outline" onClick={() => setIsTranslationDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
