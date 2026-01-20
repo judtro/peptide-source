@@ -38,11 +38,27 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Calendar, Clock, Eye, Sparkles, Loader2, ImageIcon, ImagePlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useArticleCategories, ArticleCategoryOption } from '@/hooks/useArticleCategories';
+import { ArticleImageGenerator } from './ArticleImageGenerator';
+
+interface ArticleContentBlock {
+  type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation' | 'image';
+  id?: string;
+  level?: number;
+  text?: string;
+  items?: string[];
+  variant?: 'info' | 'warning' | 'note';
+}
+
+interface ContentImageDb {
+  sectionId: string;
+  imageUrl: string;
+  altText: string;
+}
 
 interface DbArticle {
   id: string;
@@ -53,6 +69,9 @@ interface DbArticle {
   category_label: string | null;
   published_date: string | null;
   read_time: number | null;
+  featured_image_url: string | null;
+  content_images: ContentImageDb[] | null;
+  content: ArticleContentBlock[] | null;
 }
 
 interface ArticleFormData {
@@ -149,6 +168,9 @@ export default function AdminContent() {
   const [isSavingGenerated, setIsSavingGenerated] = useState(false);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
 
+  // Image generation for existing articles
+  const [imageGenArticle, setImageGenArticle] = useState<DbArticle | null>(null);
+
   // Fetch dynamic categories from database
   const { data: dbCategories, refetch: refetchCategories } = useArticleCategories();
   const categories = dbCategories && dbCategories.length > 0 ? dbCategories : fallbackCategories;
@@ -182,11 +204,17 @@ export default function AdminContent() {
     try {
       const { data, error } = await supabase
         .from('articles')
-        .select('id, slug, title, summary, category, category_label, published_date, read_time')
+        .select('id, slug, title, summary, category, category_label, published_date, read_time, featured_image_url, content_images, content')
         .order('published_date', { ascending: false });
 
       if (error) throw error;
-      setArticleList(data || []);
+      // Transform the data to match DbArticle interface
+      const articles: DbArticle[] = (data || []).map(article => ({
+        ...article,
+        content: (article.content as unknown) as ArticleContentBlock[] | null,
+        content_images: (article.content_images as unknown) as ContentImageDb[] | null,
+      }));
+      setArticleList(articles);
     } catch (err) {
       if (import.meta.env.DEV) console.error('Error fetching articles:', err);
       toast.error('Failed to load articles');
@@ -532,6 +560,7 @@ export default function AdminContent() {
               <TableRow className="border-[hsl(215,25%,20%)] hover:bg-transparent">
                 <TableHead className="text-[hsl(215,20%,70%)]">Title</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Category</TableHead>
+                <TableHead className="text-[hsl(215,20%,70%)]">Images</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Published</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)]">Read Time</TableHead>
                 <TableHead className="text-[hsl(215,20%,70%)] text-right">Actions</TableHead>
@@ -540,7 +569,7 @@ export default function AdminContent() {
             <TableBody>
               {articleList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-[hsl(215,20%,60%)]">
+                  <TableCell colSpan={6} className="text-center py-8 text-[hsl(215,20%,60%)]">
                     No articles found. Create your first article to get started.
                   </TableCell>
                 </TableRow>
@@ -562,6 +591,31 @@ export default function AdminContent() {
                       <Badge variant="outline" className={getCategoryColor(article.category)}>
                         {article.category_label || article.category}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setImageGenArticle(article)}
+                        className={`flex items-center gap-1.5 h-auto py-1 px-2 ${
+                          article.featured_image_url 
+                            ? 'text-success hover:text-success hover:bg-success/10' 
+                            : 'text-[hsl(215,20%,50%)] hover:text-primary hover:bg-primary/10'
+                        }`}
+                      >
+                        {article.featured_image_url ? (
+                          <ImageIcon className="h-3.5 w-3.5" />
+                        ) : (
+                          <ImagePlus className="h-3.5 w-3.5" />
+                        )}
+                        <span className="text-xs">
+                          {article.featured_image_url ? (
+                            <>1 + {article.content_images?.length || 0}</>
+                          ) : (
+                            'Add'
+                          )}
+                        </span>
+                      </Button>
                     </TableCell>
                     <TableCell className="text-[hsl(215,20%,70%)]">
                       <div className="flex items-center gap-1">
@@ -956,6 +1010,18 @@ export default function AdminContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Generation Dialog for Existing Articles */}
+      {imageGenArticle && (
+        <ArticleImageGenerator
+          article={imageGenArticle}
+          isOpen={!!imageGenArticle}
+          onClose={() => setImageGenArticle(null)}
+          onImagesUpdated={() => {
+            fetchArticles();
+          }}
+        />
+      )}
     </div>
   );
 }
