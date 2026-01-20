@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Article, ArticleCategory, ArticleContentBlock, TableOfContentsItem, Citation } from '@/types';
+import type { Article, ArticleCategory, ArticleContentBlock, TableOfContentsItem, Citation, ArticleContentImage } from '@/types';
 import type { Tables, Json } from '@/integrations/supabase/types';
 
 type DbArticle = Tables<'articles'>;
@@ -24,6 +24,8 @@ const transformArticle = (dbArticle: DbArticle): Article => ({
   content: (dbArticle.content as unknown as ArticleContentBlock[]) || [],
   citations: (dbArticle.citations as unknown as Citation[]) || [],
   relatedPeptides: dbArticle.related_peptides || [],
+  featuredImageUrl: (dbArticle as any).featured_image_url || undefined,
+  contentImages: ((dbArticle as any).content_images as unknown as ArticleContentImage[]) || [],
 });
 
 export const useArticles = () => {

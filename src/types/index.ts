@@ -123,13 +123,21 @@ export interface Citation {
 }
 
 export interface ArticleContentBlock {
-  type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation';
+  type: 'heading' | 'paragraph' | 'list' | 'callout' | 'citation' | 'image';
   id?: string;
   level?: number;
   text?: string;
   items?: string[];
   variant?: 'info' | 'warning' | 'note';
   citation?: Citation;
+  imageUrl?: string;
+  imageAlt?: string;
+}
+
+export interface ArticleContentImage {
+  sectionId: string;
+  imageUrl: string;
+  altText: string;
 }
 
 export interface Article {
@@ -147,6 +155,8 @@ export interface Article {
   content: ArticleContentBlock[];
   citations: Citation[];
   relatedPeptides: string[];
+  featuredImageUrl?: string;
+  contentImages?: ArticleContentImage[];
 }
 
 // ============================================

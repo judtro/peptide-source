@@ -46,7 +46,9 @@ export type Database = {
           category_label: string | null
           citations: Json | null
           content: Json | null
+          content_images: Json | null
           created_at: string
+          featured_image_url: string | null
           id: string
           published_date: string | null
           read_time: number | null
@@ -64,7 +66,9 @@ export type Database = {
           category_label?: string | null
           citations?: Json | null
           content?: Json | null
+          content_images?: Json | null
           created_at?: string
+          featured_image_url?: string | null
           id?: string
           published_date?: string | null
           read_time?: number | null
@@ -82,7 +86,9 @@ export type Database = {
           category_label?: string | null
           citations?: Json | null
           content?: Json | null
+          content_images?: Json | null
           created_at?: string
+          featured_image_url?: string | null
           id?: string
           published_date?: string | null
           read_time?: number | null
