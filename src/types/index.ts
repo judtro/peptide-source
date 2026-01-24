@@ -102,7 +102,7 @@ export interface BatchRecord {
 // ARTICLE TYPES
 // ============================================
 
-export type ArticleCategory = 'verification' | 'handling' | 'pharmacokinetics' | 'safety' | 'sourcing';
+export type ArticleCategory = 'verification' | 'handling' | 'pharmacokinetics' | 'safety' | 'sourcing' | 'peptides-1x1';
 
 export interface ArticleAuthor {
   name: string;
