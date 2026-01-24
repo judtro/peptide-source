@@ -22,6 +22,8 @@ import {
   Filter,
   Video,
   Play,
+  Atom,
+  Sparkles,
 } from 'lucide-react';
 
 const PILLAR_ICONS = {
@@ -31,12 +33,13 @@ const PILLAR_ICONS = {
   AlertTriangle,
 } as const;
 
-const CATEGORY_COLORS: Record<Article['category'], string> = {
+const CATEGORY_COLORS: Record<string, string> = {
   handling: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   verification: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
   pharmacokinetics: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
   safety: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   sourcing: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
+  'peptides-1x1': 'bg-primary/10 text-primary border-primary/20',
 };
 
 const EducationPage = () => {
@@ -82,6 +85,47 @@ const EducationPage = () => {
             and research safety standards.
           </p>
         </header>
+
+        {/* The Peptides 1x1 Hero Section */}
+        <section className="mb-10 sm:mb-16">
+          <Card 
+            className={`group relative cursor-pointer overflow-hidden border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10 transition-all hover:border-primary/50 hover:shadow-xl ${
+              selectedCategory === 'peptides-1x1' ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+            }`}
+            onClick={() => setSelectedCategory(selectedCategory === 'peptides-1x1' ? 'all' : 'peptides-1x1')}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-60" />
+            <CardContent className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-primary/20 transition-transform group-hover:scale-105 sm:h-24 sm:w-24">
+                <Atom className="h-10 w-10 text-primary sm:h-12 sm:w-12" />
+              </div>
+              <div className="flex-1">
+                <div className="mb-2 flex items-center gap-2">
+                  <Badge variant="default" className="gap-1.5 bg-primary/90 text-primary-foreground">
+                    <Sparkles className="h-3 w-3" />
+                    Essential Knowledge
+                  </Badge>
+                </div>
+                <h2 className="mb-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
+                  The Peptides 1×1
+                </h2>
+                <p className="mb-4 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                  Foundational knowledge about peptides — the essential basics every researcher should know. 
+                  Start here to build a solid understanding of peptide science.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {getArticleCountByCategory(articles, 'peptides-1x1')} {getArticleCountByCategory(articles, 'peptides-1x1') === 1 ? 'Article' : 'Articles'}
+                  </Badge>
+                  <span className="flex items-center gap-1.5 text-sm text-primary transition-transform group-hover:translate-x-1">
+                    {selectedCategory === 'peptides-1x1' ? 'Viewing' : 'Explore basics'}
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
         <section className="mb-10 sm:mb-16">
           <h2 className="mb-4 text-center text-lg font-semibold text-foreground sm:mb-6 sm:text-xl md:text-2xl">
